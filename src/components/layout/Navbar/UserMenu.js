@@ -91,7 +91,7 @@ function UserMenu() {
                                 const isAdmin = ADMIN_USERS.includes(user.login.toLowerCase());
                                 setDeveloperMode(isAdmin);
 
-                                window.history.replaceState(null, '', window.location.pathname);
+                                window.history.replaceState(null, '', window.location.pathname + window.location.search);
                             }
                         }
                     } catch (error) {

@@ -12,9 +12,21 @@ export const API_URLS = {
 };
 
 // Configuracion de Twitch OAuth
+// La redirect URI se configura automaticamente:
+// - En desarrollo: usa localhost:3000
+// - En produccion: usa la URL actual (Vercel)
+const getRedirectUri = () => {
+  // Si hay una variable de entorno configurada, usarla
+  if (process.env.REACT_APP_TWITCH_REDIRECT_URI) {
+    return process.env.REACT_APP_TWITCH_REDIRECT_URI;
+  }
+  // Si no, usar la URL actual (funciona en desarrollo y produccion)
+  return window.location.origin;
+};
+
 export const TWITCH_CONFIG = {
   CLIENT_ID: process.env.REACT_APP_TWITCH_CLIENT_ID || '',
-  REDIRECT_URI: process.env.REACT_APP_TWITCH_REDIRECT_URI || window.location.origin,
+  REDIRECT_URI: getRedirectUri(),
   SCOPES: ['user:read:email'], // Permisos necesarios
 };
 
