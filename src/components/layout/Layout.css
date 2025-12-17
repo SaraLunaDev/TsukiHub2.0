@@ -1,0 +1,28 @@
+/* ============================================
+// ESTILOS DEL LAYOUT
+// ============================================ 
+*/
+
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================
+// CONTENIDO PRINCIPAL
+// ============================================
+*/
+.layout-content {
+  flex: 1;
+  padding-bottom: 75px;
+  padding-top: 10px;
+}
+
+/* PC */
+@media (min-width: 769px) {
+  .layout-content {
+    padding-top: 80px;
+    padding-bottom: 10px;
+  }
+}

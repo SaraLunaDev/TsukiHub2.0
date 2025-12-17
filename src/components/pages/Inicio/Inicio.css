@@ -1,0 +1,38 @@
+/* ============================================
+// ESTILOS DE LA PAGINA INICIO
+// ============================================ 
+*/
+
+.inicio-container {
+  padding: 15px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.inicio-container h1 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: var(--text);
+}
+
+.inicio-container p {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+/* PC */
+@media (min-width: 769px) {
+  .inicio-container {
+    padding: 30px;
+  }
+
+  .inicio-container h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+
+  .inicio-container p {
+    font-size: 16px;
+  }
+}

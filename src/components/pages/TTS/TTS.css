@@ -1,0 +1,38 @@
+/* ============================================
+// ESTILOS DE LA PAGINA TTS
+// ============================================ 
+*/
+
+.tts-container {
+  padding: 15px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.tts-container h1 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: var(--text);
+}
+
+.tts-container p {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+/* PC */
+@media (min-width: 769px) {
+  .tts-container {
+    padding: 30px;
+  }
+
+  .tts-container h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+
+  .tts-container p {
+    font-size: 16px;
+  }
+}
