@@ -65,7 +65,7 @@ function Navbar() {
     const isGameBoyOrTTSActive = location.pathname === '/gameboy' || location.pathname === '/tts';
 
     // Icono segun que pagina estas viendo
-    const juegosOrPelisIcon = location.pathname === '/pelis' ? 'maki:cinema' : 'material-symbols:joystick';
+    const juegosOrPelisIcon = location.pathname === '/pelis' ? 'material-symbols:videocam-rounded' : 'material-symbols:joystick';
     const pokedexOrGachaIcon = location.pathname.includes('/gacha') ? 'streamline-flex:gambling-remix' : 'ic:baseline-catching-pokemon';
     const gameBoyOrTTSIcon = location.pathname === '/tts' ? 'solar:microphone-bold' : 'streamline-plump:gameboy-remix';
 
@@ -212,7 +212,7 @@ function Navbar() {
                             onClick={handleAddGameClick}
                             title="Añadir juego"
                         >
-                            + Añadir Juego
+                            + Añadir
                         </button>
                     )}
 
@@ -223,7 +223,7 @@ function Navbar() {
                             onClick={handleAddMovieClick}
                             title="Añadir pelicula o serie"
                         >
-                            + Añadir Pelicula/Serie
+                            + Añadir
                         </button>
                     )}
 

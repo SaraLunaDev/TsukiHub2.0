@@ -284,10 +284,6 @@
         color: var(--text);
     }
 
-
-
-
-
     /* Mostrar botones de desarrollador */
     .navbar-add-button {
         display: block;
@@ -301,6 +297,7 @@
         cursor: pointer;
         transition: all 0.2s;
         white-space: nowrap;
+        min-width: 130px;
     }
 
     .navbar-add-button:hover {

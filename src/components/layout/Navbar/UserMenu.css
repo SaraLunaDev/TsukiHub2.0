@@ -24,10 +24,6 @@
     padding: 0;
 }
 
-
-
-
-
 .user-menu-avatar {
     width: 100%;
     height: 100%;
@@ -36,8 +32,8 @@
 }
 
 .user-menu-icon {
-        font-size: 24px;
-        color: var(--text);
+    font-size: 24px;
+    color: var(--text);
 }
 
 @media (max-width: 600px) {
@@ -62,10 +58,16 @@
     left: 0;
     right: 0;
     background-color: var(--navbar);
-    border-radius: 0;
+    border-radius: 16px 16px 0 0;
     box-shadow: 0 -10px 20px -10px rgba(0, 0, 0, 0.4);
     z-index: 999;
     overflow: hidden;
+    border-top: 1px solid rgba(160, 168, 178, 0.25);
+    padding-top: 8px;
+}
+
+body:not(.dark-mode) .user-menu-dropdown {
+    border-top-color: rgba(102, 102, 102, 0.25);
 }
 
 /* ============================================
@@ -117,8 +119,6 @@
     cursor: pointer;
     transition: all 0.2s;
     margin-bottom: 8px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid rgba(160, 168, 178, 0.5);
     text-align: left;
 }
 
@@ -130,11 +130,11 @@ body:not(.dark-mode) .user-menu-profile-button {
 .user-menu-option-divider {
     padding-top: 18px !important;
     margin-top: 8px !important;
-    border-top: 1px solid rgba(160, 168, 178, 0.5) !important;
+    border-top: 1px solid rgba(160, 168, 178, 0.25) !important;
 }
 
 body:not(.dark-mode) .user-menu-option-divider {
-    border-top-color: rgba(102, 102, 102, 0.5) !important;
+    border-top-color: rgba(102, 102, 102, 0.25) !important;
 }
 
 .user-menu-profile-button:active {
@@ -233,13 +233,6 @@ body:not(.dark-mode) .user-menu-option-divider {
     .user-menu-option-theme {
         display: none;
     }
-
-    /* No mostrar barra divisoria en PC */
-    .user-menu-option-divider {
-        padding-top: 0;
-        margin-top: 0;
-        border-top: none !important;
-    }
 }
 
 /* ============================================
@@ -257,19 +250,19 @@ body:not(.dark-mode) .user-menu-option-divider {
         bottom: auto;
         min-width: 250px;
         border-radius: 0 0 8px 8px;
-        box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.4),
-                    -10px 10px 20px -10px rgba(0, 0, 0, 0.4),
-                    10px 10px 20px -10px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.25),
+            -10px 10px 20px -10px rgba(0, 0, 0, 0.25),
+            10px 10px 20px -10px rgba(0, 0, 0, 0.25);
         z-index: 999;
+        border-top: none;
+        border-bottom: 1px solid rgba(160, 168, 178, 0.25);
+        border-left: 1px solid rgba(160, 168, 178, 0.25);
+        border-right: 1px solid rgba(160, 168, 178, 0.25);
     }
 
     /* Boton de perfil en PC */
     .user-menu-profile-button {
         padding: 10px 12px;
-    }
-
-    .user-menu-profile-button:hover {
-        background-color: var(--mid-2);
     }
 
     .user-menu-profile-avatar {
@@ -311,10 +304,6 @@ body:not(.dark-mode) .user-menu-option-divider {
     .user-menu-option {
         padding: 10px 12px;
         font-size: 14px;
-    }
-
-    .user-menu-option:hover {
-        background-color: var(--mid-2);
     }
 
     .user-menu-option-icon {

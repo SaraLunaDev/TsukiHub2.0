@@ -158,6 +158,7 @@ function UserMenu() {
         setTwitchToken(null);
         setDeveloperMode(false);
         setIsOpen(false);
+        navigate('/');
     };
 
     const handleGoToProfile = () => {
@@ -219,28 +220,85 @@ function UserMenu() {
                             </button>
                         )}
 
-                        {/* Tema */}
-                        <button className="user-menu-option user-menu-option-theme" onClick={toggleTheme}>
-                            <Icon 
-                                icon={darkMode ? 'material-symbols:wb-sunny-outline-rounded' : 'material-symbols:dark-mode-outline-rounded'} 
-                                className="user-menu-option-icon" 
-                            />
-                            <span className="user-menu-option-text">
-                                {darkMode ? 'Modo Claro' : 'Modo Oscuro'}
-                            </span>
-                        </button>
+                        {/* Botones de añadir para desarrollador en móvil */}
+                        {window.innerWidth < 769 && twitchUser && ADMIN_USERS.includes(twitchUser.login.toLowerCase()) && (
+                            <>
+                                {(window.location.pathname === '/juegos' || window.location.pathname === '/pelis') && (
+                                    <>
+                                        {window.location.pathname === '/juegos' && (
+                                            <>
+                                                <button
+                                                    className="user-menu-option user-menu-option-primary user-menu-option-divider"
+                                                    onClick={() => {
+                                                        window.dispatchEvent(new CustomEvent('openAddGamePopup'));
+                                                        setIsOpen(false);
+                                                    }}
+                                                >
+                                                    <Icon icon="material-symbols:add-circle-outline" className="user-menu-option-icon" />
+                                                    <span className="user-menu-option-text">Añadir Juego</span>
+                                                </button>
+                                            </>
+                                        )}
+                                        {window.location.pathname === '/pelis' && (
+                                            <>
+                                                <button
+                                                    className="user-menu-option user-menu-option-primary user-menu-option-divider"
+                                                    onClick={() => {
+                                                        window.dispatchEvent(new CustomEvent('openAddMoviePopup'));
+                                                        setIsOpen(false);
+                                                    }}
+                                                >
+                                                    <Icon icon="material-symbols:add-circle-outline" className="user-menu-option-icon" />
+                                                    <span className="user-menu-option-text">Añadir Película/Serie</span>
+                                                </button>
+                                            </>
+                                        )}
+                                    </>
+                                )}
+                            </>
+                        )}
 
-                        {/* Login / Logout */}
-                        {twitchUser ? (
-                            <button className="user-menu-option user-menu-option-danger user-menu-option-divider" onClick={handleLogout}>
-                                <Icon icon="mingcute:exit-line" className="user-menu-option-icon" />
-                                <span className="user-menu-option-text">Cerrar Sesion</span>
-                            </button>
+                        {/* Tema */}
+                        {/* Tema y Login/Logout con divisores condicionales en móvil */}
+                        {window.innerWidth < 769 && !twitchUser ? (
+                            <>
+                                <button className="user-menu-option user-menu-option-theme" onClick={toggleTheme}>
+                                    <Icon 
+                                        icon={darkMode ? 'material-symbols:wb-sunny-outline-rounded' : 'material-symbols:dark-mode-outline-rounded'} 
+                                        className="user-menu-option-icon" 
+                                    />
+                                    <span className="user-menu-option-text">
+                                        {darkMode ? 'Modo Claro' : 'Modo Oscuro'}
+                                    </span>
+                                </button>
+                                <button className="user-menu-option user-menu-option-primary user-menu-option-divider" onClick={handleLogin}>
+                                    <Icon icon="mdi:twitch" className="user-menu-option-icon" />
+                                    <span className="user-menu-option-text">Iniciar con Twitch</span>
+                                </button>
+                            </>
                         ) : (
-                            <button className="user-menu-option user-menu-option-primary" onClick={handleLogin}>
-                                <Icon icon="mdi:twitch" className="user-menu-option-icon" />
-                                <span className="user-menu-option-text">Iniciar con Twitch</span>
-                            </button>
+                            <>
+                                <button className="user-menu-option user-menu-option-theme user-menu-option-divider" onClick={toggleTheme}>
+                                    <Icon 
+                                        icon={darkMode ? 'material-symbols:wb-sunny-outline-rounded' : 'material-symbols:dark-mode-outline-rounded'} 
+                                        className="user-menu-option-icon" 
+                                    />
+                                    <span className="user-menu-option-text">
+                                        {darkMode ? 'Modo Claro' : 'Modo Oscuro'}
+                                    </span>
+                                </button>
+                                {twitchUser ? (
+                                    <button className="user-menu-option user-menu-option-danger user-menu-option-divider" onClick={handleLogout}>
+                                        <Icon icon="mingcute:exit-line" className="user-menu-option-icon" />
+                                        <span className="user-menu-option-text">Cerrar Sesion</span>
+                                    </button>
+                                ) : (
+                                    <button className="user-menu-option user-menu-option-primary" onClick={handleLogin}>
+                                        <Icon icon="mdi:twitch" className="user-menu-option-icon" />
+                                        <span className="user-menu-option-text">Iniciar con Twitch</span>
+                                    </button>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
