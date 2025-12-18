@@ -81,7 +81,7 @@ function Navbar() {
                         alt="Logo"
                         onError={(e) => {
                             e.target.style.display = 'none';
-                            e.target.parentElement.textContent = 'MI WEB';
+                            e.target.parentElement.textContent = 'Logo';
                         }}
                     />
                 </Link>

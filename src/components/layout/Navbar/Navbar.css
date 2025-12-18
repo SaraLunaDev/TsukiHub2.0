@@ -65,7 +65,6 @@
     color: var(--text-2);
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s;
     position: relative;
     text-decoration: none;
     padding: 0;
@@ -165,14 +164,24 @@
         position: fixed;
         top: 0;
         bottom: auto;
+        left: 0;
+        right: 0;
         height: 70px;
+        background-color: var(--navbar);
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
     }
 
     .navbar-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
         max-width: 1300px;
+        margin: 0 auto;
         padding: 0 20px;
-        gap: 10px;
+        gap: 20px;
+        height: 100%;
     }
 
     /* Mostrar logo */
@@ -182,13 +191,10 @@
         font-size: 24px;
         font-weight: bold;
         color: var(--text);
-        transition: opacity 0.2s;
         flex-shrink: 0;
+        min-width: 40px;
         text-decoration: none;
-    }
-
-    .navbar-logo:hover {
-        opacity: 0.8;
+        margin-right: 10px;
     }
 
     .navbar-logo img {
@@ -205,11 +211,12 @@
     /* Mostrar links desktop */
     .navbar-links-desktop {
         display: flex;
-        flex: 1;
-        gap: 2px;
+        flex: 1 1 0;
+        gap: 18px;
         list-style: none;
         margin: 0;
         padding: 0;
+        min-width: 0;
     }
 
     .navbar-links-desktop li {
@@ -226,12 +233,8 @@
         font-weight: 700;
         text-decoration: none;
         border-radius: 6px;
-        transition: all 0.2s;
         position: relative;
-    }
-
-    .navbar-links-desktop a:hover {
-        color: var(--text);
+        min-width: 60px;
     }
 
     /* Link activo en PC */
@@ -280,7 +283,6 @@
         border-radius: 50%;
         font-size: 20px;
         cursor: pointer;
-        transition: all 0.2s;
         color: var(--text);
     }
 
@@ -295,19 +297,8 @@
         font-size: 14px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.2s;
         white-space: nowrap;
         min-width: 130px;
-    }
-
-    .navbar-add-button:hover {
-        background-color: var(--color-dark);
-        transform: translateY(-1px);
-        box-shadow: var(--box-shadow-2);
-    }
-
-    .navbar-add-button:active {
-        transform: translateY(0);
     }
 
     /* Ocultar wrapper de user menu movil en PC */
