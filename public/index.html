@@ -12,7 +12,19 @@
 </head>
 
 <body>
-    <div id="root"></div>
+        <script>
+            // Pre-aplicar el tema antes de que React cargue
+            try {
+                var darkMode = JSON.parse(localStorage.getItem('darkMode'));
+                if (darkMode === null || darkMode === undefined) darkMode = true;
+                if (darkMode) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } catch (e) {}
+        </script>
+        <div id="root"></div>
 </body>
 
 </html>

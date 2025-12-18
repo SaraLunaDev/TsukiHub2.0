@@ -20,7 +20,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
     padding: 0;
 }
 
@@ -117,7 +116,6 @@ body:not(.dark-mode) .user-menu-dropdown {
     border: none;
     border-radius: 0;
     cursor: pointer;
-    transition: all 0.2s;
     margin-bottom: 8px;
     text-align: left;
 }
@@ -180,7 +178,6 @@ body:not(.dark-mode) .user-menu-option-divider {
     border-radius: 0;
     font-size: 16px;
     cursor: pointer;
-    transition: all 0.2s;
     margin-bottom: 0;
     text-align: left;
 }
