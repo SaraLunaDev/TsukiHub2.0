@@ -12,6 +12,7 @@ import Pokedex from './components/pages/Pokedex/Pokedex';
 import Gacha from './components/pages/Gacha/Gacha';
 import GameBoy from './components/pages/GameBoy/GameBoy';
 import TTS from './components/pages/TTS/TTS';
+import UserProfile from './components/pages/UserProfile/UserProfile';
 import './App.css';
 
 function App() {
@@ -44,6 +45,9 @@ function App() {
 
                     {/* La ruta de TTS */}
                     <Route path="/tts" element={<TTS />} />
+
+                    {/* La ruta de perfil de usuario */}
+                    <Route path="/user/:username" element={<UserProfile />} />
                 </Routes>
             </Layout>
         </Router>

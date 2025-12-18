@@ -5,7 +5,7 @@ function Juegos() {
   return (
     <div className="juegos-container">
       <h1>Juegos</h1>
-      <p>Gestion de videojuegos (en construccion)</p>
+      <p>Base de Datos de Videojuegos (en construccion jej)</p>
     </div>
   );
 }

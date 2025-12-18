@@ -5,7 +5,7 @@ function Gacha() {
   return (
     <div className="gacha-container">
       <h1>Gacha</h1>
-      <p>Sistema de gacha (en construccion)</p>
+      <p>Sistema de Gacha (en construccion jej)</p>
     </div>
   );
 }

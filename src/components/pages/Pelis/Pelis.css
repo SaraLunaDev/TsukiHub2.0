@@ -5,7 +5,7 @@
 
 .pelis-container {
   padding: 15px;
-  max-width: 1400px;
+  max-width: 1300px;
   margin: 0 auto;
 }
 
@@ -24,7 +24,8 @@
 /* PC */
 @media (min-width: 769px) {
   .pelis-container {
-    padding: 30px;
+    padding: 0;
+    padding-top: 25px;
   }
 
   .pelis-container h1 {

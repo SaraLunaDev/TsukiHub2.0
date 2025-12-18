@@ -5,7 +5,7 @@ function GameBoy() {
   return (
     <div className="gameboy-container">
       <h1>GameBoy</h1>
-      <p>Emulador de GameBoy (en construccion)</p>
+      <p>Tutorial para la GameBoy (en construccion jej)</p>
     </div>
   );
 }

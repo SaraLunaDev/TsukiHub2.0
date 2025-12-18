@@ -5,7 +5,7 @@ function Pokedex() {
   return (
     <div className="pokedex-container">
       <h1>Pokedex</h1>
-      <p>Coleccion de Pokemon (en construccion)</p>
+      <p>Pokedex Regional de Pokemon (en construccion jej)</p>
     </div>
   );
 }

@@ -5,7 +5,7 @@ function Pelis() {
   return (
     <div className="pelis-container">
       <h1>Peliculas y Series</h1>
-      <p>Gestion de peliculas (en construccion)</p>
+      <p>Base de Datos de pelis y series (en construccion jej)</p>
     </div>
   );
 }

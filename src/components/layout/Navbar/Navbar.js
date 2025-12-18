@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Icon } from '@iconify/react';
 import UserMenu from './UserMenu';
 import useLocalStorage from '../../../hooks/useLocalStorage';
 import { STORAGE_KEYS } from '../../../constants/config';
@@ -64,9 +65,9 @@ function Navbar() {
     const isGameBoyOrTTSActive = location.pathname === '/gameboy' || location.pathname === '/tts';
 
     // Icono segun que pagina estas viendo
-    const juegosOrPelisIcon = location.pathname === '/pelis' ? '🎬' : '🎮';
-    const pokedexOrGachaIcon = location.pathname.includes('/gacha') ? '🎰' : '🐉';
-    const gameBoyOrTTSIcon = location.pathname === '/tts' ? '🔊' : '🕹️';
+    const juegosOrPelisIcon = location.pathname === '/pelis' ? 'maki:cinema' : 'material-symbols:joystick';
+    const pokedexOrGachaIcon = location.pathname.includes('/gacha') ? 'streamline-flex:gambling-remix' : 'ic:baseline-catching-pokemon';
+    const gameBoyOrTTSIcon = location.pathname === '/tts' ? 'solar:microphone-bold' : 'streamline-plump:gameboy-remix';
 
     return (
         <nav className="navbar">
@@ -76,7 +77,7 @@ function Navbar() {
             ============================================ */}
                 <Link to="/" className="navbar-logo" title="Inicio">
                     <img
-                        src="/static/resources/logo.png"
+                        src={darkMode ? '/static/resources/logo.png' : '/static/resources/logo_black.png'}
                         alt="Logo"
                         onError={(e) => {
                             e.target.style.display = 'none';
@@ -155,7 +156,7 @@ function Navbar() {
                         className={`navbar-mobile-button ${location.pathname === '/' ? 'active' : ''}`}
                         title="Inicio"
                     >
-                        <span className="nav-icon">🏠</span>
+                        <Icon icon="material-symbols:other-houses-outline" className="nav-icon" />
                     </Link>
 
                     {/* Boton 1: Alterna entre Juegos y Pelis */}
@@ -166,21 +167,10 @@ function Navbar() {
                         onClick={handleToggleJuegosPelis}
                         title={location.pathname === '/pelis' ? 'Ver Juegos' : 'Ver Peliculas'}
                     >
-                        <span className="nav-icon">{juegosOrPelisIcon}</span>
+                        <Icon icon={juegosOrPelisIcon} className="nav-icon" />
                     </button>
 
-                    {/* Boton 2: Alterna entre Pokedex y Gacha */}
-                    <button
-                        className={`navbar-mobile-button ${isPokedexOrGachaActive ? 'active' : ''} ${location.pathname.includes('/pokedex') ? 'active-left' : ''
-                            } ${location.pathname.includes('/gacha') ? 'active-right' : ''
-                            }`}
-                        onClick={handleTogglePokedexGacha}
-                        title={location.pathname.includes('/gacha') ? 'Ver Pokedex' : 'Ver Gacha'}
-                    >
-                        <span className="nav-icon">{pokedexOrGachaIcon}</span>
-                    </button>
-
-                    {/* Boton 3: Alterna entre GameBoy y TTS */}
+                    {/* Boton 2: Alterna entre GameBoy y TTS */}
                     <button
                         className={`navbar-mobile-button ${isGameBoyOrTTSActive ? 'active' : ''} ${location.pathname === '/gameboy' ? 'active-left' : ''
                             } ${location.pathname === '/tts' ? 'active-right' : ''
@@ -188,7 +178,21 @@ function Navbar() {
                         onClick={handleToggleGameBoyTTS}
                         title={location.pathname === '/tts' ? 'Ver GameBoy' : 'Ver TTS'}
                     >
-                        <span className="nav-icon">{gameBoyOrTTSIcon}</span>
+                        <Icon
+                            icon={gameBoyOrTTSIcon}
+                            className={`nav-icon ${gameBoyOrTTSIcon === 'streamline-plump:gameboy-remix' ? 'nav-icon-gameboy' : ''}`}
+                        />
+                    </button>
+
+                    {/* Boton 3: Alterna entre Pokedex y Gacha */}
+                    <button
+                        className={`navbar-mobile-button ${isPokedexOrGachaActive ? 'active' : ''} ${location.pathname.includes('/pokedex') ? 'active-left' : ''
+                            } ${location.pathname.includes('/gacha') ? 'active-right' : ''
+                            }`}
+                        onClick={handleTogglePokedexGacha}
+                        title={location.pathname.includes('/gacha') ? 'Ver Pokedex' : 'Ver Gacha'}
+                    >
+                        <Icon icon={pokedexOrGachaIcon} className="nav-icon" />
                     </button>
 
                     {/* Boton 4: Perfil de usuario */}
@@ -229,7 +233,10 @@ function Navbar() {
                         onClick={() => setDarkMode(!darkMode)}
                         title={darkMode ? 'Modo Claro' : 'Modo Oscuro'}
                     >
-                        {darkMode ? '☀️' : '🌙'}
+                        <Icon
+                            icon={darkMode ? 'material-symbols:wb-sunny-outline-rounded' : 'material-symbols:dark-mode-outline-rounded'}
+                            style={{ fontSize: '24px' }}
+                        />
                     </button>
 
                     {/* Menu de usuario */}

@@ -1,0 +1,94 @@
+/* ============================================
+// ESTILOS: UserProfile
+// ============================================ 
+*/
+
+.user-profile-container {
+    width: 100%;
+    min-height: calc(100vh - 70px);
+    padding: 15px;
+}
+
+.user-profile-content {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 100px);
+}
+
+.user-profile-content h1 {
+    font-size: 24px;
+    color: var(--text);
+    margin-bottom: 20px;
+}
+
+.user-profile-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-profile-info {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-profile-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+}
+
+.user-profile-id {
+    font-size: 14px;
+    color: var(--text-2);
+    margin: 0;
+}
+
+.user-profile-placeholder {
+    color: var(--text-2);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ============================================
+// PC
+// ============================================ 
+*/
+@media (min-width: 769px) {
+    .user-profile-container {
+        min-height: calc(100vh - 70px);
+        padding: 0;
+        padding-top: 25px;
+    }
+
+    .user-profile-content {
+        min-height: calc(100vh - 95px);
+    }
+
+    .user-profile-content h1 {
+        font-size: 32px;
+    }
+
+    .user-profile-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .user-profile-name {
+        font-size: 24px;
+    }
+}
