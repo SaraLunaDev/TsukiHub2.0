@@ -26,6 +26,8 @@
   .pokedex-container {
     padding: 0;
     padding-top: 25px;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
   .pokedex-container h1 {

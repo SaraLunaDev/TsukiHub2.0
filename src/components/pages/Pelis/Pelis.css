@@ -26,6 +26,8 @@
   .pelis-container {
     padding: 0;
     padding-top: 25px;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
   .pelis-container h1 {

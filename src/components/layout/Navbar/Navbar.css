@@ -17,7 +17,6 @@
     height: 100%;
     max-width: 100%;
     margin: 0 auto;
-    padding: 0 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -171,7 +170,7 @@
     }
 
     .navbar-container {
-        max-width: 1400px;
+        max-width: 1300px;
         padding: 0 20px;
         gap: 10px;
     }
@@ -285,13 +284,9 @@
         color: var(--text);
     }
 
-    .navbar-theme-button:hover {
-        transform: scale(1.15);
-    }
 
-    .navbar-theme-button:active {
-        transform: scale(0.95);
-    }
+
+
 
     /* Mostrar botones de desarrollador */
     .navbar-add-button {
@@ -330,7 +325,6 @@
 */
 @media (min-width: 1200px) {
     .navbar-container {
-        padding: 0 40px;
         gap: 20px;
     }
 

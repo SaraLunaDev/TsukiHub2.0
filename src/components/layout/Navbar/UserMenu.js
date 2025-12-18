@@ -195,7 +195,7 @@ function UserMenu() {
                         className="user-menu-avatar"
                     />
                 ) : (
-                    <span className="user-menu-icon">👤</span>
+                    <Icon icon="material-symbols:account-circle-full" className="user-menu-icon" />
                 )}
             </button>
 
@@ -238,7 +238,7 @@ function UserMenu() {
                             </button>
                         ) : (
                             <button className="user-menu-option user-menu-option-primary" onClick={handleLogin}>
-                                <span className="user-menu-option-icon">📺</span>
+                                <Icon icon="mdi:twitch" className="user-menu-option-icon" />
                                 <span className="user-menu-option-text">Iniciar con Twitch</span>
                             </button>
                         )}

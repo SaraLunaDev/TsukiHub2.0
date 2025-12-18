@@ -26,6 +26,8 @@
   .tts-container {
     padding: 0;
     padding-top: 25px;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
   .tts-container h1 {
