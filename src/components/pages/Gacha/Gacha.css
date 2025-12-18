@@ -24,10 +24,7 @@
 /* PC */
 @media (min-width: 769px) {
   .gacha-container {
-    padding: 0;
-    padding-top: 25px;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 20px;
   }
 
   .gacha-container h1 {

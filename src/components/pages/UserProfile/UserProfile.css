@@ -24,10 +24,7 @@
 /* PC */
 @media (min-width: 769px) {
     .userprofile-container {
-        padding: 0;
-        padding-top: 25px;
-        padding-left: 20px;
-        padding-right: 20px;
+        padding: 20px;
     }
 
     .userprofile-container h1 {
@@ -75,19 +72,24 @@
         padding-left: 20px;
         padding-right: 20px;
     }
+
     .user-profile-content {
         min-height: calc(100vh - 95px);
     }
+
     .user-profile-content h1 {
         font-size: 32px;
     }
+
     .user-profile-avatar {
         width: 100px;
         height: 100px;
     }
+
     .user-profile-name {
         font-size: 24px;
     }
+
     .user-profile-placeholder {
         font-size: 22px;
     }
