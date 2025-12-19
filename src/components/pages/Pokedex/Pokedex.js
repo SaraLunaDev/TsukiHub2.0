@@ -1,9 +1,9 @@
-import React from 'react';
-import './Pokedex.css';
+import React from "react";
+import "./Pokedex.css";
 
 function Pokedex() {
   return (
-    <div className="pokedex-container">
+    <div className="main-container">
       <h1>Pokedex</h1>
       <p>Pokedex Regional de Pokemon (en construccion jej)</p>
     </div>

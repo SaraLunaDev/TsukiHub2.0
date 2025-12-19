@@ -16,13 +16,12 @@
 .layout-content {
   flex: 1;
   padding-bottom: 75px;
-  padding-top: 10px;
 }
 
 /* PC */
 @media (min-width: 769px) {
   .layout-content {
-    padding-top: 80px;
+    padding-top: 70px;
     padding-bottom: 10px;
   }
 }

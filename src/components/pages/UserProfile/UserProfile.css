@@ -2,14 +2,7 @@
 // ESTILOS DE LA PAGINA PERFIL (CLON INICIO)
 // ============================================ 
 */
-
-.userprofile-container {
-    padding: 15px;
-    max-width: 1300px;
-    margin: 0 auto;
-}
-
-.userprofile-container h1 {
+.main-container h1 {
     font-size: 24px;
     margin-bottom: 15px;
     color: var(--text);
@@ -23,11 +16,7 @@
 
 /* PC */
 @media (min-width: 769px) {
-    .userprofile-container {
-        padding: 20px;
-    }
-
-    .userprofile-container h1 {
+    .main-container h1 {
         font-size: 32px;
         margin-bottom: 20px;
     }
