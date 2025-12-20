@@ -1,9 +1,28 @@
+.emotes-expand-btn,
+.emotes-collapse-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  vertical-align: top;
+  display: inline-flex;
+  align-items: flex-start;
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin-left: 0;
+  height: 32px;
+  width: 32px;
+  justify-content: center;
+}
+
 .emotes-container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
   position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-right: 36px;
 }
 
 .emotes-container .more-users {
@@ -158,11 +177,12 @@
   flex-wrap: nowrap;
   gap: 8px;
   margin-top: 14px;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
   align-items: center;
   overflow: hidden;
   max-width: 100%;
   position: relative;
+  min-height: 30px;
 }
 
 .achievement-users.expanded {
@@ -179,6 +199,10 @@
   flex-wrap: wrap;
   gap: 8px;
   max-width: 100%;
+}
+
+.achievement-users-list.has-users {
+  margin-top: 6px;
 }
 
 .achievement-section.show-desc .achievement-users {
@@ -206,16 +230,7 @@
   justify-content: flex-start;
   min-height: 48px;
   height: 48px;
-  margin-top: 0;
-  margin-bottom: 0;
   max-width: 100%;
-}
-
-@media (max-width: 600px) {
-  .achievement-section.show-desc .achievement-desc-inline {
-    min-height: 56px;
-    height: 56px;
-  }
 }
 
 .achievement-user-avatar {
@@ -272,6 +287,8 @@
 .emotes-section .user-avatar-cell {
   width: 45px;
   text-align: center;
+
+  vertical-align: top;
 }
 
 .stat-section td:first-child {

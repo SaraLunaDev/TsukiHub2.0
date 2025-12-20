@@ -1,61 +1,77 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useGoogleSheet } from "../../../hooks/useGoogleSheet";
-import { Icon } from "@iconify/react";
+
+import { SolarCupBold } from "../../icons/SolarCupBold";
+import { MdiChevronUp } from "../../icons/MdiChevronUp";
+import { MdiChevronDown } from "../../icons/MdiChevronDown";
+import { MaterialSymbolsAndroidMessages } from "../../icons/MaterialSymbolsAndroidMessages";
+import { IonTicket } from "../../icons/IonTicket";
+
 import SearchBar from "../../common/SearchBar";
 import "./Inicio.css";
 
 const EXCLUDED_USERS = ["TsukiSoft", "TsukiwiChan"];
 
 function Inicio() {
-  const [hoveredEmotesRow, setHoveredEmotesRow] = useState(null);
-
-  const [descKey, setDescKey] = useState(null);
-
-  const [anyAchievementHovered, setAnyAchievementHovered] = useState(false);
-  const hoverTimeoutRef = useRef();
-
-  const [achievements, setAchievements] = useState({});
-
+  const [expandedEmotesRow, setExpandedEmotesRow] = useState(null);
+  const [expandedAchievements, setExpandedAchievements] = useState([]);
   const achievementsGridRef = useRef(null);
   const [maxUsersMap, setMaxUsersMap] = useState({});
-
-  useEffect(() => {
-    function updateMaxUsers() {
-      const grid = achievementsGridRef.current;
-      if (!grid) return;
-      const sections = grid.querySelectorAll(".achievement-section");
-      const newMap = {};
-      sections.forEach((section, idx) => {
-        const usersRow = section.querySelector(".achievement-users");
-        if (!usersRow) return;
-
-        const avatarWidth = 27;
-
-        const moreWidth = 38;
-
-        const available = usersRow.offsetWidth - 8;
-
-        const max = Math.max(
-          2,
-          Math.floor((available - moreWidth) / avatarWidth)
-        );
-
-        const key = section.getAttribute("data-achievement-key");
-        if (key) newMap[key] = max;
-      });
-      setMaxUsersMap(newMap);
-    }
-
-    setTimeout(updateMaxUsers, 0);
-    window.addEventListener("resize", updateMaxUsers);
-    return () => window.removeEventListener("resize", updateMaxUsers);
-  }, [achievements]);
   const sheetUrl = process.env.REACT_APP_USERDATA_SHEET_URL;
   const {
     data: rawData,
     loading,
     error,
   } = useGoogleSheet(sheetUrl, "userData");
+
+  const achievements = useMemo(() => {
+    if (!rawData || !rawData.length) return {};
+    const headers = Object.keys(rawData[0] || {});
+    const achievementHeaders = headers.filter((header) =>
+      header.startsWith("l_")
+    );
+    const achievementUsers = {};
+    achievementHeaders.forEach((achievement) => {
+      achievementUsers[achievement] = rawData.filter(
+        (user) =>
+          user[achievement]?.toString().toLowerCase() === "si" &&
+          user.nombre &&
+          !EXCLUDED_USERS.includes(String(user.nombre))
+      );
+    });
+    return achievementUsers;
+  }, [rawData]);
+
+  useEffect(() => {
+    const grid = achievementsGridRef.current;
+    if (!grid) return;
+    const updateMaxUsers = () => {
+      const sections = grid.querySelectorAll(".achievement-section");
+      const newMap = {};
+      sections.forEach((section) => {
+        const usersRow = section.querySelector(".achievement-users");
+        if (!usersRow) return;
+        const avatarWidth = 27;
+        const moreWidth = 38;
+        const available = usersRow.offsetWidth - 8;
+        const max = Math.max(
+          2,
+          Math.floor((available - moreWidth) / avatarWidth) + 1
+        );
+        const key = section.getAttribute("data-achievement-key");
+        if (key) newMap[key] = max;
+      });
+      setMaxUsersMap(newMap);
+    };
+    updateMaxUsers();
+    window.addEventListener("resize", updateMaxUsers);
+    const observer = new window.ResizeObserver(updateMaxUsers);
+    observer.observe(grid);
+    return () => {
+      window.removeEventListener("resize", updateMaxUsers);
+      observer.disconnect();
+    };
+  }, [achievements]);
 
   const [searchFilters, setSearchFilters] = useState({
     racha: "",
@@ -93,8 +109,7 @@ function Inicio() {
   };
 
   const userData = useMemo(() => {
-    if (!rawData.length) return [];
-
+    if (!rawData || !rawData.length) return [];
     return rawData
       .filter(
         (user) => user.nombre && !EXCLUDED_USERS.includes(String(user.nombre))
@@ -110,28 +125,7 @@ function Inicio() {
       }));
   }, [rawData]);
 
-  useEffect(() => {
-    if (!rawData.length) return;
-
-    const headers = Object.keys(rawData[0] || {});
-    const achievementHeaders = headers.filter((header) =>
-      header.startsWith("l_")
-    );
-    const achievementUsers = {};
-
-    achievementHeaders.forEach((achievement) => {
-      achievementUsers[achievement] = rawData.filter(
-        (user) =>
-          user[achievement]?.toString().toLowerCase() === "si" &&
-          user.nombre &&
-          !EXCLUDED_USERS.includes(String(user.nombre))
-      );
-    });
-
-    setAchievements(achievementUsers);
-  }, [rawData]);
-
-  if (loading) {
+  if (loading && (!rawData || rawData.length === 0)) {
     return (
       <div className="inicio-container">
         <p>Cargando estadisticas...</p>
@@ -306,8 +300,11 @@ function Inicio() {
                               verticalAlign: "text-bottom",
                             }}
                           >
-                            <Icon
-                              icon="solar:fire-bold"
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              height="1em"
                               style={{
                                 verticalAlign: "baseline",
                                 color:
@@ -317,9 +314,12 @@ function Inicio() {
                                     ? "rgba(128, 41, 26, 1)"
                                     : "rgba(26, 104, 128, 1)",
                               }}
-                              width="14"
-                              height="14"
-                            />
+                            >
+                              <path
+                                fill="currentColor"
+                                d="M12.832 21.801c3.126-.626 7.168-2.875 7.168-8.69c0-5.291-3.873-8.815-6.658-10.434c-.619-.36-1.342.113-1.342.828v1.828c0 1.442-.606 4.074-2.29 5.169c-.86.559-1.79-.278-1.894-1.298l-.086-.838c-.1-.974-1.092-1.565-1.87-.971C4.461 8.46 3 10.33 3 13.11C3 20.221 8.289 22 10.933 22q.232 0 .484-.015C10.111 21.874 8 21.064 8 18.444c0-2.05 1.495-3.435 2.631-4.11c.306-.18.663.055.663.41v.59c0 .45.175 1.155.59 1.637c.47.546 1.159-.026 1.214-.744c.018-.226.246-.37.442-.256c.641.375 1.46 1.175 1.46 2.473c0 2.048-1.129 2.99-2.168 3.357"
+                              />
+                            </svg>
                           </span>
                         </td>
                       </tr>
@@ -400,8 +400,7 @@ function Inicio() {
                             verticalAlign: "text-bottom",
                           }}
                         >
-                          <Icon
-                            icon="material-symbols:android-messages"
+                          <MaterialSymbolsAndroidMessages
                             style={{
                               verticalAlign: "baseline",
                               color: "var(--text-2)",
@@ -488,8 +487,7 @@ function Inicio() {
                             verticalAlign: "text-bottom",
                           }}
                         >
-                          <Icon
-                            icon="ion:ticket"
+                          <IonTicket
                             style={{
                               verticalAlign: "baseline",
                               color: "var(--text-2)",
@@ -562,7 +560,7 @@ function Inicio() {
                       user.emotes.length > maxEmotes;
 
                     const emotesToShow =
-                      hoveredEmotesRow === index || !hasMany
+                      expandedEmotesRow === index || !hasMany
                         ? Array.isArray(user.emotes)
                           ? user.emotes
                           : []
@@ -570,15 +568,11 @@ function Inicio() {
                         ? user.emotes.slice(0, maxEmotes)
                         : [];
                     const emotesHidden =
-                      hasMany && hoveredEmotesRow !== index
+                      hasMany && expandedEmotesRow !== index
                         ? user.emotes.length - maxEmotes
                         : 0;
                     return (
-                      <tr
-                        key={user.id || index}
-                        onMouseEnter={() => setHoveredEmotesRow(index)}
-                        onMouseLeave={() => setHoveredEmotesRow(null)}
-                      >
+                      <tr key={user.id || index}>
                         <td className="user-avatar-cell">
                           <img
                             src={user.pfp}
@@ -609,9 +603,48 @@ function Inicio() {
                               </a>
                             ))}
                             {emotesHidden > 0 && (
-                              <span className="more-users">
-                                +{emotesHidden}
-                              </span>
+                              <button
+                                className="emotes-expand-btn"
+                                title="Mostrar todos los emotes"
+                                onClick={() => setExpandedEmotesRow(index)}
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  padding: 0,
+                                  marginLeft: "4px",
+                                  cursor: "pointer",
+                                  verticalAlign: "middle",
+                                  display: "inline-flex",
+                                }}
+                              >
+                                <MdiChevronDown
+                                  width={22}
+                                  height={22}
+                                  style={{ color: "var(--text)" }}
+                                />
+                              </button>
+                            )}
+                            {expandedEmotesRow === index && hasMany && (
+                              <button
+                                className="emotes-collapse-btn"
+                                title="Ocultar emotes"
+                                onClick={() => setExpandedEmotesRow(null)}
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  padding: 0,
+                                  marginLeft: "4px",
+                                  cursor: "pointer",
+                                  verticalAlign: "middle",
+                                  display: "inline-flex",
+                                }}
+                              >
+                                <MdiChevronUp
+                                  width={22}
+                                  height={22}
+                                  style={{ color: "var(--text)" }}
+                                />
+                              </button>
                             )}
                           </div>
                         </td>
@@ -625,85 +658,100 @@ function Inicio() {
         </div>
       </div>
 
-      <div className="top-section" style={{ marginTop: "20px" }}>
-        <h2
-          className="user-info-header"
-          style={{
-            margin: "0 0 6px 0",
-            fontSize: "1.2em",
-            color: "var(--text)",
-          }}
-        >
-          Logros del Stream
-        </h2>
-        <div
-          className="user-count-info"
-          style={{
-            fontWeight: 500,
-            color: "var(--text-2)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "8px",
-          }}
-        >
-          <span>
-            <b>
-              {
-                userData.filter((user) =>
-                  Object.keys(achievements).some((key) =>
-                    (achievements[key] || []).some(
-                      (u) => u.nombre === user.nombre
+      <div
+        className="top-section"
+        style={{
+          marginTop: "20px",
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+        }}
+      >
+        <div style={{ flex: 1 }}>
+          <h2
+            className="user-info-header"
+            style={{
+              margin: "0 0 6px 0",
+              fontSize: "1.2em",
+              color: "var(--text)",
+            }}
+          >
+            Logros del Directo
+          </h2>
+          <div
+            className="user-count-info"
+            style={{
+              fontWeight: 500,
+              color: "var(--text-2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "8px",
+            }}
+          >
+            <span>
+              <b>
+                {
+                  userData.filter((user) =>
+                    Object.keys(achievements).some((key) =>
+                      (achievements[key] || []).some(
+                        (u) => u.nombre === user.nombre
+                      )
                     )
+                  ).length
+                }
+              </b>{" "}
+              usuario
+              {userData.filter((user) =>
+                Object.keys(achievements).some((key) =>
+                  (achievements[key] || []).some(
+                    (u) => u.nombre === user.nombre
                   )
-                ).length
-              }
-            </b>{" "}
-            usuario
-            {userData.filter((user) =>
-              Object.keys(achievements).some((key) =>
-                (achievements[key] || []).some((u) => u.nombre === user.nombre)
-              )
-            ).length === 1
-              ? ""
-              : "s"}
-          </span>
-          {userData.some(
-            (user) =>
-              user.l_platino && user.l_platino.toString().toLowerCase() === "si"
-          ) && (
-            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <Icon
-                icon="solar:cup-bold"
-                width={18}
-                height={18}
-                style={{
-                  color: "#ff8888",
-                  flexShrink: 0,
-                  verticalAlign: "text-bottom",
-                }}
-              />
-              Platino:
-              {userData
-                .filter(
-                  (user) =>
-                    user.l_platino &&
-                    user.l_platino.toString().toLowerCase() === "si"
                 )
-                .map((user, idx) => (
-                  <img
-                    key={user.id || user.nombre || idx}
-                    src={user.pfp}
-                    alt={user.nombre}
-                    className="achievement-user-avatar"
-                    title={user.nombre}
-                    style={{ marginLeft: "2px" }}
-                  />
-                ))}
+              ).length === 1
+                ? ""
+                : "s"}
             </span>
-          )}
+            {userData.some(
+              (user) =>
+                user.l_platino &&
+                user.l_platino.toString().toLowerCase() === "si"
+            ) && (
+              <span
+                style={{ display: "flex", alignItems: "center", gap: "6px" }}
+              >
+                <SolarCupBold
+                  width={18}
+                  height={18}
+                  style={{
+                    color: "#ff8888",
+                    flexShrink: 0,
+                    verticalAlign: "text-bottom",
+                  }}
+                />
+                Platino:
+                {userData
+                  .filter(
+                    (user) =>
+                      user.l_platino &&
+                      user.l_platino.toString().toLowerCase() === "si"
+                  )
+                  .map((user, idx) => (
+                    <img
+                      key={user.id || user.nombre || idx}
+                      src={user.pfp}
+                      alt={user.nombre}
+                      className="achievement-user-avatar"
+                      title={user.nombre}
+                      style={{ marginLeft: "2px" }}
+                    />
+                  ))}
+              </span>
+            )}
+          </div>
         </div>
+        {/* Botón global eliminado, solo quedan los individuales en cada logro */}
       </div>
       <div
         className="achievements-grid inset-section"
@@ -711,85 +759,132 @@ function Inicio() {
       >
         {Object.entries(achievementDetails).map(([key, details]) => {
           const users = achievements[key] || [];
-          const maxUsers = maxUsersMap[key] || 8;
+          const maxUsers = maxUsersMap[key] || 7;
+          const expanded = expandedAchievements.includes(key);
           return (
             <div
               key={key}
-              className={`achievement-section${
-                descKey === key ? " show-desc" : ""
-              }`}
+              className={`achievement-section${expanded ? " show-desc" : ""}`}
               data-achievement-key={key}
             >
               <h3
-                onMouseEnter={() => setDescKey(key)}
-                onMouseLeave={() => setDescKey(null)}
-                tabIndex={0}
                 style={{
-                  cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
+                  cursor: "default",
+                  justifyContent: "space-between",
+                  width: "100%",
                 }}
                 aria-describedby={`desc-${key}`}
               >
-                <Icon
-                  icon="solar:cup-bold"
-                  width={16}
-                  height={16}
-                  color={details.color}
-                  style={{
-                    color: details.color,
-                    flexShrink: 0,
-                    verticalAlign: "text-bottom",
-                  }}
-                />
-                {details.name}
-              </h3>
-              {descKey === key && (
                 <span
-                  id={`desc-${key}`}
-                  className="achievement-desc-inline"
-                  style={{ maxWidth: "100%" }}
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
-                  {details.description}
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: 16,
+                      height: 16,
+                      flexShrink: 0,
+                      verticalAlign: "text-bottom",
+                    }}
+                  >
+                    <SolarCupBold
+                      width={16}
+                      height={16}
+                      color={details.color}
+                      style={{
+                        color: details.color,
+                        width: 16,
+                        height: 16,
+                        verticalAlign: "text-bottom",
+                        display: "block",
+                      }}
+                    />
+                  </span>
+                  <span
+                    style={{
+                      minHeight: 24,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    {details.name}
+                  </span>
                 </span>
-              )}
-              {descKey !== key && (
-                <div
-                  className={`achievement-users${
-                    anyAchievementHovered ? " expanded" : ""
-                  }`}
-                  onMouseEnter={() => {
-                    if (hoverTimeoutRef.current) {
-                      clearTimeout(hoverTimeoutRef.current);
-                      hoverTimeoutRef.current = null;
-                    }
-                    setAnyAchievementHovered(true);
+                <button
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 2,
+                    marginLeft: 8,
+                    display: "flex",
+                    alignItems: "center",
                   }}
-                  onMouseLeave={() => {
-                    if (hoverTimeoutRef.current)
-                      clearTimeout(hoverTimeoutRef.current);
-                    setAnyAchievementHovered(false);
+                  onClick={() => {
+                    setExpandedAchievements((prev) =>
+                      expanded ? prev.filter((k) => k !== key) : [...prev, key]
+                    );
                   }}
-                  tabIndex={0}
-                  style={{ cursor: "pointer" }}
-                  aria-expanded={anyAchievementHovered}
                 >
-                  {anyAchievementHovered ? (
-                    <div className="achievement-users-list">
-                      {users.map((user, index) => (
-                        <img
-                          key={user.id || index}
-                          src={user.pfp}
-                          alt={user.nombre}
-                          className="achievement-user-avatar"
-                          title={user.nombre}
-                        />
-                      ))}
-                    </div>
+                  {expanded ? (
+                    <MdiChevronUp
+                      width={20}
+                      height={20}
+                      style={{ color: "var(--text)" }}
+                    />
                   ) : (
-                    <>
-                      {users.slice(0, maxUsers).map((user, index) => (
+                    <MdiChevronDown
+                      width={20}
+                      height={20}
+                      style={{ color: "var(--text)" }}
+                    />
+                  )}
+                </button>
+              </h3>
+              {expanded && (
+                <>
+                  <span
+                    id={`desc-${key}`}
+                    className="achievement-desc-inline"
+                    style={{ maxWidth: "100%" }}
+                  >
+                    {details.description}
+                  </span>
+                  <div
+                    className={`achievement-users-list${
+                      users.length > 0 ? " has-users" : ""
+                    }`}
+                  >
+                    {users.map((user, index) => (
+                      <img
+                        key={user.id || index}
+                        src={user.pfp}
+                        alt={user.nombre}
+                        className="achievement-user-avatar"
+                        title={user.nombre}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+              {!expanded && (
+                <div className="achievement-users">
+                  {users.length > maxUsers
+                    ? users
+                        .slice(0, maxUsers - 1)
+                        .map((user, index) => (
+                          <img
+                            key={user.id || index}
+                            src={user.pfp}
+                            alt={user.nombre}
+                            className="achievement-user-avatar"
+                            title={user.nombre}
+                          />
+                        ))
+                    : users.map((user, index) => (
                         <img
                           key={user.id || index}
                           src={user.pfp}
@@ -798,12 +893,10 @@ function Inicio() {
                           title={user.nombre}
                         />
                       ))}
-                      {users.length > maxUsers && (
-                        <span className="more-users">
-                          +{users.length - maxUsers}
-                        </span>
-                      )}
-                    </>
+                  {users.length > maxUsers && (
+                    <span className="more-users">
+                      +{users.length - (maxUsers - 1)}
+                    </span>
                   )}
                 </div>
               )}

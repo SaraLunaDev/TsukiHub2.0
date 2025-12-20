@@ -21,8 +21,8 @@
   padding: 10px 12px 10px 40px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: var(--dark-2);
-  color: var(--text);
+  background: var(--row-bg);
+  color: var(--text-2);
   font-size: 14px;
   box-sizing: border-box;
 }

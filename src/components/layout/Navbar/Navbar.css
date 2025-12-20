@@ -242,14 +242,31 @@
         color: var(--text);
     }
 
-    .navbar-links-desktop a.active::after {
+
+    /* Barra animada solo bajo el texto, no todo el link */
+    .navbar-links-desktop a .nav-text {
+        position: relative;
+        z-index: 1;
+    }
+    .navbar-links-desktop a .nav-text::after {
         content: '';
+        display: block;
         position: absolute;
-        bottom: 0;
-        left: 6px;
-        right: 6px;
+        left: 0;
+        right: 0;
+        bottom: -7px;
         height: 2px;
         background-color: var(--color-mid);
+        border-radius: 2px;
+        opacity: 0;
+        transform: scaleX(0);
+        transition: opacity 0.2s, transform 0.2s;
+        pointer-events: none;
+    }
+    .navbar-links-desktop a.active .nav-text::after,
+    .navbar-links-desktop a:hover .nav-text::after {
+        opacity: 1;
+        transform: scaleX(1);
     }
 
     /* Iconos ocultos en PC */

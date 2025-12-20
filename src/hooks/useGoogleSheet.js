@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
+import useLocalStorage from "./useLocalStorage";
 
-export function useGoogleSheet(sheetUrl, cacheKey = null) {
-  const storageKey = cacheKey || `sheet_${btoa(sheetUrl).slice(0, 20)}`;
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+export function useGoogleSheet(sheetUrl, tabName = "default") {
+  const cacheKey = `gsheet_cache_${sheetUrl}_${tabName}`;
+  const [localData, setLocalData] = useLocalStorage(cacheKey, []);
+  const [data, setData] = useState(localData || []);
+  const [loading, setLoading] = useState(!localData || localData.length === 0);
   const [error, setError] = useState(null);
-  const currentDataRef = useRef([]);
 
   const fetchData = useCallback(async () => {
     if (!sheetUrl) {
@@ -13,39 +14,30 @@ export function useGoogleSheet(sheetUrl, cacheKey = null) {
       setLoading(false);
       return;
     }
-
     try {
-      const response = await fetch(sheetUrl, { cache: "no-store" });
+      const response = await fetch(sheetUrl);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const csvText = await response.text();
       const rows = csvText.split("\n").filter((row) => row.trim());
       if (rows.length < 2) throw new Error("Datos insuficientes");
 
-      const headers = rows[0].split(",");
+      const headers = rows[0].split(",").map((h) => h.trim());
       const parsedData = rows.slice(1).map((row) => {
         const columns = row.split(",");
-        const item = {};
-        headers.forEach((header, index) => {
+        return headers.reduce((item, header, index) => {
           const value = columns[index]?.trim() || "";
           const numValue = parseFloat(value);
-          item[header.trim()] =
+          item[header] =
             /[a-zA-Z]/.test(value) || value !== numValue.toString()
               ? value
               : numValue;
-        });
-        return item;
+          return item;
+        }, {});
       });
 
-      const newDataString = JSON.stringify(parsedData);
-      const currentDataString = JSON.stringify(currentDataRef.current);
-
-      if (newDataString !== currentDataString) {
-        localStorage.setItem(storageKey, newDataString);
-        currentDataRef.current = parsedData;
-        setData(parsedData);
-      }
-
+      setData(parsedData);
+      setLocalData(parsedData);
       setError(null);
     } catch (err) {
       console.error("Error:", err.message);
@@ -53,7 +45,7 @@ export function useGoogleSheet(sheetUrl, cacheKey = null) {
     } finally {
       setLoading(false);
     }
-  }, [sheetUrl, storageKey]);
+  }, [sheetUrl, setLocalData]);
 
   const refetch = useCallback(() => {
     setLoading(true);
@@ -61,20 +53,14 @@ export function useGoogleSheet(sheetUrl, cacheKey = null) {
   }, [fetchData]);
 
   useEffect(() => {
-    const cached = localStorage.getItem(storageKey);
-    if (cached) {
-      try {
-        const parsedCache = JSON.parse(cached);
-        currentDataRef.current = parsedCache;
-        setData(parsedCache);
-        setLoading(false);
-      } catch (err) {
-        console.error("Cache corrupto jejeje wooopsss:", err);
-      }
-    }
+    setData(localData || []);
+    setLoading(!localData || localData.length === 0);
+  }, [localData]);
 
+  useEffect(() => {
     fetchData();
-  }, [fetchData, storageKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sheetUrl]);
 
   return { data, loading, error, refetch };
 }
