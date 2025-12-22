@@ -73,7 +73,6 @@ function UserMenu() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       const hash = window.location.hash;
-      console.log("Hash detectado:", hash);
 
       if (hash && hash.includes("access_token")) {
         setLoading(true);
@@ -81,22 +80,16 @@ function UserMenu() {
         const params = new URLSearchParams(hash.substring(1));
         const accessToken = params.get("access_token");
 
-        console.log("Access token obtenido:", accessToken ? "Si" : "No");
-
         if (accessToken) {
           try {
             // Validar el token
-            console.log("Validando token...");
+
             const validateResponse = await fetch(API_URLS.TWITCH_VALIDATE, {
               headers: { Authorization: `OAuth ${accessToken}` },
             });
 
-            console.log("Respuesta de validacion:", validateResponse.status);
-
             if (validateResponse.ok) {
               // Obtener datos del usuario
-              console.log("Obteniendo datos del usuario...");
-              console.log("Client ID:", TWITCH_CONFIG.CLIENT_ID);
 
               const userResponse = await fetch(API_URLS.TWITCH_USERS, {
                 headers: {
@@ -105,11 +98,8 @@ function UserMenu() {
                 },
               });
 
-              console.log("Respuesta de usuario:", userResponse.status);
-
               if (userResponse.ok) {
                 const userData = await userResponse.json();
-                console.log("Datos de usuario:", userData);
 
                 const user = userData.data[0];
 
@@ -121,12 +111,11 @@ function UserMenu() {
                   email: user.email,
                 };
 
-                console.log("Guardando usuario:", userInfo);
                 setTwitchUser(userInfo);
                 setTwitchToken(accessToken);
 
                 const isAdmin = ADMIN_USERS.includes(user.login.toLowerCase());
-                console.log("Es admin?", isAdmin);
+
                 setDeveloperMode(isAdmin);
 
                 // Limpiar la URL del hash sin recargar la pagina
@@ -135,16 +124,9 @@ function UserMenu() {
                   "",
                   window.location.pathname + window.location.search
                 );
-              } else {
-                const errorData = await userResponse.json();
-                console.error("Error al obtener usuario:", errorData);
               }
-            } else {
-              const errorData = await validateResponse.json();
-              console.error("Error al validar token:", errorData);
             }
           } catch (error) {
-            console.error("Error en autenticacion Twitch:", error);
           } finally {
             setLoading(false);
           }
@@ -159,10 +141,6 @@ function UserMenu() {
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const handleLogin = () => {
-    console.log("Iniciando login con Twitch...");
-    console.log("Client ID:", TWITCH_CONFIG.CLIENT_ID);
-    console.log("Redirect URI:", TWITCH_CONFIG.REDIRECT_URI);
-
     const authUrl =
       `${API_URLS.TWITCH_AUTH}?` +
       new URLSearchParams({
@@ -172,7 +150,6 @@ function UserMenu() {
         scope: TWITCH_CONFIG.SCOPES.join(" "),
       }).toString();
 
-    console.log("URL de autenticacion:", authUrl);
     window.location.href = authUrl;
   };
 
@@ -317,7 +294,7 @@ function UserMenu() {
                   className="user-menu-option user-menu-option-primary user-menu-option-divider"
                   onClick={handleLogin}
                 >
-                  <MdiTwitch className="user-menu-option-icon" />
+                  <MdiTwitch className="user-menu-option-icon user-menu-twitch-icon" />
                   <span className="user-menu-option-text">
                     Iniciar con Twitch
                   </span>
@@ -351,7 +328,7 @@ function UserMenu() {
                     className="user-menu-option user-menu-option-primary"
                     onClick={handleLogin}
                   >
-                    <MdiTwitch className="user-menu-option-icon" />
+                    <MdiTwitch className="user-menu-option-icon user-menu-twitch-icon" />
                     <span className="user-menu-option-text">
                       Iniciar con Twitch
                     </span>

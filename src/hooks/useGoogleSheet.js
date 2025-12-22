@@ -40,7 +40,6 @@ export function useGoogleSheet(sheetUrl, tabName = "default") {
       setLocalData(parsedData);
       setError(null);
     } catch (err) {
-      console.error("Error:", err.message);
       setError(err.message);
     } finally {
       setLoading(false);

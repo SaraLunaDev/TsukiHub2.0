@@ -3,26 +3,3 @@
 // ============================================ 
 */
 
-.main-container h1 {
-  font-size: 24px;
-  margin-bottom: 15px;
-  color: var(--text);
-}
-
-.main-container p {
-  font-size: 14px;
-  color: var(--text-2);
-  line-height: 1.6;
-}
-
-/* PC */
-@media (min-width: 769px) {
-  .main-container h1 {
-    font-size: 32px;
-    margin-bottom: 20px;
-  }
-
-  .main-container p {
-    font-size: 16px;
-  }
-}

@@ -13,6 +13,7 @@
   --dark-2: #181d23;
   --text: #e6e6e6;
   --text-2: #a0a8b2;
+  --text-url: #ca6e6e;
   --divider: #ffffff1e;
   --border: #a0a8b233;
   --row-bg: #b3d6ff05;
@@ -31,6 +32,7 @@ body:not(.dark-mode) {
   --dark-2: #eeeeee;
   --text: #333333;
   --text-2: #666666;
+  --text-url: #ff8888;
   --divider: #e0e0e0;
   --border: #c0c0c0;
   --row-bg: #ffffff;

@@ -17,7 +17,6 @@ import "./App.css";
 
 function App() {
   return (
-    // El Router habilita la navegacion entre paginas sin recargar
     <Router>
       {/* El Layout que incluye Navbar y estructura comun */}
       <Layout>

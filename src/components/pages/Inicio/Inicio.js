@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import { useGoogleSheet } from "../../../hooks/useGoogleSheet";
 
 import { SolarCupBold } from "../../icons/SolarCupBold";
@@ -6,6 +8,7 @@ import { MdiChevronUp } from "../../icons/MdiChevronUp";
 import { MdiChevronDown } from "../../icons/MdiChevronDown";
 import { MaterialSymbolsAndroidMessages } from "../../icons/MaterialSymbolsAndroidMessages";
 import { IonTicket } from "../../icons/IonTicket";
+import { SolarFireBold } from "../../icons/SolarFireBold";
 
 import SearchBar from "../../common/SearchBar";
 import "./Inicio.css";
@@ -17,6 +20,10 @@ function Inicio() {
   const [expandedAchievements, setExpandedAchievements] = useState([]);
   const achievementsGridRef = useRef(null);
   const [maxUsersMap, setMaxUsersMap] = useState({});
+  const [showRachaTable, setShowRachaTable] = useState(true);
+  const [showMensajesTable] = useState(true);
+  const [showTicketsTable, setShowTicketsTable] = useState(true);
+  const [showEmotesTable, setShowEmotesTable] = useState(true);
   const sheetUrl = process.env.REACT_APP_USERDATA_SHEET_URL;
   const {
     data: rawData,
@@ -190,24 +197,11 @@ function Inicio() {
   return (
     <div className="main-container">
       <div className="top-section">
-        <h2
-          className="user-info-header"
-          style={{
-            margin: "0 0 6px 0",
-            fontSize: "1.2em",
-            color: "var(--text)",
-          }}
-        >
-          Tablas de Datos
-        </h2>
-        <div
-          className="user-count-info"
-          style={{
-            fontWeight: 500,
-            color: "var(--text-2)",
-          }}
-        >
-          <b>{userData.length}</b> usuario{userData.length === 1 ? "" : "s"}
+        <h2>Tablas de Datos</h2>
+        <div className="top-section-h2-down">
+          <span>
+            <b>{userData.length}</b> usuario{userData.length === 1 ? "" : "s"}
+          </span>
         </div>
       </div>
 
@@ -220,17 +214,51 @@ function Inicio() {
               alignItems: "center",
             }}
           >
-            <h2
-              style={{
-                margin: 0,
-                marginBottom: 16,
-                fontSize: "1.1em",
-                color: "var(--text)",
-                fontWeight: 600,
-              }}
-            >
-              Rachas
-            </h2>
+            <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+              <button
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  marginRight: 6,
+                  marginBottom: 13,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onClick={() => setShowRachaTable((prev) => !prev)}
+                aria-label={
+                  showRachaTable
+                    ? "Ocultar tabla Rachas"
+                    : "Mostrar tabla Rachas"
+                }
+              >
+                {showRachaTable ? (
+                  <MdiChevronUp
+                    width={20}
+                    height={20}
+                    style={{ color: "var(--text)" }}
+                  />
+                ) : (
+                  <MdiChevronDown
+                    width={20}
+                    height={20}
+                    style={{ color: "var(--text)" }}
+                  />
+                )}
+              </button>
+              <h2
+                style={{
+                  margin: 0,
+                  marginBottom: 16,
+                  fontSize: "1.1em",
+                  color: "var(--text)",
+                  fontWeight: 600,
+                }}
+              >
+                Rachas
+              </h2>
+            </div>
             <span
               style={{
                 fontSize: "0.88em",
@@ -252,82 +280,113 @@ function Inicio() {
               activas
             </span>
           </div>
-          <SearchBar
-            placeholder="Buscar usuario..."
-            value={searchFilters.racha}
-            onChange={(value) =>
-              setSearchFilters((prev) => ({ ...prev, racha: value }))
-            }
-          />
+          {showRachaTable && (
+            <SearchBar
+              placeholder="Buscar usuario..."
+              value={searchFilters.racha}
+              onChange={(value) =>
+                setSearchFilters((prev) => ({ ...prev, racha: value }))
+              }
+            />
+          )}
           <div className="table-container">
-            <table>
-              <tbody>
-                {getTopUsers("racha", 10, searchFilters.racha).map(
-                  (user, index) => {
-                    const rachaStr = String(user.racha || "");
-                    const isRed = rachaStr.startsWith("m_");
-                    const isBlue = rachaStr.startsWith("f_");
-                    const rachaValue = rachaStr.replace(/^[mf]_/, "") || "0";
+            {showRachaTable ? (
+              <table>
+                <tbody>
+                  {getTopUsers("racha", 10, searchFilters.racha).map(
+                    (user, index) => {
+                      const rachaStr = String(user.racha || "");
+                      const isRed = rachaStr.startsWith("m_");
+                      const isBlue = rachaStr.startsWith("f_");
+                      const rachaValue = rachaStr.replace(/^[mf]_/, "") || "0";
 
-                    return (
-                      <tr key={user.id || index}>
-                        <td>
-                          <img
-                            src={user.pfp}
-                            alt={user.nombre}
-                            className="profile-pic"
-                          />
-                        </td>
-                        <td>{user.nombre}</td>
-                        <td
-                          style={{
-                            color:
-                              !isRed && !isBlue
-                                ? "var(--text-2)"
-                                : isRed
-                                ? "rgba(128, 41, 26, 1)"
-                                : "rgba(26, 104, 128, 1)",
-                          }}
-                        >
-                          <span style={{ marginRight: "8px" }}>
-                            {rachaValue}
-                          </span>
-                          <span
+                      return (
+                        <tr key={user.id || index}>
+                          <td>
+                            <img
+                              src={user.pfp}
+                              alt={user.nombre}
+                              className="profile-pic"
+                            />
+                          </td>
+                          <td>{user.nombre}</td>
+                          <td
                             style={{
-                              display: "inline-block",
-                              width: 16,
-                              height: 16,
-                              verticalAlign: "text-bottom",
+                              color:
+                                !isRed && !isBlue
+                                  ? "var(--text-2)"
+                                  : isRed
+                                  ? "rgba(128, 41, 26, 1)"
+                                  : "rgba(26, 104, 128, 1)",
                             }}
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              height="1em"
+                            <span style={{ marginRight: "8px" }}>
+                              {rachaValue}
+                            </span>
+                            <span
                               style={{
-                                verticalAlign: "baseline",
-                                color:
-                                  !isRed && !isBlue
-                                    ? "var(--text-2)"
-                                    : isRed
-                                    ? "rgba(128, 41, 26, 1)"
-                                    : "rgba(26, 104, 128, 1)",
+                                display: "inline-block",
+                                width: 16,
+                                height: 16,
+                                verticalAlign: "text-bottom",
                               }}
                             >
-                              <path
-                                fill="currentColor"
-                                d="M12.832 21.801c3.126-.626 7.168-2.875 7.168-8.69c0-5.291-3.873-8.815-6.658-10.434c-.619-.36-1.342.113-1.342.828v1.828c0 1.442-.606 4.074-2.29 5.169c-.86.559-1.79-.278-1.894-1.298l-.086-.838c-.1-.974-1.092-1.565-1.87-.971C4.461 8.46 3 10.33 3 13.11C3 20.221 8.289 22 10.933 22q.232 0 .484-.015C10.111 21.874 8 21.064 8 18.444c0-2.05 1.495-3.435 2.631-4.11c.306-.18.663.055.663.41v.59c0 .45.175 1.155.59 1.637c.47.546 1.159-.026 1.214-.744c.018-.226.246-.37.442-.256c.641.375 1.46 1.175 1.46 2.473c0 2.048-1.129 2.99-2.168 3.357"
+                              <SolarFireBold
+                                width={14}
+                                height={14}
+                                style={{
+                                  verticalAlign: "baseline",
+                                  color:
+                                    !isRed && !isBlue
+                                      ? "var(--text-2)"
+                                      : isRed
+                                      ? "rgba(128, 41, 26, 1)"
+                                      : "rgba(26, 104, 128, 1)",
+                                }}
                               />
-                            </svg>
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  }
-                )}
-              </tbody>
-            </table>
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    }
+                  )}
+                </tbody>
+              </table>
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  minHeight: 40,
+                  display: "flex",
+                  alignItems: "flex-start",
+                  justifyContent: "flex-start",
+                }}
+              >
+                <div
+                  style={{ padding: 0, width: "100%", marginTop: -10 }}
+                  className="table-markdown"
+                >
+                  <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                    {`**¿Como funciona la racha?**
+
+- Escribe al menos **<span style="color: var(--text-2);">un mensaje</span>** por directo para mantenerla.
+- Si faltas a un directo, la racha se reinicia.
+- La racha estara activa solo si tienes mas de 5 dias seguidos.
+
+**¿Como congelar racha?**
+- Si tienes al menos **<span style="color: var(--text-2);">24 tickets</span>** y tu racha **<span style="color: var(--text-2);">esta activa</span>**, se consumiran los tickets y se congelara al faltar a un directo automaticamente.
+- Si sigues faltando, la racha se mantendra tantas veces como tickets tengas.
+- Al siguiente directo que escribas, la racha se mantendra y aumentara.
+- Sin tickets, la racha se reinicia.
+
+**¿Que significan los colores?**
+- **<span style="color: var(--text-2);">Normal:</span>** la racha esta mantenida
+- **<span style="color: rgba(128, 41, 26, 1);">Rojo:</span>** falta mensaje en el directo actual
+- **<span style="color: rgba(26, 104, 128, 1);">Azul:</span>** racha congelada, podras ampliarla`}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -339,17 +398,19 @@ function Inicio() {
               alignItems: "center",
             }}
           >
-            <h2
-              style={{
-                margin: 0,
-                marginBottom: 16,
-                fontSize: "1.1em",
-                color: "var(--text)",
-                fontWeight: 600,
-              }}
-            >
-              Mensajes
-            </h2>
+            <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+              <h2
+                style={{
+                  margin: 0,
+                  marginBottom: 16,
+                  fontSize: "1.1em",
+                  color: "var(--text)",
+                  fontWeight: 600,
+                }}
+              >
+                Mensajes
+              </h2>
+            </div>
             <span
               style={{
                 fontSize: "0.88em",
@@ -367,54 +428,82 @@ function Inicio() {
               })()}
             </span>
           </div>
-          <SearchBar
-            placeholder="Buscar usuario..."
-            value={searchFilters.mensajes}
-            onChange={(value) =>
-              setSearchFilters((prev) => ({ ...prev, mensajes: value }))
-            }
-          />
+          {showMensajesTable && (
+            <SearchBar
+              placeholder="Buscar usuario..."
+              value={searchFilters.mensajes}
+              onChange={(value) =>
+                setSearchFilters((prev) => ({ ...prev, mensajes: value }))
+              }
+            />
+          )}
           <div className="table-container">
-            <table>
-              <tbody>
-                {getTopUsers("mensajes", 10, searchFilters.mensajes).map(
-                  (user, index) => (
-                    <tr key={user.id || index}>
-                      <td>
-                        <img
-                          src={user.pfp}
-                          alt={user.nombre}
-                          className="profile-pic"
-                        />
-                      </td>
-                      <td>{user.nombre}</td>
-                      <td style={{ whiteSpace: "nowrap" }}>
-                        <span style={{ marginRight: "8px" }}>
-                          {user.mensajes}
-                        </span>
-                        <span
-                          style={{
-                            display: "inline-block",
-                            width: 16,
-                            height: 16,
-                            verticalAlign: "text-bottom",
-                          }}
-                        >
-                          <MaterialSymbolsAndroidMessages
-                            style={{
-                              verticalAlign: "baseline",
-                              color: "var(--text-2)",
-                            }}
-                            width="14"
-                            height="14"
+            {showMensajesTable ? (
+              <table>
+                <tbody>
+                  {getTopUsers("mensajes", 10, searchFilters.mensajes).map(
+                    (user, index) => (
+                      <tr key={user.id || index}>
+                        <td>
+                          <img
+                            src={user.pfp}
+                            alt={user.nombre}
+                            className="profile-pic"
                           />
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                )}
-              </tbody>
-            </table>
+                        </td>
+                        <td>{user.nombre}</td>
+                        <td style={{ whiteSpace: "nowrap" }}>
+                          <span style={{ marginRight: "8px" }}>
+                            {user.mensajes}
+                          </span>
+                          <span
+                            style={{
+                              display: "inline-block",
+                              width: 16,
+                              height: 16,
+                              verticalAlign: "text-bottom",
+                            }}
+                          >
+                            <MaterialSymbolsAndroidMessages
+                              style={{
+                                verticalAlign: "baseline",
+                                color: "var(--text-2)",
+                              }}
+                              width="14"
+                              height="14"
+                            />
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  justifyContent: "flex-start",
+                }}
+              >
+                <div
+                  style={{ padding: 0, width: "100%", marginTop: -10 }}
+                  className="table-markdown"
+                >
+                  <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                    {`
+*No se me ocurre que vergas poner aqui ajjajjh*
+
+*amove que en verdad no hace falta poner nada, pero es que si no que voy a poner un chevron en cada tabla y en esta no? ajjaajajj*
+
+*noove*
+                    `}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -426,17 +515,51 @@ function Inicio() {
               alignItems: "center",
             }}
           >
-            <h2
-              style={{
-                margin: 0,
-                marginBottom: 16,
-                fontSize: "1.1em",
-                color: "var(--text)",
-                fontWeight: 600,
-              }}
-            >
-              Tickets
-            </h2>
+            <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+              <button
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  marginRight: 6,
+                  marginBottom: 12,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onClick={() => setShowTicketsTable((prev) => !prev)}
+                aria-label={
+                  showTicketsTable
+                    ? "Ocultar tabla Tickets"
+                    : "Mostrar tabla Tickets"
+                }
+              >
+                {showTicketsTable ? (
+                  <MdiChevronUp
+                    width={20}
+                    height={20}
+                    style={{ color: "var(--text)" }}
+                  />
+                ) : (
+                  <MdiChevronDown
+                    width={20}
+                    height={20}
+                    style={{ color: "var(--text)" }}
+                  />
+                )}
+              </button>
+              <h2
+                style={{
+                  margin: 0,
+                  marginBottom: 16,
+                  fontSize: "1.1em",
+                  color: "var(--text)",
+                  fontWeight: 600,
+                }}
+              >
+                Tickets
+              </h2>
+            </div>
             <span
               style={{
                 fontSize: "0.88em",
@@ -454,54 +577,84 @@ function Inicio() {
               })()}
             </span>
           </div>
-          <SearchBar
-            placeholder="Buscar usuario..."
-            value={searchFilters.tickets}
-            onChange={(value) =>
-              setSearchFilters((prev) => ({ ...prev, tickets: value }))
-            }
-          />
+          {showTicketsTable && (
+            <SearchBar
+              placeholder="Buscar usuario..."
+              value={searchFilters.tickets}
+              onChange={(value) =>
+                setSearchFilters((prev) => ({ ...prev, tickets: value }))
+              }
+            />
+          )}
           <div className="table-container">
-            <table>
-              <tbody>
-                {getTopUsers("tickets", 10, searchFilters.tickets).map(
-                  (user, index) => (
-                    <tr key={user.id || index}>
-                      <td>
-                        <img
-                          src={user.pfp}
-                          alt={user.nombre}
-                          className="profile-pic"
-                        />
-                      </td>
-                      <td>{user.nombre}</td>
-                      <td style={{ whiteSpace: "nowrap" }}>
-                        <span style={{ marginRight: "8px" }}>
-                          {user.tickets}
-                        </span>
-                        <span
-                          style={{
-                            display: "inline-block",
-                            width: 16,
-                            height: 16,
-                            verticalAlign: "text-bottom",
-                          }}
-                        >
-                          <IonTicket
-                            style={{
-                              verticalAlign: "baseline",
-                              color: "var(--text-2)",
-                            }}
-                            width="14"
-                            height="14"
+            {showTicketsTable ? (
+              <table>
+                <tbody>
+                  {getTopUsers("tickets", 10, searchFilters.tickets).map(
+                    (user, index) => (
+                      <tr key={user.id || index}>
+                        <td>
+                          <img
+                            src={user.pfp}
+                            alt={user.nombre}
+                            className="profile-pic"
                           />
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                )}
-              </tbody>
-            </table>
+                        </td>
+                        <td>{user.nombre}</td>
+                        <td style={{ whiteSpace: "nowrap" }}>
+                          <span style={{ marginRight: "8px" }}>
+                            {user.tickets}
+                          </span>
+                          <span
+                            style={{
+                              display: "inline-block",
+                              width: 16,
+                              height: 16,
+                              verticalAlign: "text-bottom",
+                            }}
+                          >
+                            <IonTicket
+                              style={{
+                                verticalAlign: "baseline",
+                                color: "var(--text-2)",
+                              }}
+                              width="14"
+                              height="14"
+                            />
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  justifyContent: "flex-start",
+                }}
+              >
+                <div
+                  style={{ padding: 0, width: "100%", marginTop: -10 }}
+                  className="table-markdown"
+                >
+                  <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                    {`
+**¿Para que sirven los tickets?**
+- Usar el Gacha consume **<span style="color: var(--text-2);">3 tickets</span>**.
+- Congelar tu racha consume **<span style="color: var(--text-2);">24 tickets</span>**.
+
+**¿Como conseguir tickets?**
+- Ganando los minijuegos de la [GameBoy](/gameboy).
+- Eventos que organice la Sara.
+                    `}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -513,17 +666,51 @@ function Inicio() {
               alignItems: "center",
             }}
           >
-            <h2
-              style={{
-                margin: 0,
-                marginBottom: 16,
-                fontSize: "1.1em",
-                color: "var(--text)",
-                fontWeight: 600,
-              }}
-            >
-              Emotes
-            </h2>
+            <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+              <button
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  marginRight: 6,
+                  marginBottom: 12,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onClick={() => setShowEmotesTable((prev) => !prev)}
+                aria-label={
+                  showEmotesTable
+                    ? "Ocultar tabla Emotes"
+                    : "Mostrar tabla Emotes"
+                }
+              >
+                {showEmotesTable ? (
+                  <MdiChevronUp
+                    width={20}
+                    height={20}
+                    style={{ color: "var(--text)" }}
+                  />
+                ) : (
+                  <MdiChevronDown
+                    width={20}
+                    height={20}
+                    style={{ color: "var(--text)" }}
+                  />
+                )}
+              </button>
+              <h2
+                style={{
+                  margin: 0,
+                  marginBottom: 16,
+                  fontSize: "1.1em",
+                  color: "var(--text)",
+                  fontWeight: 600,
+                }}
+              >
+                Emotes
+              </h2>
+            </div>
             <span
               style={{
                 fontSize: "0.88em",
@@ -542,118 +729,161 @@ function Inicio() {
               })()}
             </span>
           </div>
-          <SearchBar
-            placeholder="Buscar usuario..."
-            value={searchFilters.emotes}
-            onChange={(value) =>
-              setSearchFilters((prev) => ({ ...prev, emotes: value }))
-            }
-          />
+          {showEmotesTable && (
+            <SearchBar
+              placeholder="Buscar usuario..."
+              value={searchFilters.emotes}
+              onChange={(value) =>
+                setSearchFilters((prev) => ({ ...prev, emotes: value }))
+              }
+            />
+          )}
           <div className="table-container">
-            <table>
-              <tbody>
-                {getTopUsers("emotes", 10, searchFilters.emotes).map(
-                  (user, index) => {
-                    const maxEmotes = 5;
-                    const hasMany =
-                      Array.isArray(user.emotes) &&
-                      user.emotes.length > maxEmotes;
+            {showEmotesTable ? (
+              <table>
+                <tbody>
+                  {getTopUsers("emotes", 10, searchFilters.emotes).map(
+                    (user, index) => {
+                      const maxEmotes = 5;
+                      const hasMany =
+                        Array.isArray(user.emotes) &&
+                        user.emotes.length > maxEmotes;
 
-                    const emotesToShow =
-                      expandedEmotesRow === index || !hasMany
-                        ? Array.isArray(user.emotes)
-                          ? user.emotes
-                          : []
-                        : Array.isArray(user.emotes)
-                        ? user.emotes.slice(0, maxEmotes)
-                        : [];
-                    const emotesHidden =
-                      hasMany && expandedEmotesRow !== index
-                        ? user.emotes.length - maxEmotes
-                        : 0;
-                    return (
-                      <tr key={user.id || index}>
-                        <td className="user-avatar-cell">
-                          <img
-                            src={user.pfp}
-                            alt={user.nombre}
-                            className="profile-pic"
-                            title={user.nombre}
-                          />
-                        </td>
-                        <td className="emotes-cell">
-                          <div className="emotes-container">
-                            {emotesToShow.map((emoteId, emoteIndex) => (
-                              <a
-                                key={emoteIndex}
-                                href={`https://7tv.app/emotes/${emoteId}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ display: "inline-block" }}
-                              >
-                                <img
-                                  src={`https://cdn.7tv.app/emote/${emoteId}/1x.webp`}
-                                  alt={`Emote ${emoteIndex}`}
-                                  className="emote-icon"
-                                  onError={(e) => {
-                                    e.target.style.display = "none";
+                      const emotesToShow =
+                        expandedEmotesRow === index || !hasMany
+                          ? Array.isArray(user.emotes)
+                            ? user.emotes
+                            : []
+                          : Array.isArray(user.emotes)
+                          ? user.emotes.slice(0, maxEmotes)
+                          : [];
+                      const emotesHidden =
+                        hasMany && expandedEmotesRow !== index
+                          ? user.emotes.length - maxEmotes
+                          : 0;
+                      return (
+                        <tr key={user.id || index}>
+                          <td className="user-avatar-cell">
+                            <img
+                              src={user.pfp}
+                              alt={user.nombre}
+                              className="profile-pic"
+                              title={user.nombre}
+                            />
+                          </td>
+                          <td className="emotes-cell">
+                            <div className="emotes-container">
+                              {emotesToShow.map((emoteId, emoteIndex) => (
+                                <a
+                                  key={emoteIndex}
+                                  href={`https://7tv.app/emotes/${emoteId}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{ display: "inline-block" }}
+                                >
+                                  <img
+                                    src={`https://cdn.7tv.app/emote/${emoteId}/1x.webp`}
+                                    alt={`Emote ${emoteIndex}`}
+                                    className="emote-icon"
+                                    onError={(e) => {
+                                      e.target.style.display = "none";
+                                    }}
+                                    title={`Emote ${emoteIndex + 1}`}
+                                  />
+                                </a>
+                              ))}
+                              {emotesHidden > 0 && (
+                                <button
+                                  className="emotes-expand-btn"
+                                  title="Mostrar todos los emotes"
+                                  onClick={() => setExpandedEmotesRow(index)}
+                                  style={{
+                                    background: "none",
+                                    border: "none",
+                                    padding: 0,
+                                    marginLeft: "4px",
+                                    cursor: "pointer",
+                                    verticalAlign: "middle",
+                                    display: "inline-flex",
                                   }}
-                                  title={`Emote ${emoteIndex + 1}`}
-                                />
-                              </a>
-                            ))}
-                            {emotesHidden > 0 && (
-                              <button
-                                className="emotes-expand-btn"
-                                title="Mostrar todos los emotes"
-                                onClick={() => setExpandedEmotesRow(index)}
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  padding: 0,
-                                  marginLeft: "4px",
-                                  cursor: "pointer",
-                                  verticalAlign: "middle",
-                                  display: "inline-flex",
-                                }}
-                              >
-                                <MdiChevronDown
-                                  width={22}
-                                  height={22}
-                                  style={{ color: "var(--text)" }}
-                                />
-                              </button>
-                            )}
-                            {expandedEmotesRow === index && hasMany && (
-                              <button
-                                className="emotes-collapse-btn"
-                                title="Ocultar emotes"
-                                onClick={() => setExpandedEmotesRow(null)}
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  padding: 0,
-                                  marginLeft: "4px",
-                                  cursor: "pointer",
-                                  verticalAlign: "middle",
-                                  display: "inline-flex",
-                                }}
-                              >
-                                <MdiChevronUp
-                                  width={22}
-                                  height={22}
-                                  style={{ color: "var(--text)" }}
-                                />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  }
-                )}
-              </tbody>
-            </table>
+                                >
+                                  <MdiChevronDown
+                                    width={22}
+                                    height={22}
+                                    style={{ color: "var(--text)" }}
+                                  />
+                                </button>
+                              )}
+                              {expandedEmotesRow === index && hasMany && (
+                                <button
+                                  className="emotes-collapse-btn"
+                                  title="Ocultar emotes"
+                                  onClick={() => setExpandedEmotesRow(null)}
+                                  style={{
+                                    background: "none",
+                                    border: "none",
+                                    padding: 0,
+                                    marginLeft: "4px",
+                                    cursor: "pointer",
+                                    verticalAlign: "middle",
+                                    display: "inline-flex",
+                                  }}
+                                >
+                                  <MdiChevronUp
+                                    width={22}
+                                    height={22}
+                                    style={{ color: "var(--text)" }}
+                                  />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    }
+                  )}
+                </tbody>
+              </table>
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  justifyContent: "flex-start",
+                }}
+              >
+                <div
+                  style={{ padding: 0, width: "100%", marginTop: -10 }}
+                  className="table-markdown"
+                >
+                  <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                    {`
+**¿No puedes ver los emotes?**
+- Añade la extension de [7TV](https://7tv.app/).
+
+**¿Que necesitas para añadir emotes?**
+- <span style="font-weight: 500;">500 mensajes</span> y <span style="font-weight: 500;">3 meses</span> de follow
+    - *5 huecos.*
+- <span style="font-weight: 500;">10000 mensajes</span> y <span style="font-weight: 500;">1 año</span> de follow
+    - *10 huecos.*
+
+**Comandos de chat disponibles**
+- **<span style="color: var(--text-2);">!asignar <url_emote7TV></span>**
+    - *El emote que añadas tendra tu nombre (no consume hueco)*
+- **<span style="color: var(--text-2);">!añadir <url_emote7TV></span>**
+    - *Añade un emote.*
+- **<span style="color: var(--text-2);">!añadir [nombre] <url_emote7TV></span>**
+    - *Añade un emote con un nombre.*
+- **<span style="color: var(--text-2);">!editar [nombre] [nuevo_nombre]</span>**
+    - *Cambia el nombre de un emote.*
+- **<span style="color: var(--text-2);">!eliminar [nombre]</span>**
+    - *Elimina un emote.*
+                    `}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -662,34 +892,11 @@ function Inicio() {
         className="top-section"
         style={{
           marginTop: "20px",
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
         }}
       >
         <div style={{ flex: 1 }}>
-          <h2
-            className="user-info-header"
-            style={{
-              margin: "0 0 6px 0",
-              fontSize: "1.2em",
-              color: "var(--text)",
-            }}
-          >
-            Logros del Directo
-          </h2>
-          <div
-            className="user-count-info"
-            style={{
-              fontWeight: 500,
-              color: "var(--text-2)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "8px",
-            }}
-          >
+          <h2>Logros del Directo</h2>
+          <div className="top-section-h2-down">
             <span>
               <b>
                 {
@@ -751,7 +958,6 @@ function Inicio() {
             )}
           </div>
         </div>
-        {/* Botón global eliminado, solo quedan los individuales en cada logro */}
       </div>
       <div
         className="achievements-grid inset-section"

@@ -2,37 +2,3 @@
 // ESTILOS DE LA PAGINA GAMEBOY
 // ============================================ 
 */
-
-.gameboy-container {
-  padding: 15px;
-  max-width: 1300px;
-  margin: 0 auto;
-}
-
-.gameboy-container h1 {
-  font-size: 24px;
-  margin-bottom: 15px;
-  color: var(--text);
-}
-
-.gameboy-container p {
-  font-size: 14px;
-  color: var(--text-2);
-  line-height: 1.6;
-}
-
-/* PC */
-@media (min-width: 769px) {
-  .gameboy-container {
-    padding: 20px;
-  }
-
-  .gameboy-container h1 {
-    font-size: 32px;
-    margin-bottom: 20px;
-  }
-
-  .gameboy-container p {
-    font-size: 16px;
-  }
-}

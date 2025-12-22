@@ -13,7 +13,6 @@ function UserProfile() {
   const { username } = useParams();
   const [twitchUser] = useLocalStorage(STORAGE_KEYS.TWITCH_USER, null);
 
-  // Si el usuario logueado es el mismo que el del perfil, mostrar su displayName y id
   const isOwnProfile = twitchUser && twitchUser.login === username;
   const displayName =
     isOwnProfile && twitchUser ? twitchUser.displayName : username;
