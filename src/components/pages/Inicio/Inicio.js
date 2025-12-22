@@ -6,22 +6,59 @@ import { useGoogleSheet } from "../../../hooks/useGoogleSheet";
 import { SolarCupBold } from "../../icons/SolarCupBold";
 import { MdiChevronUp } from "../../icons/MdiChevronUp";
 import { MdiChevronDown } from "../../icons/MdiChevronDown";
+import { MdiChevronDoubleDown } from "../../icons/MdiChevronDoubleDown";
 import { MaterialSymbolsAndroidMessages } from "../../icons/MaterialSymbolsAndroidMessages";
 import { IonTicket } from "../../icons/IonTicket";
 import { SolarFireBold } from "../../icons/SolarFireBold";
+import useLocalStorage from "../../../hooks/useLocalStorage";
 
 import SearchBar from "../../common/SearchBar";
 import "./Inicio.css";
 
 const EXCLUDED_USERS = ["TsukiSoft", "TsukiwiChan"];
 
+const MOD_USERS = [
+  "TsukiSoft",
+  "vytoking",
+  "Rabam",
+  "dollanganger",
+  "unai9x",
+  "Vilexis98",
+  "Samuel_Pincel",
+  "el_capde",
+  "pubgdemont",
+  "AnaPandemonium",
+  "Daruz",
+  "alvaro_palmer",
+  "Emilio2772",
+  "enraid1",
+  "ShadouShot",
+  "oogiebuttie",
+  "Lintes96",
+  "Donramonrisas",
+  "IreNuska__",
+  "moon_defaultt",
+  "BasedTrolso",
+  "NucleoDeJuego",
+  "eiosoydev",
+  "maese_Javilon",
+  "JOSEtomas99",
+  "bigmacius",
+  "KaranirNoFake",
+  "Criis_joestar",
+  "Achachancha",
+  "TsukiwiChan",
+  "JoranEssed",
+];
+
 function Inicio() {
+  const [twitchUser] = useLocalStorage("twitchUser", null);
   const [expandedEmotesRow, setExpandedEmotesRow] = useState(null);
   const [expandedAchievements, setExpandedAchievements] = useState([]);
   const achievementsGridRef = useRef(null);
   const [maxUsersMap, setMaxUsersMap] = useState({});
   const [showRachaTable, setShowRachaTable] = useState(true);
-  const [showMensajesTable] = useState(true);
+  const [mensajesView, setMensajesView] = useState(0);
   const [showTicketsTable, setShowTicketsTable] = useState(true);
   const [showEmotesTable, setShowEmotesTable] = useState(true);
   const sheetUrl = process.env.REACT_APP_USERDATA_SHEET_URL;
@@ -194,6 +231,12 @@ function Inicio() {
       .slice(0, limit);
   };
 
+  const isMod =
+    twitchUser &&
+    MOD_USERS.map((u) => u.toLowerCase()).includes(
+      (twitchUser.login || twitchUser.displayName || "").toLowerCase()
+    );
+
   return (
     <div className="main-container">
       <div className="top-section">
@@ -234,13 +277,13 @@ function Inicio() {
                 }
               >
                 {showRachaTable ? (
-                  <MdiChevronUp
+                  <MdiChevronDown
                     width={20}
                     height={20}
                     style={{ color: "var(--text)" }}
                   />
                 ) : (
-                  <MdiChevronDown
+                  <MdiChevronUp
                     width={20}
                     height={20}
                     style={{ color: "var(--text)" }}
@@ -399,6 +442,81 @@ function Inicio() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+              {isMod ? (
+                <button
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    marginRight: 6,
+                    marginBottom: 13,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  onClick={() => setMensajesView((v) => (v === 2 ? 0 : v + 1))}
+                  aria-label={
+                    mensajesView === 0
+                      ? "Mostrar información pública"
+                      : mensajesView === 1
+                      ? "Mostrar información de mods"
+                      : "Mostrar tabla de mensajes"
+                  }
+                >
+                  {mensajesView === 0 ? (
+                    <MdiChevronDown
+                      width={20}
+                      height={20}
+                      style={{ color: "var(--text)" }}
+                    />
+                  ) : mensajesView === 1 ? (
+                    <MdiChevronDoubleDown
+                      width={20}
+                      height={20}
+                      style={{ color: "var(--text)" }}
+                    />
+                  ) : (
+                    <MdiChevronUp
+                      width={20}
+                      height={20}
+                      style={{ color: "var(--text)" }}
+                    />
+                  )}
+                </button>
+              ) : (
+                <button
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    marginRight: 6,
+                    marginBottom: 13,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  onClick={() => setMensajesView((v) => (v === 1 ? 0 : 1))}
+                  aria-label={
+                    mensajesView === 0
+                      ? "Mostrar información pública"
+                      : "Mostrar tabla de mensajes"
+                  }
+                >
+                  {mensajesView === 0 ? (
+                    <MdiChevronDown
+                      width={20}
+                      height={20}
+                      style={{ color: "var(--text)" }}
+                    />
+                  ) : (
+                    <MdiChevronUp
+                      width={20}
+                      height={20}
+                      style={{ color: "var(--text)" }}
+                    />
+                  )}
+                </button>
+              )}
               <h2
                 style={{
                   margin: 0,
@@ -428,83 +546,147 @@ function Inicio() {
               })()}
             </span>
           </div>
-          {showMensajesTable && (
-            <SearchBar
-              placeholder="Buscar usuario..."
-              value={searchFilters.mensajes}
-              onChange={(value) =>
-                setSearchFilters((prev) => ({ ...prev, mensajes: value }))
-              }
-            />
-          )}
-          <div className="table-container">
-            {showMensajesTable ? (
-              <table>
-                <tbody>
-                  {getTopUsers("mensajes", 10, searchFilters.mensajes).map(
-                    (user, index) => (
-                      <tr key={user.id || index}>
-                        <td>
-                          <img
-                            src={user.pfp}
-                            alt={user.nombre}
-                            className="profile-pic"
-                          />
-                        </td>
-                        <td>{user.nombre}</td>
-                        <td style={{ whiteSpace: "nowrap" }}>
-                          <span style={{ marginRight: "8px" }}>
-                            {user.mensajes}
-                          </span>
-                          <span
-                            style={{
-                              display: "inline-block",
-                              width: 16,
-                              height: 16,
-                              verticalAlign: "text-bottom",
-                            }}
-                          >
-                            <MaterialSymbolsAndroidMessages
-                              style={{
-                                verticalAlign: "baseline",
-                                color: "var(--text-2)",
-                              }}
-                              width="14"
-                              height="14"
+          {mensajesView === 0 && (
+            <>
+              <SearchBar
+                placeholder="Buscar usuario..."
+                value={searchFilters.mensajes}
+                onChange={(value) =>
+                  setSearchFilters((prev) => ({ ...prev, mensajes: value }))
+                }
+              />
+              <div className="table-container">
+                <table>
+                  <tbody>
+                    {getTopUsers("mensajes", 10, searchFilters.mensajes).map(
+                      (user, index) => (
+                        <tr key={user.id || index}>
+                          <td>
+                            <img
+                              src={user.pfp}
+                              alt={user.nombre}
+                              className="profile-pic"
                             />
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  )}
-                </tbody>
-              </table>
-            ) : (
+                          </td>
+                          <td>{user.nombre}</td>
+                          <td style={{ whiteSpace: "nowrap" }}>
+                            <span style={{ marginRight: "8px" }}>
+                              {user.mensajes}
+                            </span>
+                            <span
+                              style={{
+                                display: "inline-block",
+                                width: 16,
+                                height: 16,
+                                verticalAlign: "text-bottom",
+                              }}
+                            >
+                              <MaterialSymbolsAndroidMessages
+                                style={{
+                                  verticalAlign: "baseline",
+                                  color: "var(--text-2)",
+                                }}
+                                width="14"
+                                height="14"
+                              />
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+          {mensajesView === 1 && (
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "flex-start",
+              }}
+            >
               <div
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "flex-start",
-                }}
+                style={{ padding: 0, width: "100%", marginTop: -10 }}
+                className="table-markdown"
               >
-                <div
-                  style={{ padding: 0, width: "100%", marginTop: -10 }}
-                  className="table-markdown"
-                >
+                <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                  {`
+**Comandos del Chat**
+
+- **<span style="color: var(--text-2);">spoiler</span>**
+  - Le ocultara el historial de mensajes a Sara para asi evitar que lea el spoiler.
+- **<span style="color: var(--text-2);">!clip</span>**
+  - Clip automatico de los ultimos 30 segundos.
+  - Se resubira al Discord.
+- **<span style="color: var(--text-2);">!sr [cancion]</span>** → *!sr Ado - 罪と罰*
+  - Si Sara lo activa, puedes añadir canciones a la lista de reproduccion.
+- **<span style="color: var(--text-2);">!cum [dd/mm]</span>** → *!cum 03/08*
+  - Cuando llegue el dia se te felicitara en el Discord.
+  - Si hay directo ese dia, tambien se te felicitara por el chat.
+`}
+                </ReactMarkdown>
+                {isMod ? (
+                  // TODO: Puede que en un futuro ponga algo aqui asi que por ahora lo dejo asi jej
+                  <ReactMarkdown rehypePlugins={[rehypeRaw]}></ReactMarkdown>
+                ) : (
                   <ReactMarkdown rehypePlugins={[rehypeRaw]}>
                     {`
-*No se me ocurre que vergas poner aqui ajjajjh*
+**Moderadores Clandestinos**
 
-*amove que en verdad no hace falta poner nada, pero es que si no que voy a poner un chevron en cada tabla y en esta no? ajjaajajj*
+*El acceso completo a esta informacion esta reservado a moderadores clandestinos*
 
-*noove*
-                    `}
+*Si eres uno inicia sesion con tu cuenta de Twitch*
+`}
                   </ReactMarkdown>
-                </div>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
+          {isMod && mensajesView === 2 && (
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "flex-start",
+              }}
+            >
+              <div
+                style={{ padding: 0, width: "100%", marginTop: -10 }}
+                className="table-markdown"
+              >
+                <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                  {`
+**Moderadores Clandestinos**
+
+- Si puedes ver esto, Sara te ha asignado como moderador clandestino.
+- Puedes expulsar usuarios temporal o permanentemente si incumplen las normas.
+- No estas obligado a actuar.
+
+**Comandos del Chat**
+
+- **<span style="color: var(--text-2); font-family: 'JetBrains Mono', monospace;">bs [usuario]</span>** → *Ban temporal (10m)*
+- **<span style="color: var(--text-2); font-family: 'JetBrains Mono', monospace;">bn [usuario]</span>** → *Ban permanente*
+- **<span style="color: var(--text-2); font-family: 'JetBrains Mono', monospace;">ub [usuario]</span>** → *Quitar ban*
+
+**Guia Rapida**
+- **<span style="color: var(--text-2); font-family: 'JetBrains Mono', monospace;">bs</span>** *(backsit)*
+  - *Destripe de la historia de un juego*
+  - *Ayuda no solicitada*
+- **<span style="color: var(--text-2); font-family: 'JetBrains Mono', monospace;">bn</span>** *(ban)*
+  - *Insultos y faltas de respeto*
+  - *Incitacion al odio de cualquier tipo*
+  - *Reiteracion de malos comportamientos*
+
+*Los conflictos entre usuarios los gestiona Sara.*
+`}
+                </ReactMarkdown>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="stat-section">
@@ -535,13 +717,13 @@ function Inicio() {
                 }
               >
                 {showTicketsTable ? (
-                  <MdiChevronUp
+                  <MdiChevronDown
                     width={20}
                     height={20}
                     style={{ color: "var(--text)" }}
                   />
                 ) : (
-                  <MdiChevronDown
+                  <MdiChevronUp
                     width={20}
                     height={20}
                     style={{ color: "var(--text)" }}
@@ -686,13 +868,13 @@ function Inicio() {
                 }
               >
                 {showEmotesTable ? (
-                  <MdiChevronUp
+                  <MdiChevronDown
                     width={20}
                     height={20}
                     style={{ color: "var(--text)" }}
                   />
                 ) : (
-                  <MdiChevronDown
+                  <MdiChevronUp
                     width={20}
                     height={20}
                     style={{ color: "var(--text)" }}
