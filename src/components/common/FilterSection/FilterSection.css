@@ -1,0 +1,102 @@
+.filter-spinner.genre-spinner {
+  width: 140px;
+}
+.filter-searchbar {
+  flex: 1 1 0%;
+  min-width: 100px;
+  width: 100%;
+  max-width: unset;
+  padding: 6px 10px 6px 34px;
+  border-radius: 4px;
+  border: 1px solid var(--divider);
+  background: var(--item);
+  color: var(--text-2);
+  font-size: 13px;
+  min-width: 300px;
+  outline: none;
+  /* mas de lo mismo */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="%23999" fill-rule="evenodd" d="M3.25 11a7.75 7.75 0 1 1 15.5 0a7.75 7.75 0 0 1-15.5 0M11 .75C5.34.75.75 5.34.75 11S5.34 21.25 11 21.25c2.38 0 4.57-.811 6.31-2.172l3.806 3.806l1.768-1.768l-3.806-3.806A10.2 10.2 0 0 0 21.25 11C21.25 5.34 16.661.75 11 .75" clip-rule="evenodd"/></svg>');
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 14px 14px;
+}
+
+.filter-section {
+  padding: 10px;
+  border-top: 1px solid var(--divider);
+  padding-top: 14px;
+  padding-bottom: 14px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+@media (min-width: 900px) {
+  .filter-section {
+    flex-wrap: nowrap;
+    gap: 18px;
+  }
+  .filter-searchbar {
+    margin-left: auto;
+    width: 100%;
+    max-width: unset;
+    order: 99;
+  }
+}
+
+@media (max-width: 899px) {
+  .filter-section {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .filter-searchbar {
+    width: 100%;
+    max-width: unset;
+    margin-left: 0;
+    margin-right: 0;
+    order: 99;
+  }
+}
+
+.filter-text {
+  color: var(--text-2);
+  margin-right: 6px;
+}
+
+.filter-section-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.filter-spinner {
+  border-radius: 4px;
+  border: none;
+  background-color: var(--item);
+  color: var(--text-2);
+  padding: 4px 8px;
+  width: auto;
+  padding-right: 28px;
+  outline: none;
+  appearance: none;
+  /* ni zorra de como usar el icono que tengo ya asi que copio el path. jej */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23aaa" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 20px 20px;
+}
+
+.filter-spinner.order-spinner {
+  width: 100px;
+}
+
+.filter-spinner.type-spinner {
+  width: auto;
+  padding-right: 28px;
+}
+
+.filter-spinner.genre-spinner {
+  width: 150px;
+}
