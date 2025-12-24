@@ -186,7 +186,7 @@ code {
 .table-markdown ul ul li,
 .table-markdown ol ol li,
 .table-markdown ul ol li,
-.table-markdown ol ul li {
+.table-markdown.ol ul li {
   color: var(--text-2);
   font-size: 13px;
   margin-bottom: 4px !important;
@@ -200,7 +200,7 @@ code {
 .table-markdown ul ul li::before,
 .table-markdown ol ol li::before,
 .table-markdown ul ol li::before,
-.table-markdown ol ul li::before {
+.table-markdown.ol ul li::before {
   content: "‣";
   color: var(--text-2);
   font-weight: bold;
@@ -259,3 +259,10 @@ img {
   display: flex;
   flex-direction: column;
 }
+
+th,
+td {
+  text-align: left;
+}
+
+/* El bloque de estilos item-caratula ha sido movido a ItemCaratula.css */

@@ -1,0 +1,147 @@
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.stat-section {
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.stat-section h2 {
+  font-size: 18px;
+  margin-bottom: 16px;
+  color: var(--text);
+  text-align: center;
+}
+
+.stat-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.stat-section li {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--divider);
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.stat-section li:last-child {
+  border-bottom: none;
+}
+
+.table-container {
+  margin-top: 10px;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.stat-section table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.stat-section th,
+.stat-section td {
+  padding: 10px 8px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.stat-section:not(.emotes-section) td:nth-child(3) {
+  text-align: right;
+}
+
+.emotes-section .user-avatar-cell {
+  width: 45px;
+  text-align: center;
+  vertical-align: top;
+}
+
+.stat-section td:first-child {
+  width: 45px;
+  text-align: center;
+}
+
+.stat-section td:nth-child(2) {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stat-section td:nth-child(3) {
+  white-space: nowrap;
+}
+
+.emotes-section .emotes-cell {
+  width: auto;
+}
+
+.emotes-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.emote-icon {
+  width: auto;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.emote-icon:hover {
+  transform: scale(1.1);
+}
+.stat-section {
+  background: var(--bg-2);
+  border-radius: 8px;
+}
+
+.stat-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.stat-section-toggle {
+  background: none;
+  border: none;
+  padding: 0px;
+  margin-right: 6px;
+  margin-bottom: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.stat-section-title {
+  margin: 0;
+  font-size: 1.1em;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.stat-section-subtitle {
+  font-size: 0.88em;
+  color: var(--text-2);
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.stat-section-content {
+  margin-top: 8px;
+}

@@ -10,6 +10,9 @@ import { MdiChevronDoubleDown } from "../../icons/MdiChevronDoubleDown";
 import { MaterialSymbolsAndroidMessages } from "../../icons/MaterialSymbolsAndroidMessages";
 import { IonTicket } from "../../icons/IonTicket";
 import { SolarFireBold } from "../../icons/SolarFireBold";
+import StatTable from "../../common/StatTable/StatTable";
+import AchievementSection from "../../common/AchievementSection/AchievementSection";
+import StatSection from "../../common/StatSection/StatSection";
 import useLocalStorage from "../../../hooks/useLocalStorage";
 
 import SearchBar from "../../common/SearchBar";
@@ -249,152 +252,78 @@ function Inicio() {
       </div>
 
       <div className="stats-grid inset-section">
-        <div className="stat-section">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
-              <button
-                style={{
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  marginRight: 6,
-                  marginBottom: 13,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-                onClick={() => setShowRachaTable((prev) => !prev)}
-                aria-label={
-                  showRachaTable
-                    ? "Ocultar tabla Rachas"
-                    : "Mostrar tabla Rachas"
+        <StatSection
+          title="Rachas"
+          icon={
+            showRachaTable ? (
+              <MdiChevronDown
+                width={20}
+                height={20}
+                style={{ color: "var(--text)" }}
+              />
+            ) : (
+              <MdiChevronUp
+                width={20}
+                height={20}
+                style={{ color: "var(--text)" }}
+              />
+            )
+          }
+          expanded={showRachaTable}
+          onToggle={() => setShowRachaTable((prev) => !prev)}
+          subtitle={`${
+            userData.filter((user) => {
+              const rachaStr = String(user.racha || "");
+              const rachaNum =
+                rachaStr.startsWith("m_") || rachaStr.startsWith("f_")
+                  ? parseInt(rachaStr.slice(2), 10)
+                  : parseInt(rachaStr, 10);
+              return !isNaN(rachaNum) && rachaNum >= 5;
+            }).length
+          } activas`}
+          searchBar={
+            showRachaTable && (
+              <SearchBar
+                placeholder="Buscar usuario..."
+                value={searchFilters.racha}
+                onChange={(value) =>
+                  setSearchFilters((prev) => ({ ...prev, racha: value }))
                 }
-              >
-                {showRachaTable ? (
-                  <MdiChevronDown
-                    width={20}
-                    height={20}
-                    style={{ color: "var(--text)" }}
-                  />
-                ) : (
-                  <MdiChevronUp
-                    width={20}
-                    height={20}
-                    style={{ color: "var(--text)" }}
-                  />
-                )}
-              </button>
-              <h2
-                style={{
-                  margin: 0,
-                  marginBottom: 16,
-                  fontSize: "1.1em",
-                  color: "var(--text)",
-                  fontWeight: 600,
-                }}
-              >
-                Rachas
-              </h2>
-            </div>
-            <span
-              style={{
-                fontSize: "0.88em",
-                color: "var(--text-2)",
-                fontWeight: 500,
-                marginBottom: 16,
-              }}
-            >
-              {
-                userData.filter((user) => {
-                  const rachaStr = String(user.racha || "");
-                  const rachaNum =
-                    rachaStr.startsWith("m_") || rachaStr.startsWith("f_")
-                      ? parseInt(rachaStr.slice(2), 10)
-                      : parseInt(rachaStr, 10);
-                  return !isNaN(rachaNum) && rachaNum >= 5;
-                }).length
-              }{" "}
-              activas
-            </span>
-          </div>
-          {showRachaTable && (
-            <SearchBar
-              placeholder="Buscar usuario..."
-              value={searchFilters.racha}
-              onChange={(value) =>
-                setSearchFilters((prev) => ({ ...prev, racha: value }))
-              }
-            />
-          )}
+              />
+            )
+          }
+        >
           <div className="table-container">
             {showRachaTable ? (
-              <table>
-                <tbody>
-                  {getTopUsers("racha", 10, searchFilters.racha).map(
-                    (user, index) => {
-                      const rachaStr = String(user.racha || "");
-                      const isRed = rachaStr.startsWith("m_");
-                      const isBlue = rachaStr.startsWith("f_");
-                      const rachaValue = rachaStr.replace(/^[mf]_/, "") || "0";
-
-                      return (
-                        <tr key={user.id || index}>
-                          <td>
-                            <img
-                              src={user.pfp}
-                              alt={user.nombre}
-                              className="profile-pic"
-                            />
-                          </td>
-                          <td>{user.nombre}</td>
-                          <td
-                            style={{
-                              color:
-                                !isRed && !isBlue
-                                  ? "var(--text-2)"
-                                  : isRed
-                                  ? "rgba(128, 41, 26, 1)"
-                                  : "rgba(26, 104, 128, 1)",
-                            }}
-                          >
-                            <span style={{ marginRight: "8px" }}>
-                              {rachaValue}
-                            </span>
-                            <span
-                              style={{
-                                display: "inline-block",
-                                width: 16,
-                                height: 16,
-                                verticalAlign: "text-bottom",
-                              }}
-                            >
-                              <SolarFireBold
-                                width={14}
-                                height={14}
-                                style={{
-                                  verticalAlign: "baseline",
-                                  color:
-                                    !isRed && !isBlue
-                                      ? "var(--text-2)"
-                                      : isRed
-                                      ? "rgba(128, 41, 26, 1)"
-                                      : "rgba(26, 104, 128, 1)",
-                                }}
-                              />
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    }
-                  )}
-                </tbody>
-              </table>
+              <StatTable
+                type="racha"
+                rowKey="id"
+                rows={getTopUsers("racha", 10, searchFilters.racha)}
+                columns={[
+                  {
+                    key: "pfp",
+                    className: "user-avatar-cell",
+                    render: (row) => (
+                      <img
+                        src={row.pfp}
+                        alt={row.nombre}
+                        className="profile-pic"
+                      />
+                    ),
+                  },
+                  { key: "nombre" },
+                  {
+                    key: "racha",
+                    icon: (
+                      <SolarFireBold
+                        width={14}
+                        height={14}
+                        style={{ verticalAlign: "baseline" }}
+                      />
+                    ),
+                  },
+                ]}
+              />
             ) : (
               <div
                 style={{
@@ -431,123 +360,57 @@ function Inicio() {
               </div>
             )}
           </div>
-        </div>
+        </StatSection>
 
-        <div className="stat-section">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
-              {isMod ? (
-                <button
-                  style={{
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    marginRight: 6,
-                    marginBottom: 13,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                  onClick={() => setMensajesView((v) => (v === 2 ? 0 : v + 1))}
-                  aria-label={
-                    mensajesView === 0
-                      ? "Mostrar información pública"
-                      : mensajesView === 1
-                      ? "Mostrar información de mods"
-                      : "Mostrar tabla de mensajes"
-                  }
-                >
-                  {mensajesView === 0 ? (
-                    <MdiChevronDown
-                      width={20}
-                      height={20}
-                      style={{ color: "var(--text)" }}
-                    />
-                  ) : mensajesView === 1 ? (
-                    <MdiChevronDoubleDown
-                      width={20}
-                      height={20}
-                      style={{ color: "var(--text)" }}
-                    />
-                  ) : (
-                    <MdiChevronUp
-                      width={20}
-                      height={20}
-                      style={{ color: "var(--text)" }}
-                    />
-                  )}
-                </button>
+        <StatSection
+          title="Mensajes"
+          icon={
+            isMod ? (
+              mensajesView === 0 ? (
+                <MdiChevronDown
+                  width={20}
+                  height={20}
+                  style={{ color: "var(--text)" }}
+                />
+              ) : mensajesView === 1 ? (
+                <MdiChevronDoubleDown
+                  width={20}
+                  height={20}
+                  style={{ color: "var(--text)" }}
+                />
               ) : (
-                <button
-                  style={{
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    marginRight: 6,
-                    marginBottom: 13,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                  onClick={() => setMensajesView((v) => (v === 1 ? 0 : 1))}
-                  aria-label={
-                    mensajesView === 0
-                      ? "Mostrar información pública"
-                      : "Mostrar tabla de mensajes"
-                  }
-                >
-                  {mensajesView === 0 ? (
-                    <MdiChevronDown
-                      width={20}
-                      height={20}
-                      style={{ color: "var(--text)" }}
-                    />
-                  ) : (
-                    <MdiChevronUp
-                      width={20}
-                      height={20}
-                      style={{ color: "var(--text)" }}
-                    />
-                  )}
-                </button>
-              )}
-              <h2
-                style={{
-                  margin: 0,
-                  marginBottom: 16,
-                  fontSize: "1.1em",
-                  color: "var(--text)",
-                  fontWeight: 600,
-                }}
-              >
-                Mensajes
-              </h2>
-            </div>
-            <span
-              style={{
-                fontSize: "0.88em",
-                color: "var(--text-2)",
-                fontWeight: 500,
-                marginBottom: 16,
-              }}
-            >
-              {(() => {
-                const total = userData.reduce(
-                  (acc, user) => acc + (parseInt(user.mensajes, 10) || 0),
-                  0
-                );
-                return `${total} mensajes`;
-              })()}
-            </span>
-          </div>
-          {mensajesView === 0 && (
-            <>
+                <MdiChevronUp
+                  width={20}
+                  height={20}
+                  style={{ color: "var(--text)" }}
+                />
+              )
+            ) : mensajesView === 0 ? (
+              <MdiChevronDown
+                width={20}
+                height={20}
+                style={{ color: "var(--text)" }}
+              />
+            ) : (
+              <MdiChevronUp
+                width={20}
+                height={20}
+                style={{ color: "var(--text)" }}
+              />
+            )
+          }
+          expanded={mensajesView === 0}
+          onToggle={
+            isMod
+              ? () => setMensajesView((v) => (v === 2 ? 0 : v + 1))
+              : () => setMensajesView((v) => (v === 1 ? 0 : 1))
+          }
+          subtitle={`${userData.reduce(
+            (acc, user) => acc + (parseInt(user.mensajes, 10) || 0),
+            0
+          )} mensajes`}
+          searchBar={
+            mensajesView === 0 && (
               <SearchBar
                 placeholder="Buscar usuario..."
                 value={searchFilters.mensajes}
@@ -555,49 +418,44 @@ function Inicio() {
                   setSearchFilters((prev) => ({ ...prev, mensajes: value }))
                 }
               />
-              <div className="table-container">
-                <table>
-                  <tbody>
-                    {getTopUsers("mensajes", 10, searchFilters.mensajes).map(
-                      (user, index) => (
-                        <tr key={user.id || index}>
-                          <td>
-                            <img
-                              src={user.pfp}
-                              alt={user.nombre}
-                              className="profile-pic"
-                            />
-                          </td>
-                          <td>{user.nombre}</td>
-                          <td style={{ whiteSpace: "nowrap" }}>
-                            <span style={{ marginRight: "8px" }}>
-                              {user.mensajes}
-                            </span>
-                            <span
-                              style={{
-                                display: "inline-block",
-                                width: 16,
-                                height: 16,
-                                verticalAlign: "text-bottom",
-                              }}
-                            >
-                              <MaterialSymbolsAndroidMessages
-                                style={{
-                                  verticalAlign: "baseline",
-                                  color: "var(--text-2)",
-                                }}
-                                width="14"
-                                height="14"
-                              />
-                            </span>
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </>
+            )
+          }
+        >
+          {mensajesView === 0 && (
+            <div className="table-container">
+              <StatTable
+                type="mensajes"
+                rowKey="id"
+                rows={getTopUsers("mensajes", 10, searchFilters.mensajes)}
+                columns={[
+                  {
+                    key: "pfp",
+                    className: "user-avatar-cell",
+                    render: (row) => (
+                      <img
+                        src={row.pfp}
+                        alt={row.nombre}
+                        className="profile-pic"
+                      />
+                    ),
+                  },
+                  { key: "nombre" },
+                  {
+                    key: "mensajes",
+                    icon: (
+                      <MaterialSymbolsAndroidMessages
+                        style={{
+                          verticalAlign: "baseline",
+                          color: "var(--text-2)",
+                        }}
+                        width="14"
+                        height="14"
+                      />
+                    ),
+                  },
+                ]}
+              />
+            </div>
           )}
           {mensajesView === 1 && (
             <div
@@ -629,7 +487,6 @@ function Inicio() {
 `}
                 </ReactMarkdown>
                 {isMod ? (
-                  // TODO: Puede que en un futuro ponga algo aqui asi que por ahora lo dejo asi jej
                   <ReactMarkdown rehypePlugins={[rehypeRaw]}></ReactMarkdown>
                 ) : (
                   <ReactMarkdown rehypePlugins={[rehypeRaw]}>
@@ -687,129 +544,77 @@ function Inicio() {
               </div>
             </div>
           )}
-        </div>
+        </StatSection>
 
-        <div className="stat-section">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
-              <button
-                style={{
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  marginRight: 6,
-                  marginBottom: 12,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-                onClick={() => setShowTicketsTable((prev) => !prev)}
-                aria-label={
-                  showTicketsTable
-                    ? "Ocultar tabla Tickets"
-                    : "Mostrar tabla Tickets"
+        <StatSection
+          title="Tickets"
+          icon={
+            showTicketsTable ? (
+              <MdiChevronDown
+                width={20}
+                height={20}
+                style={{ color: "var(--text)" }}
+              />
+            ) : (
+              <MdiChevronUp
+                width={20}
+                height={20}
+                style={{ color: "var(--text)" }}
+              />
+            )
+          }
+          expanded={showTicketsTable}
+          onToggle={() => setShowTicketsTable((prev) => !prev)}
+          subtitle={`${userData.reduce(
+            (acc, user) => acc + (parseInt(user.tickets, 10) || 0),
+            0
+          )} tickets`}
+          searchBar={
+            showTicketsTable && (
+              <SearchBar
+                placeholder="Buscar usuario..."
+                value={searchFilters.tickets}
+                onChange={(value) =>
+                  setSearchFilters((prev) => ({ ...prev, tickets: value }))
                 }
-              >
-                {showTicketsTable ? (
-                  <MdiChevronDown
-                    width={20}
-                    height={20}
-                    style={{ color: "var(--text)" }}
-                  />
-                ) : (
-                  <MdiChevronUp
-                    width={20}
-                    height={20}
-                    style={{ color: "var(--text)" }}
-                  />
-                )}
-              </button>
-              <h2
-                style={{
-                  margin: 0,
-                  marginBottom: 16,
-                  fontSize: "1.1em",
-                  color: "var(--text)",
-                  fontWeight: 600,
-                }}
-              >
-                Tickets
-              </h2>
-            </div>
-            <span
-              style={{
-                fontSize: "0.88em",
-                color: "var(--text-2)",
-                fontWeight: 500,
-                marginBottom: 16,
-              }}
-            >
-              {(() => {
-                const total = userData.reduce(
-                  (acc, user) => acc + (parseInt(user.tickets, 10) || 0),
-                  0
-                );
-                return `${total} tickets`;
-              })()}
-            </span>
-          </div>
-          {showTicketsTable && (
-            <SearchBar
-              placeholder="Buscar usuario..."
-              value={searchFilters.tickets}
-              onChange={(value) =>
-                setSearchFilters((prev) => ({ ...prev, tickets: value }))
-              }
-            />
-          )}
+              />
+            )
+          }
+        >
           <div className="table-container">
             {showTicketsTable ? (
-              <table>
-                <tbody>
-                  {getTopUsers("tickets", 10, searchFilters.tickets).map(
-                    (user, index) => (
-                      <tr key={user.id || index}>
-                        <td>
-                          <img
-                            src={user.pfp}
-                            alt={user.nombre}
-                            className="profile-pic"
-                          />
-                        </td>
-                        <td>{user.nombre}</td>
-                        <td style={{ whiteSpace: "nowrap" }}>
-                          <span style={{ marginRight: "8px" }}>
-                            {user.tickets}
-                          </span>
-                          <span
-                            style={{
-                              display: "inline-block",
-                              width: 16,
-                              height: 16,
-                              verticalAlign: "text-bottom",
-                            }}
-                          >
-                            <IonTicket
-                              style={{
-                                verticalAlign: "baseline",
-                                color: "var(--text-2)",
-                              }}
-                              width="14"
-                              height="14"
-                            />
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  )}
-                </tbody>
-              </table>
+              <StatTable
+                type="tickets"
+                rowKey="id"
+                rows={getTopUsers("tickets", 10, searchFilters.tickets)}
+                columns={[
+                  {
+                    key: "pfp",
+                    className: "user-avatar-cell",
+                    render: (row) => (
+                      <img
+                        src={row.pfp}
+                        alt={row.nombre}
+                        className="profile-pic"
+                      />
+                    ),
+                  },
+                  { key: "nombre" },
+                  {
+                    key: "tickets",
+                    icon: (
+                      <IonTicket
+                        style={{
+                          verticalAlign: "baseline",
+                          color: "var(--text-2)",
+                        }}
+                        width="14"
+                        height="14"
+                      />
+                    ),
+                  },
+                ]}
+              />
             ) : (
               <div
                 style={{
@@ -838,194 +643,163 @@ function Inicio() {
               </div>
             )}
           </div>
-        </div>
+        </StatSection>
 
-        <div className="stat-section emotes-section">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
-              <button
-                style={{
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  marginRight: 6,
-                  marginBottom: 12,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-                onClick={() => setShowEmotesTable((prev) => !prev)}
-                aria-label={
-                  showEmotesTable
-                    ? "Ocultar tabla Emotes"
-                    : "Mostrar tabla Emotes"
+        <StatSection
+          title="Emotes"
+          icon={
+            showEmotesTable ? (
+              <MdiChevronDown
+                width={20}
+                height={20}
+                style={{ color: "var(--text)" }}
+              />
+            ) : (
+              <MdiChevronUp
+                width={20}
+                height={20}
+                style={{ color: "var(--text)" }}
+              />
+            )
+          }
+          expanded={showEmotesTable}
+          onToggle={() => setShowEmotesTable((prev) => !prev)}
+          subtitle={`${userData.reduce(
+            (acc, user) =>
+              acc + (Array.isArray(user.emotes) ? user.emotes.length : 0),
+            0
+          )} emotes`}
+          searchBar={
+            showEmotesTable && (
+              <SearchBar
+                placeholder="Buscar usuario..."
+                value={searchFilters.emotes}
+                onChange={(value) =>
+                  setSearchFilters((prev) => ({ ...prev, emotes: value }))
                 }
-              >
-                {showEmotesTable ? (
-                  <MdiChevronDown
-                    width={20}
-                    height={20}
-                    style={{ color: "var(--text)" }}
-                  />
-                ) : (
-                  <MdiChevronUp
-                    width={20}
-                    height={20}
-                    style={{ color: "var(--text)" }}
-                  />
-                )}
-              </button>
-              <h2
-                style={{
-                  margin: 0,
-                  marginBottom: 16,
-                  fontSize: "1.1em",
-                  color: "var(--text)",
-                  fontWeight: 600,
-                }}
-              >
-                Emotes
-              </h2>
-            </div>
-            <span
-              style={{
-                fontSize: "0.88em",
-                color: "var(--text-2)",
-                fontWeight: 500,
-                marginBottom: 16,
-              }}
-            >
-              {(() => {
-                const total = userData.reduce(
-                  (acc, user) =>
-                    acc + (Array.isArray(user.emotes) ? user.emotes.length : 0),
-                  0
-                );
-                return `${total} emotes`;
-              })()}
-            </span>
-          </div>
-          {showEmotesTable && (
-            <SearchBar
-              placeholder="Buscar usuario..."
-              value={searchFilters.emotes}
-              onChange={(value) =>
-                setSearchFilters((prev) => ({ ...prev, emotes: value }))
-              }
-            />
-          )}
+              />
+            )
+          }
+        >
           <div className="table-container">
             {showEmotesTable ? (
-              <table>
-                <tbody>
-                  {getTopUsers("emotes", 10, searchFilters.emotes).map(
-                    (user, index) => {
-                      const maxEmotes = 5;
-                      const hasMany =
-                        Array.isArray(user.emotes) &&
-                        user.emotes.length > maxEmotes;
-
-                      const emotesToShow =
-                        expandedEmotesRow === index || !hasMany
-                          ? Array.isArray(user.emotes)
-                            ? user.emotes
-                            : []
-                          : Array.isArray(user.emotes)
-                          ? user.emotes.slice(0, maxEmotes)
-                          : [];
-                      const emotesHidden =
-                        hasMany && expandedEmotesRow !== index
-                          ? user.emotes.length - maxEmotes
-                          : 0;
-                      return (
-                        <tr key={user.id || index}>
-                          <td className="user-avatar-cell">
-                            <img
-                              src={user.pfp}
-                              alt={user.nombre}
-                              className="profile-pic"
-                              title={user.nombre}
+              <StatTable
+                type="emotes"
+                rowKey="id"
+                rows={getTopUsers("emotes", 10, searchFilters.emotes).map(
+                  (user, index) => {
+                    const maxEmotes = 5;
+                    const hasMany =
+                      Array.isArray(user.emotes) &&
+                      user.emotes.length > maxEmotes;
+                    const emotesToShow =
+                      expandedEmotesRow === index || !hasMany
+                        ? Array.isArray(user.emotes)
+                          ? user.emotes
+                          : []
+                        : Array.isArray(user.emotes)
+                        ? user.emotes.slice(0, maxEmotes)
+                        : [];
+                    const emotesHidden =
+                      hasMany && expandedEmotesRow !== index
+                        ? user.emotes.length - maxEmotes
+                        : 0;
+                    return {
+                      ...user,
+                      emotesToShow,
+                      emotesHidden,
+                      hasMany,
+                      rowIndex: index,
+                    };
+                  }
+                )}
+                columns={[
+                  {
+                    key: "pfp",
+                    className: "user-avatar-cell",
+                    render: (row) => (
+                      <img
+                        src={row.pfp}
+                        alt={row.nombre}
+                        className="profile-pic"
+                        title={row.nombre}
+                      />
+                    ),
+                  },
+                  {
+                    key: "emotes",
+                    className: "emotes-cell",
+                    render: (row) => (
+                      <div className="emotes-container">
+                        {row.emotesToShow &&
+                          row.emotesToShow.map((emoteId, emoteIndex) => (
+                            <a
+                              key={emoteIndex}
+                              href={`https://7tv.app/emotes/${emoteId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ display: "inline-block" }}
+                            >
+                              <img
+                                src={`https://cdn.7tv.app/emote/${emoteId}/1x.webp`}
+                                alt={`Emote ${emoteIndex}`}
+                                className="emote-icon"
+                                onError={(e) => {
+                                  e.target.style.display = "none";
+                                }}
+                                title={`Emote ${emoteIndex + 1}`}
+                              />
+                            </a>
+                          ))}
+                        {row.emotesHidden > 0 && (
+                          <button
+                            className="emotes-expand-btn"
+                            title="Mostrar todos los emotes"
+                            onClick={() => setExpandedEmotesRow(row.rowIndex)}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              padding: 0,
+                              marginLeft: "4px",
+                              cursor: "pointer",
+                              verticalAlign: "middle",
+                              display: "inline-flex",
+                            }}
+                          >
+                            <MdiChevronDown
+                              width={22}
+                              height={22}
+                              style={{ color: "var(--text)" }}
                             />
-                          </td>
-                          <td className="emotes-cell">
-                            <div className="emotes-container">
-                              {emotesToShow.map((emoteId, emoteIndex) => (
-                                <a
-                                  key={emoteIndex}
-                                  href={`https://7tv.app/emotes/${emoteId}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{ display: "inline-block" }}
-                                >
-                                  <img
-                                    src={`https://cdn.7tv.app/emote/${emoteId}/1x.webp`}
-                                    alt={`Emote ${emoteIndex}`}
-                                    className="emote-icon"
-                                    onError={(e) => {
-                                      e.target.style.display = "none";
-                                    }}
-                                    title={`Emote ${emoteIndex + 1}`}
-                                  />
-                                </a>
-                              ))}
-                              {emotesHidden > 0 && (
-                                <button
-                                  className="emotes-expand-btn"
-                                  title="Mostrar todos los emotes"
-                                  onClick={() => setExpandedEmotesRow(index)}
-                                  style={{
-                                    background: "none",
-                                    border: "none",
-                                    padding: 0,
-                                    marginLeft: "4px",
-                                    cursor: "pointer",
-                                    verticalAlign: "middle",
-                                    display: "inline-flex",
-                                  }}
-                                >
-                                  <MdiChevronDown
-                                    width={22}
-                                    height={22}
-                                    style={{ color: "var(--text)" }}
-                                  />
-                                </button>
-                              )}
-                              {expandedEmotesRow === index && hasMany && (
-                                <button
-                                  className="emotes-collapse-btn"
-                                  title="Ocultar emotes"
-                                  onClick={() => setExpandedEmotesRow(null)}
-                                  style={{
-                                    background: "none",
-                                    border: "none",
-                                    padding: 0,
-                                    marginLeft: "4px",
-                                    cursor: "pointer",
-                                    verticalAlign: "middle",
-                                    display: "inline-flex",
-                                  }}
-                                >
-                                  <MdiChevronUp
-                                    width={22}
-                                    height={22}
-                                    style={{ color: "var(--text)" }}
-                                  />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    }
-                  )}
-                </tbody>
-              </table>
+                          </button>
+                        )}
+                        {row.hasMany && expandedEmotesRow === row.rowIndex && (
+                          <button
+                            className="emotes-collapse-btn"
+                            title="Ocultar emotes"
+                            onClick={() => setExpandedEmotesRow(null)}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              padding: 0,
+                              marginLeft: "4px",
+                              cursor: "pointer",
+                              verticalAlign: "middle",
+                              display: "inline-flex",
+                            }}
+                          >
+                            <MdiChevronUp
+                              width={22}
+                              height={22}
+                              style={{ color: "var(--text)" }}
+                            />
+                          </button>
+                        )}
+                      </div>
+                    ),
+                  },
+                ]}
+              />
             ) : (
               <div
                 style={{
@@ -1067,7 +841,7 @@ function Inicio() {
               </div>
             )}
           </div>
-        </div>
+        </StatSection>
       </div>
 
       <div
@@ -1150,145 +924,18 @@ function Inicio() {
           const maxUsers = maxUsersMap[key] || 7;
           const expanded = expandedAchievements.includes(key);
           return (
-            <div
+            <AchievementSection
               key={key}
-              className={`achievement-section${expanded ? " show-desc" : ""}`}
-              data-achievement-key={key}
-            >
-              <h3
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  cursor: "default",
-                  justifyContent: "space-between",
-                  width: "100%",
-                }}
-                aria-describedby={`desc-${key}`}
-              >
-                <span
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
-                >
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: 16,
-                      height: 16,
-                      flexShrink: 0,
-                      verticalAlign: "text-bottom",
-                    }}
-                  >
-                    <SolarCupBold
-                      width={16}
-                      height={16}
-                      color={details.color}
-                      style={{
-                        color: details.color,
-                        width: 16,
-                        height: 16,
-                        verticalAlign: "text-bottom",
-                        display: "block",
-                      }}
-                    />
-                  </span>
-                  <span
-                    style={{
-                      minHeight: 24,
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    {details.name}
-                  </span>
-                </span>
-                <button
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: 2,
-                    marginLeft: 8,
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                  onClick={() => {
-                    setExpandedAchievements((prev) =>
-                      expanded ? prev.filter((k) => k !== key) : [...prev, key]
-                    );
-                  }}
-                >
-                  {expanded ? (
-                    <MdiChevronUp
-                      width={20}
-                      height={20}
-                      style={{ color: "var(--text)" }}
-                    />
-                  ) : (
-                    <MdiChevronDown
-                      width={20}
-                      height={20}
-                      style={{ color: "var(--text)" }}
-                    />
-                  )}
-                </button>
-              </h3>
-              {expanded && (
-                <>
-                  <span
-                    id={`desc-${key}`}
-                    className="achievement-desc-inline"
-                    style={{ maxWidth: "100%" }}
-                  >
-                    {details.description}
-                  </span>
-                  <div
-                    className={`achievement-users-list${
-                      users.length > 0 ? " has-users" : ""
-                    }`}
-                  >
-                    {users.map((user, index) => (
-                      <img
-                        key={user.id || index}
-                        src={user.pfp}
-                        alt={user.nombre}
-                        className="achievement-user-avatar"
-                        title={user.nombre}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-              {!expanded && (
-                <div className="achievement-users">
-                  {users.length > maxUsers
-                    ? users
-                        .slice(0, maxUsers - 1)
-                        .map((user, index) => (
-                          <img
-                            key={user.id || index}
-                            src={user.pfp}
-                            alt={user.nombre}
-                            className="achievement-user-avatar"
-                            title={user.nombre}
-                          />
-                        ))
-                    : users.map((user, index) => (
-                        <img
-                          key={user.id || index}
-                          src={user.pfp}
-                          alt={user.nombre}
-                          className="achievement-user-avatar"
-                          title={user.nombre}
-                        />
-                      ))}
-                  {users.length > maxUsers && (
-                    <span className="more-users">
-                      +{users.length - (maxUsers - 1)}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
+              details={{ ...details, key }}
+              users={users}
+              expanded={expanded}
+              maxUsers={maxUsers}
+              onToggle={() =>
+                setExpandedAchievements((prev) =>
+                  expanded ? prev.filter((k) => k !== key) : [...prev, key]
+                )
+              }
+            />
           );
         })}
       </div>

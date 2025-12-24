@@ -22,11 +22,39 @@ export function useGoogleSheet(sheetUrl, tabName = "default") {
       const rows = csvText.split("\n").filter((row) => row.trim());
       if (rows.length < 2) throw new Error("Datos insuficientes");
 
-      const headers = rows[0].split(",").map((h) => h.trim());
+      // Nuevo parse que maneja comillas y comas dentro de los campos
+      function parseCSVRow(row) {
+        const result = [];
+        let current = "";
+        let inQuotes = false;
+        for (let i = 0; i < row.length; i++) {
+          const char = row[i];
+          if (char === '"') {
+            if (inQuotes && row[i + 1] === '"') {
+              current += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (char === "," && !inQuotes) {
+            result.push(current);
+            current = "";
+          } else {
+            current += char;
+          }
+        }
+        result.push(current);
+        return result;
+      }
+
+      const headers = parseCSVRow(rows[0]).map((h) => h.trim());
       const parsedData = rows.slice(1).map((row) => {
-        const columns = row.split(",");
+        const columns = parseCSVRow(row);
         return headers.reduce((item, header, index) => {
-          const value = columns[index]?.trim() || "";
+          let value = columns[index]?.trim() || "";
+          if (value.startsWith('"') && value.endsWith('"')) {
+            value = value.slice(1, -1).replace(/""/g, '"');
+          }
           const numValue = parseFloat(value);
           item[header] =
             /[a-zA-Z]/.test(value) || value !== numValue.toString()

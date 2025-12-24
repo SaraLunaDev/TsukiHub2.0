@@ -1,0 +1,30 @@
+.stat-table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.stat-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: none;
+}
+
+.stat-table td {
+  padding: 6px 8px;
+  font-size: 14px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.stat-table tr:last-child td {
+  border-bottom: none;
+}
+
+.stat-table img.profile-pic {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 4px;
+}

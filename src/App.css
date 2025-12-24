@@ -11,13 +11,16 @@
   --navbar: #20262d;
   --dark: #13181d;
   --dark-2: #181d23;
+  --item: #20262d;
   --text: #e6e6e6;
   --text-2: #a0a8b2;
+  --button: #20262d;
   --text-url: #ca6e6e;
   --divider: #ffffff1e;
   --border: #a0a8b233;
   --row-bg: #b3d6ff05;
   --box-shadow-inset: inset 0 0 20px rgba(0, 0, 0, 0.25);
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   --font-main: "JetBrains Mono", monospace;
   --color-mid: #ff8888;
 }
@@ -30,13 +33,16 @@ body:not(.dark-mode) {
   --navbar: #ffffff;
   --dark: #f5f5f5;
   --dark-2: #eeeeee;
+  --item: #ffffff;
   --text: #333333;
   --text-2: #666666;
   --text-url: #ff8888;
+  --button: #ffffff;
   --divider: #e0e0e0;
   --border: #c0c0c0;
   --row-bg: #ffffff;
   --box-shadow-inset: inset 0 0 10px rgba(0, 0, 0, 0.25);
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   --font-main: "JetBrains Mono", monospace;
   --color-mid: #ff8888;
 }
