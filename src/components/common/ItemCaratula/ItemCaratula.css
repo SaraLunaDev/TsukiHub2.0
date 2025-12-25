@@ -73,10 +73,6 @@
   font-weight: normal;
 }
 
-.item-caratula:hover {
-  transform: scale(1.04);
-}
-
 .item-img-wrapper {
   position: relative;
   width: 100%;

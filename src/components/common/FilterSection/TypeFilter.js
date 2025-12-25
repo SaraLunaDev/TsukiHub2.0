@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function TypeFilter({ options, selected, onChange, label }) {
   return (
     <div className="type-filter">

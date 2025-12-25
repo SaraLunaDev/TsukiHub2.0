@@ -1,4 +1,3 @@
-import React from "react";
 import "./StatTable.css";
 
 export default function StatTable({ rows, columns, rowKey, type }) {
@@ -32,7 +31,6 @@ export default function StatTable({ rows, columns, rowKey, type }) {
                 verticalAlign: "text-bottom",
               }}
             >
-              {/* Icono fuego */}
               {col.icon}
             </span>
           </span>
@@ -99,7 +97,6 @@ export default function StatTable({ rows, columns, rowKey, type }) {
         );
       }
     }
-    // Por defecto, valor plano
     return row[col.key];
   };
 

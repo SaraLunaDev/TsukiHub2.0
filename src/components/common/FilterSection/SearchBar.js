@@ -1,4 +1,3 @@
-import React from "react";
 import "./FilterSection.css";
 
 export default function SearchBar({ value, onChange, placeholder }) {

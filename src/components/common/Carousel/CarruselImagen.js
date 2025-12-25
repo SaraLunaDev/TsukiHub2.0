@@ -3,7 +3,12 @@ import "./Carousel.css";
 import ItemImagen from "../ItemImagen/ItemImagen";
 
 export function CarruselImagen({ items }) {
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(() => {
+    if (items && items.length > 1) {
+      return Math.floor(Math.random() * items.length);
+    }
+    return 0;
+  });
   const timerRef = React.useRef();
   React.useEffect(() => {
     if (!items || items.length <= 1) return;
@@ -19,9 +24,23 @@ export function CarruselImagen({ items }) {
 
   if (!items || items.length === 0) return null;
 
+  const resetTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = setInterval(() => {
+        setIndex((i) => (i === items.length - 1 ? 0 : i + 1));
+      }, 10000);
+    }
+  };
   const handleTouchStart = (e) => {
     dragging.current = true;
     startX.current = e.touches ? e.touches[0].clientX : e.clientX;
+    resetTimer();
+  };
+  const handleTouchMove = (e) => {
+    if (dragging.current) {
+      resetTimer();
+    }
   };
   const handleTouchEnd = (e) => {
     if (!dragging.current) return;
@@ -36,6 +55,27 @@ export function CarruselImagen({ items }) {
     }
     dragging.current = false;
     startX.current = null;
+    resetTimer();
+  };
+  const handleMouseMove = (e) => {
+    if (!dragging.current) return;
+    const endX = e.clientX;
+    const delta = endX - startX.current;
+    if (Math.abs(delta) > 30) {
+      if (delta < 0 && index < items.length - 1) {
+        setIndex(index + 1);
+      } else if (delta > 0 && index > 0) {
+        setIndex(index - 1);
+      }
+      dragging.current = false;
+      startX.current = null;
+    }
+    resetTimer();
+  };
+  const handleMouseLeave = () => {
+    dragging.current = false;
+    startX.current = null;
+    resetTimer();
   };
 
   return (
@@ -49,11 +89,20 @@ export function CarruselImagen({ items }) {
     >
       <div
         ref={touchRef}
-        style={{ padding: 8, width: "100%" }}
+        className={dragging.current ? "carousel-dragging" : "carousel-idle"}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchMove}
         onMouseDown={handleTouchStart}
         onMouseUp={handleTouchEnd}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          padding: 8,
+          width: "100%",
+          userSelect: dragging.current ? "none" : undefined,
+        }}
+        onDragStart={(e) => e.preventDefault()}
       >
         <div className="carousel-anim">
           <ItemImagen {...items[index]} />

@@ -66,7 +66,6 @@ function Pelis() {
 
   return (
     <div className="main-container">
-      {/* Sección Próximamente */}
       {data &&
         (data.some(
           (row) => (row["Estado"] || "").trim().toLowerCase() === "ahora"
@@ -75,7 +74,6 @@ function Pelis() {
             (row) => (row["Estado"] || "").trim().toLowerCase() === "planeo"
           )) && (
           <div style={{ display: "flex", gap: 24 }}>
-            {/* Próximamente */}
             <div className="hide-mobile" style={{ flex: 0 }}>
               <div className="top-section">
                 <h2>Proximamente</h2>
@@ -112,7 +110,6 @@ function Pelis() {
                 />
               </div>
             </div>
-            {/* Planeo Ver */}
             <div style={{ flex: 1 }}>
               <div className="top-section">
                 <h2>Planeo Ver</h2>
@@ -148,7 +145,6 @@ function Pelis() {
             </div>
           </div>
         )}
-      {/* Sección principal */}
       <div className="top-section" style={{ marginTop: 8 }}>
         <h2>Peliculas y Series Vistas</h2>
         <div className="top-section-h2-down">

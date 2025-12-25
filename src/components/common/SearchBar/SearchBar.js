@@ -1,4 +1,3 @@
-import React from "react";
 import "./SearchBar.css";
 
 import { StreamlineSharpMagnifyingGlassSolid } from "../../icons/StreamlineSharpMagnifyingGlassSolid";

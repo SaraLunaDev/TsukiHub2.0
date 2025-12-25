@@ -1,4 +1,3 @@
-import React from "react";
 import "./StatSection.css";
 
 export default function StatSection({

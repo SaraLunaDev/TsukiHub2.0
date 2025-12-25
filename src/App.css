@@ -18,9 +18,9 @@
   --genero: #20262d7c;
   --text-url: #ca6e6e;
   --divider: #ffffff1e;
-  --border: #a0a8b233;
+  --border: #33363a;
   --row-bg: #161c22;
-  --box-shadow-inset: inset 0 0 20px rgba(0, 0, 0, 0.25);
+  --box-shadow-inset: inset 0 0 10px rgba(0, 0, 0, 0.25);
   --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   --font-main: "JetBrains Mono", monospace;
   --color-mid: #ff8888;

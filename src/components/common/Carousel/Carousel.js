@@ -12,7 +12,6 @@ export function Carousel({ items }) {
     return () => clearInterval(timerRef.current);
   }, [items]);
 
-  // Swipe/drag logic (hooks deben ir antes de cualquier return)
   const touchRef = React.useRef();
   const startX = React.useRef(null);
   const dragging = React.useRef(false);

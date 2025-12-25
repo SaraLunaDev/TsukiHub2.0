@@ -66,7 +66,6 @@ function Juegos() {
 
   return (
     <div className="main-container">
-      {/* Sección Jugando */}
       {data &&
         (data.some(
           (row) => (row["Estado"] || "").trim().toLowerCase() === "ahora"
@@ -75,7 +74,6 @@ function Juegos() {
             (row) => (row["Estado"] || "").trim().toLowerCase() === "planeo"
           )) && (
           <div style={{ display: "flex", gap: 24 }}>
-            {/* Jugando */}
             <div className="hide-mobile" style={{ flex: 0 }}>
               <div className="top-section">
                 <h2>Jugando</h2>
@@ -112,7 +110,6 @@ function Juegos() {
                 />
               </div>
             </div>
-            {/* Planeo Jugar */}
             <div style={{ flex: 1 }}>
               <div className="top-section">
                 <h2>Planeo Jugar</h2>
@@ -148,7 +145,6 @@ function Juegos() {
             </div>
           </div>
         )}
-      {/* Sección principal */}
       <div className="top-section" style={{ marginTop: 8 }}>
         <h2>Juegos Jugados</h2>
         <div className="top-section-h2-down">

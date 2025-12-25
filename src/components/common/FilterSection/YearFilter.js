@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function YearFilter({ years, selected, onChange }) {
   return (
     <div className="year-filter">

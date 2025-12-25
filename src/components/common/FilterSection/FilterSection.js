@@ -1,4 +1,3 @@
-import React from "react";
 import "./FilterSection.css";
 import { MdiChevronDown } from "../../icons/MdiChevronDown";
 import { MdiChevronUp } from "../../icons/MdiChevronUp";

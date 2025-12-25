@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function OrderFilter({ value, onChange }) {
   return (
     <div className="order-filter">

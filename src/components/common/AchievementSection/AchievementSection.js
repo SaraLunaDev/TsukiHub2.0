@@ -1,4 +1,3 @@
-import React from "react";
 import { SolarCupBold } from "../../icons/SolarCupBold";
 import { MdiChevronUp } from "../../icons/MdiChevronUp";
 import { MdiChevronDown } from "../../icons/MdiChevronDown";
@@ -73,9 +72,17 @@ export default function AchievementSection({
           onClick={onToggle}
         >
           {expanded ? (
-            <MdiChevronUp width={20} height={20} style={{ color: "var(--text)" }} />
+            <MdiChevronUp
+              width={20}
+              height={20}
+              style={{ color: "var(--text)" }}
+            />
           ) : (
-            <MdiChevronDown width={20} height={20} style={{ color: "var(--text)" }} />
+            <MdiChevronDown
+              width={20}
+              height={20}
+              style={{ color: "var(--text)" }}
+            />
           )}
         </button>
       </h3>
@@ -89,7 +96,9 @@ export default function AchievementSection({
             {details.description}
           </span>
           <div
-            className={`achievement-users-list${users.length > 0 ? " has-users" : ""}`}
+            className={`achievement-users-list${
+              users.length > 0 ? " has-users" : ""
+            }`}
           >
             {users.map((user, index) => (
               <img
