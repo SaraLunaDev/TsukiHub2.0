@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import "./Juegos.css";
 import ItemCaratula from "../../common/ItemCaratula/ItemCaratula";
+import { CarruselImagen } from "../../common/Carousel/CarruselImagen";
+import { Carousel } from "../../common/Carousel/Carousel";
+import "../../common/Carousel/Carousel.css";
 import { useGoogleSheet } from "../../../hooks/useGoogleSheet";
 
 import FilterSection from "../../common/FilterSection/FilterSection";
@@ -63,7 +66,90 @@ function Juegos() {
 
   return (
     <div className="main-container">
-      <div className="top-section">
+      {/* Sección Jugando */}
+      {data &&
+        (data.some(
+          (row) => (row["Estado"] || "").trim().toLowerCase() === "ahora"
+        ) ||
+          data.some(
+            (row) => (row["Estado"] || "").trim().toLowerCase() === "planeo"
+          )) && (
+          <div style={{ display: "flex", gap: 24 }}>
+            {/* Jugando */}
+            <div className="hide-mobile" style={{ flex: 0 }}>
+              <div className="top-section">
+                <h2>Jugando</h2>
+                <div className="top-section-h2-down">
+                  <span>
+                    <b>
+                      {
+                        data.filter(
+                          (row) =>
+                            (row["Estado"] || "").trim().toLowerCase() ===
+                            "ahora"
+                        ).length
+                      }
+                    </b>{" "}
+                    entrada
+                    {data.filter(
+                      (row) =>
+                        (row["Estado"] || "").trim().toLowerCase() === "ahora"
+                    ).length === 1
+                      ? ""
+                      : "s"}
+                  </span>
+                </div>
+              </div>
+              <div className="inset-section">
+                <Carousel
+                  items={data.filter(
+                    (row) =>
+                      (row["Estado"] || "").trim().toLowerCase() === "ahora"
+                  )}
+                  renderItem={(row, idx) => (
+                    <ItemCaratula key={"jugando-" + idx} {...row} />
+                  )}
+                />
+              </div>
+            </div>
+            {/* Planeo Jugar */}
+            <div style={{ flex: 1 }}>
+              <div className="top-section">
+                <h2>Planeo Jugar</h2>
+                <div className="top-section-h2-down">
+                  <span>
+                    <b>
+                      {
+                        data.filter(
+                          (row) =>
+                            (row["Estado"] || "").trim().toLowerCase() ===
+                            "planeo"
+                        ).length
+                      }
+                    </b>{" "}
+                    entrada
+                    {data.filter(
+                      (row) =>
+                        (row["Estado"] || "").trim().toLowerCase() === "planeo"
+                    ).length === 1
+                      ? ""
+                      : "s"}
+                  </span>
+                </div>
+              </div>
+              <div className="inset-section">
+                <CarruselImagen
+                  items={data.filter(
+                    (row) =>
+                      (row["Estado"] || "").trim().toLowerCase() === "planeo"
+                  )}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      {/* Sección principal */}
+      <div className="top-section" style={{ marginTop: 8 }}>
         <h2>Juegos Jugados</h2>
         <div className="top-section-h2-down">
           <span>

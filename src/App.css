@@ -15,10 +15,11 @@
   --text: #e6e6e6;
   --text-2: #a0a8b2;
   --button: #20262d;
+  --genero: #20262d7c;
   --text-url: #ca6e6e;
   --divider: #ffffff1e;
   --border: #a0a8b233;
-  --row-bg: #b3d6ff05;
+  --row-bg: #161c22;
   --box-shadow-inset: inset 0 0 20px rgba(0, 0, 0, 0.25);
   --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   --font-main: "JetBrains Mono", monospace;
@@ -38,6 +39,7 @@ body:not(.dark-mode) {
   --text-2: #666666;
   --text-url: #ff8888;
   --button: #ffffff;
+  --genero: #ffffff7c;
   --divider: #e0e0e0;
   --border: #c0c0c0;
   --row-bg: #ffffff;
