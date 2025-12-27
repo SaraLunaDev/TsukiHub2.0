@@ -10,6 +10,7 @@ function SearchBar({
   onChange,
   className = "",
   inputId,
+  onInputClick,
 }) {
   const generatedId = useId();
   const id = inputId || `search-bar-input-${generatedId}`;
@@ -30,6 +31,7 @@ function SearchBar({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="search-input-field"
+          onClick={onInputClick}
         />
       </div>
     </div>

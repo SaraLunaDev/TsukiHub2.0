@@ -14,45 +14,11 @@ import StatTable from "../../common/StatTable/StatTable";
 import AchievementSection from "../../common/AchievementSection/AchievementSection";
 import StatSection from "../../common/StatSection/StatSection";
 import useLocalStorage from "../../../hooks/useLocalStorage";
-
 import SearchBar from "../../common/SearchBar";
 import "./Inicio.css";
+import { MOD_USERS } from "../../../constants/config";
 
 const EXCLUDED_USERS = ["TsukiSoft", "TsukiwiChan"];
-
-const MOD_USERS = [
-  "TsukiSoft",
-  "vytoking",
-  "Rabam",
-  "dollanganger",
-  "unai9x",
-  "Vilexis98",
-  "Samuel_Pincel",
-  "el_capde",
-  "pubgdemont",
-  "AnaPandemonium",
-  "Daruz",
-  "alvaro_palmer",
-  "Emilio2772",
-  "enraid1",
-  "ShadouShot",
-  "oogiebuttie",
-  "Lintes96",
-  "Donramonrisas",
-  "IreNuska__",
-  "moon_defaultt",
-  "BasedTrolso",
-  "NucleoDeJuego",
-  "eiosoydev",
-  "maese_Javilon",
-  "JOSEtomas99",
-  "bigmacius",
-  "KaranirNoFake",
-  "Criis_joestar",
-  "Achachancha",
-  "TsukiwiChan",
-  "JoranEssed",
-];
 
 function Inicio() {
   const [twitchUser] = useLocalStorage("twitchUser", null);

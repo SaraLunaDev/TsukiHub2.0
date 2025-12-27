@@ -1,343 +1,328 @@
-/* ============================================
-// ESTRUCTURA BASE
-// ============================================ 
-*/
+.navbar-link-recomendar.active .nav-text::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
 .navbar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 74px;
-    background-color: var(--navbar);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 74px;
+  background-color: var(--navbar);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
 }
 
 .navbar-container {
-    height: 100%;
-    max-width: 100%;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 5px;
+  height: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
 }
 
-/* ============================================
-// LOGO
-// ============================================ 
-*/
 .navbar-logo {
-    display: none;
+  display: none;
 }
 
-/* ============================================
-// LINKS DESKTOP
-// ============================================ 
-*/
 .navbar-links-desktop {
-    display: none;
+  display: none;
 }
 
-/* ============================================
-// BOTONES MOVIL
-// ============================================ 
-*/
 .navbar-links-mobile {
-    display: flex;
-    flex: 1;
-    gap: 5px;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  flex: 1;
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Cada boton movil */
 .navbar-mobile-button {
-    flex: 1;
-    height: 60px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    background: transparent;
-    border: none;
-    color: var(--text-2);
-    border-radius: 8px;
-    cursor: pointer;
-    position: relative;
-    text-decoration: none;
-    padding: 0;
+  flex: 1;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  color: var(--text-2);
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+  padding: 0;
 }
 
-/* Contenedor especial para el user menu en movil */
 .navbar-mobile-user {
-    cursor: default;
-    padding: 0;
+  cursor: default;
+  padding: 0;
 }
 
 .navbar-mobile-button.active {
-    color: var(--text);
+  color: var(--text);
 }
 
 .navbar-mobile-button.active::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 10%;
-    right: 10%;
-    height: 3px;
-    background-color: var(--color-mid);
-    border-radius: 0 0 3px 3px;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 3px;
+  background-color: var(--color-mid);
+  border-radius: 0 0 3px 3px;
 }
 
-/* Barra completa - primer elemento del par */
-.navbar-mobile-button.active-left::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 10%;
-    right: 10%;
-    height: 3px;
-    background-color: var(--color-mid);
-    border-radius: 0 0 3px 3px;
-}
-
-/* Barra dividida en dos - segundo elemento del par */
+.navbar-mobile-button.active-left::before,
 .navbar-mobile-button.active-right::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 10%;
-    right: 10%;
-    height: 3px;
-    background: linear-gradient(to right,
-            var(--color-mid) 0%,
-            var(--color-mid) 45%,
-            transparent 45%,
-            transparent 55%,
-            var(--color-mid) 55%,
-            var(--color-mid) 100%);
-    border-radius: 0 0 3px 3px;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
 }
 
-/* Icono del boton */
+.navbar-mobile-button.active-left::before {
+  background: linear-gradient(
+    to right,
+    var(--color-mid) 0%,
+    var(--color-mid) 45%,
+    transparent 45%,
+    transparent 55%,
+    rgba(var(--color-mid-rgb, 100, 100, 100), 0.25) 55%,
+    rgba(var(--color-mid-rgb, 100, 100, 100), 0.25) 100%
+  );
+}
+
+.navbar-mobile-button.active-right::before {
+  background: linear-gradient(
+    to right,
+    rgba(var(--color-mid-rgb, 100, 100, 100), 0.25) 0%,
+    rgba(var(--color-mid-rgb, 100, 100, 100), 0.25) 45%,
+    transparent 45%,
+    transparent 55%,
+    var(--color-mid) 55%,
+    var(--color-mid) 100%
+  );
+}
+
 .nav-icon {
-    font-size: 32px;
+  font-size: 32px;
 }
 
 .nav-icon-gameboy {
-    font-size: 28px;
-    position: relative;
-    top: 2px;
+  font-size: 28px;
+  position: relative;
+  top: 2px;
 }
 
-/* Texto de navegacion (oculto en movil) */
 .nav-text {
-    display: none;
+  display: none;
 }
 
-/* ============================================
-// SECCION DERECHA
-// ============================================ 
-*/
 .navbar-right {
-    display: none;
+  display: none;
 }
 
-/* ============================================
-// BOTONES DE DESARROLLADOR
-// ============================================ 
-*/
-.navbar-add-button {
-    display: none;
+.navbar-link-recomendar {
+  display: flex;
+  align-items: center;
+  padding: 10px 6px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 6px;
+  position: relative;
+  min-width: 60px;
+  background: none;
+  border: none;
+  transition: background 0.2s;
+}
+.navbar-link-recomendar:hover .nav-text::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+.navbar-link-recomendar .nav-text {
+  position: relative;
+  z-index: 1;
+}
+.navbar-link-recomendar .nav-text::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -7px;
+  height: 2px;
+  background-color: var(--color-mid);
+  border-radius: 2px;
+  opacity: 0;
+  transform: scaleX(0);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
 }
 
-/* ============================================
-// TABLET Y PC
-// ============================================ 
-*/
 @media (min-width: 769px) {
+  .navbar {
+    position: fixed;
+    top: 0;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background-color: var(--navbar);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+  }
 
-    /* Navbar superior */
-    .navbar {
-        position: fixed;
-        top: 0;
-        bottom: auto;
-        left: 0;
-        right: 0;
-        height: 70px;
-        background-color: var(--navbar);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        z-index: 1000;
-    }
+  .navbar-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+    gap: 20px;
+    height: 100%;
+  }
 
-    .navbar-container {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        max-width: 1300px;
-        margin: 0 auto;
-        padding: 0 20px;
-        gap: 20px;
-        height: 100%;
-    }
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text);
+    flex-shrink: 0;
+    min-width: 40px;
+    text-decoration: none;
+    margin-right: 10px;
+  }
 
-    /* Mostrar logo */
-    .navbar-logo {
-        display: flex;
-        align-items: center;
-        font-size: 24px;
-        font-weight: bold;
-        color: var(--text);
-        flex-shrink: 0;
-        min-width: 40px;
-        text-decoration: none;
-        margin-right: 10px;
-    }
+  .navbar-logo img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+  }
 
-    .navbar-logo img {
-        height: 40px;
-        width: auto;
-        object-fit: contain;
-    }
+  .navbar-links-mobile {
+    display: none;
+  }
 
-    /* Ocultar botones movil */
-    .navbar-links-mobile {
-        display: none;
-    }
+  .navbar-links-desktop {
+    display: flex;
+    flex: 1 1 0;
+    gap: 18px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
 
-    /* Mostrar links desktop */
-    .navbar-links-desktop {
-        display: flex;
-        flex: 1 1 0;
-        gap: 18px;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        min-width: 0;
-    }
+  .navbar-links-desktop li {
+    flex: none;
+    margin: 0;
+  }
 
-    .navbar-links-desktop li {
-        flex: none;
-        margin: 0;
-    }
+  .navbar-links-desktop a {
+    display: flex;
+    align-items: center;
+    padding: 10px 6px;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 6px;
+    position: relative;
+    min-width: 60px;
+  }
 
-    .navbar-links-desktop a {
-        display: flex;
-        align-items: center;
-        padding: 10px 6px;
-        color: var(--text);
-        font-size: 15px;
-        font-weight: 700;
-        text-decoration: none;
-        border-radius: 6px;
-        position: relative;
-        min-width: 60px;
-    }
+  .navbar-links-desktop a.active {
+    color: var(--text);
+  }
 
-    /* Link activo en PC */
-    .navbar-links-desktop a.active {
-        color: var(--text);
-    }
+  .navbar-links-desktop a .nav-text {
+    position: relative;
+    z-index: 1;
+  }
+  .navbar-links-desktop a .nav-text::after {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -7px;
+    height: 2px;
+    background-color: var(--color-mid);
+    border-radius: 2px;
+    opacity: 0;
+    transform: scaleX(0);
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+  }
+  .navbar-links-desktop a.active .nav-text::after,
+  .navbar-links-desktop a:hover .nav-text::after {
+    opacity: 1;
+    transform: scaleX(1);
+  }
 
+  .nav-icon {
+    display: none;
+  }
 
-    /* Barra animada solo bajo el texto, no todo el link */
-    .navbar-links-desktop a .nav-text {
-        position: relative;
-        z-index: 1;
-    }
-    .navbar-links-desktop a .nav-text::after {
-        content: '';
-        display: block;
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: -7px;
-        height: 2px;
-        background-color: var(--color-mid);
-        border-radius: 2px;
-        opacity: 0;
-        transform: scaleX(0);
-        transition: opacity 0.2s, transform 0.2s;
-        pointer-events: none;
-    }
-    .navbar-links-desktop a.active .nav-text::after,
-    .navbar-links-desktop a:hover .nav-text::after {
-        opacity: 1;
-        transform: scaleX(1);
-    }
+  .nav-text {
+    display: inline;
+    font-size: 15px;
+  }
 
-    /* Iconos ocultos en PC */
-    .nav-icon {
-        display: none;
-    }
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+  }
 
-    /* Texto visible en PC */
-    .nav-text {
-        display: inline;
-        font-size: 15px;
-    }
+  .navbar-theme-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text);
+  }
 
-    /* Mostrar seccion derecha */
-    .navbar-right {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        flex-shrink: 0;
-    }
+  .navbar-add-button {
+    display: block;
+  }
 
-    /* Boton de cambio de tema en PC */
-    .navbar-theme-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        background: transparent;
-        border: none;
-        border-radius: 50%;
-        font-size: 20px;
-        cursor: pointer;
-        color: var(--text);
-    }
-
-    /* Mostrar botones de desarrollador */
-    .navbar-add-button {
-        display: block;
-        padding: 8px 16px;
-        background-color: var(--color-mid);
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        white-space: nowrap;
-        min-width: 130px;
-    }
-
-    /* Ocultar wrapper de user menu movil en PC */
-    .navbar-mobile-user {
-        display: none;
-    }
+  .navbar-mobile-user {
+    display: none;
+  }
 }
 
-/* ============================================ 
-// PC GRANDE
-// ============================================ 
-*/
 @media (min-width: 1200px) {
-    .navbar-container {
-        gap: 20px;
-    }
+  .navbar-container {
+    gap: 20px;
+  }
 
-    .navbar-links-desktop {
-        gap: 18px;
-    }
+  .navbar-links-desktop {
+    gap: 18px;
+  }
 
-    .navbar-links-desktop a {
-        padding: 10px 6px;
-    }
+  .navbar-links-desktop a {
+    padding: 10px 6px;
+  }
 }

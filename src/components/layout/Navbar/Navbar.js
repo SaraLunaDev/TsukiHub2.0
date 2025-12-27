@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import UserMenu from "./UserMenu";
 import useLocalStorage from "../../../hooks/useLocalStorage";
@@ -18,24 +17,8 @@ import { SolarMicrophoneBold } from "../../icons/SolarMicrophoneBold";
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isDeveloperMode] = useLocalStorage(STORAGE_KEYS.DEVELOPER_MODE, false);
   const [darkMode, setDarkMode] = useLocalStorage(STORAGE_KEYS.DARK_MODE, true);
 
-  // Disparar evento para abrir popup de añadir juego
-  const handleAddGameClick = () => {
-    window.dispatchEvent(new CustomEvent("openAddGamePopup"));
-  };
-
-  // Disparar evento para abrir popup de añadir pelicula/serie
-  const handleAddMovieClick = () => {
-    window.dispatchEvent(new CustomEvent("openAddMoviePopup"));
-  };
-
-  // ============================================
-  // LOGICA DE ALTERNANCIA PARA MOVIL
-  // ============================================
-
-  // Alternar entre Juegos y Pelis
   const handleToggleJuegosPelis = () => {
     if (location.pathname === "/juegos") {
       navigate("/pelis");
@@ -44,7 +27,6 @@ function Navbar() {
     }
   };
 
-  // Alternar entre Pokedex y Gacha
   const handleTogglePokedexGacha = () => {
     if (location.pathname.includes("/pokedex")) {
       navigate("/gacha/Dragon-Ball");
@@ -53,7 +35,6 @@ function Navbar() {
     }
   };
 
-  // Alternar entre GameBoy y TTS
   const handleToggleGameBoyTTS = () => {
     if (location.pathname === "/gameboy") {
       navigate("/tts");
@@ -62,7 +43,6 @@ function Navbar() {
     }
   };
 
-  // Determinar estado activo y que icono mostrar
   const isJuegosOrPelisActive =
     location.pathname === "/juegos" || location.pathname === "/pelis";
   const isPokedexOrGachaActive =
@@ -71,7 +51,6 @@ function Navbar() {
   const isGameBoyOrTTSActive =
     location.pathname === "/gameboy" || location.pathname === "/tts";
 
-  // Icono segun que pagina estas viendo (React components)
   const juegosOrPelisIcon =
     location.pathname === "/pelis" ? (
       <MaterialSymbolsVideocamRounded className="nav-icon" />
@@ -93,9 +72,6 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        {/* ============================================
-            LOGO (solo PC) - Lleva a inicio
-            ============================================ */}
         <Link to="/" className="navbar-logo" title="Inicio">
           <img
             src={
@@ -111,9 +87,6 @@ function Navbar() {
           />
         </Link>
 
-        {/* ============================================
-            LINKS DE NAVEGACION - PC (5 opciones)
-            ============================================ */}
         <ul className="navbar-links navbar-links-desktop">
           <li>
             <Link
@@ -171,11 +144,7 @@ function Navbar() {
           </li>
         </ul>
 
-        {/* ============================================
-            BOTONES DE NAVEGACION - MOVIL (4 opciones)
-            ============================================ */}
         <div className="navbar-links navbar-links-mobile">
-          {/* Boton 0: Inicio */}
           <Link
             to="/"
             className={`navbar-mobile-button ${
@@ -186,7 +155,6 @@ function Navbar() {
             <MaterialSymbolsOtherHousesOutlineRounded className="nav-icon" />
           </Link>
 
-          {/* Boton 1: Alterna entre Juegos y Pelis */}
           <button
             className={`navbar-mobile-button ${
               isJuegosOrPelisActive ? "active" : ""
@@ -201,7 +169,6 @@ function Navbar() {
             {juegosOrPelisIcon}
           </button>
 
-          {/* Boton 2: Alterna entre GameBoy y TTS */}
           <button
             className={`navbar-mobile-button ${
               isGameBoyOrTTSActive ? "active" : ""
@@ -214,7 +181,6 @@ function Navbar() {
             {gameBoyOrTTSIcon}
           </button>
 
-          {/* Boton 3: Alterna entre Pokedex y Gacha */}
           <button
             className={`navbar-mobile-button ${
               isPokedexOrGachaActive ? "active" : ""
@@ -229,39 +195,51 @@ function Navbar() {
             {pokedexOrGachaIcon}
           </button>
 
-          {/* Boton 4: Perfil de usuario */}
           <div className="navbar-mobile-button navbar-mobile-user">
             <UserMenu />
           </div>
         </div>
 
-        {/* ============================================
-            SECCION DERECHA (solo PC)
-            ============================================ */}
         <div className="navbar-right">
-          {/* Boton añadir juego (solo en /juegos y modo desarrollador) */}
-          {isDeveloperMode && location.pathname === "/juegos" && (
-            <button
-              className="navbar-add-button"
-              onClick={handleAddGameClick}
-              title="Añadir juego"
+          {(location.pathname === "/juegos" ||
+            location.pathname === "/pelis" ||
+            location.pathname === "/juegos/recomendar" ||
+            location.pathname === "/pelis/recomendar") && (
+            <Link
+              to={
+                location.pathname.startsWith("/juegos")
+                  ? "/juegos/recomendar"
+                  : "/pelis/recomendar"
+              }
+              className={`navbar-link navbar-link-recomendar${
+                location.pathname === "/juegos/recomendar" ||
+                location.pathname === "/pelis/recomendar"
+                  ? " active"
+                  : ""
+              }`}
+              title="Recomendar"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "10px 6px",
+                color: "var(--text)",
+                fontSize: "15px",
+                fontWeight: 700,
+                textDecoration: "none",
+                borderRadius: "6px",
+                position: "relative",
+                minWidth: "60px",
+              }}
             >
-              + Añadir
-            </button>
+              <span
+                className="nav-text"
+                style={{ display: "flex", alignItems: "center", gap: "6px" }}
+              >
+                Recomendaciones
+              </span>
+            </Link>
           )}
 
-          {/* Boton añadir pelicula (solo en /pelis y modo desarrollador) */}
-          {isDeveloperMode && location.pathname === "/pelis" && (
-            <button
-              className="navbar-add-button"
-              onClick={handleAddMovieClick}
-              title="Añadir pelicula o serie"
-            >
-              + Añadir
-            </button>
-          )}
-
-          {/* Boton cambiar tema (solo PC) */}
           <button
             className="navbar-theme-button"
             onClick={() => setDarkMode(!darkMode)}
@@ -278,7 +256,6 @@ function Navbar() {
             )}
           </button>
 
-          {/* Menu de usuario */}
           <UserMenu />
         </div>
       </div>

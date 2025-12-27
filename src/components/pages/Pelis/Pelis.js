@@ -64,6 +64,29 @@ function Pelis() {
     return Array.from(set).sort((a, b) => b - a);
   }, [data]);
 
+  const filteredVistas = data
+    ? data
+        .filter((row) => (row["Estado"] || "").toLowerCase() === "pasado")
+        .filter(
+          (row) =>
+            (!selectedYear ||
+              (row["Fecha"] && row["Fecha"].endsWith("/" + selectedYear))) &&
+            (!selectedType || cleanType(row["Tipo"]) === selectedType) &&
+            (!selectedGenre ||
+              (row["Generos"] &&
+                row["Generos"]
+                  .split(",")
+                  .map((g) => g.trim())
+                  .includes(selectedGenre))) &&
+            (!searchText ||
+              Object.values(row).some(
+                (v) =>
+                  v &&
+                  v.toString().toLowerCase().includes(searchText.toLowerCase())
+              ))
+        )
+    : [];
+
   return (
     <div className="main-container">
       {data &&
@@ -149,20 +172,8 @@ function Pelis() {
         <h2>Peliculas y Series Vistas</h2>
         <div className="top-section-h2-down">
           <span>
-            <b>
-              {data
-                ? data.filter(
-                    (row) => (row["Estado"] || "").toLowerCase() === "pasado"
-                  ).length
-                : 0}
-            </b>{" "}
-            entrada
-            {data &&
-            data.filter(
-              (row) => (row["Estado"] || "").toLowerCase() === "pasado"
-            ).length === 1
-              ? ""
-              : "s"}
+            <b>{filteredVistas.length}</b> entrada
+            {filteredVistas.length === 1 ? "" : "s"}
           </span>
           <FilterSection
             label="Filtrar"
@@ -206,35 +217,9 @@ function Pelis() {
         </div>
       ) : (
         <div className="inset-section">
-          {data && data.length > 0 ? (
+          {filteredVistas.length > 0 ? (
             <div className="pelis-grid">
-              {data
-                .filter(
-                  (row) => (row["Estado"] || "").toLowerCase() === "pasado"
-                )
-                .filter(
-                  (row) =>
-                    (!selectedYear ||
-                      (row["Fecha"] &&
-                        row["Fecha"].endsWith("/" + selectedYear))) &&
-                    (!selectedType ||
-                      cleanType(row["Tipo"]) === selectedType) &&
-                    (!selectedGenre ||
-                      (row["Generos"] &&
-                        row["Generos"]
-                          .split(",")
-                          .map((g) => g.trim())
-                          .includes(selectedGenre))) &&
-                    (!searchText ||
-                      Object.values(row).some(
-                        (v) =>
-                          v &&
-                          v
-                            .toString()
-                            .toLowerCase()
-                            .includes(searchText.toLowerCase())
-                      ))
-                )
+              {filteredVistas
                 .sort((a, b) => {
                   const parse = (d) => {
                     if (!d) return 0;
@@ -291,8 +276,14 @@ function Pelis() {
                 ))}
             </div>
           ) : (
-            <div style={{ textAlign: "center", padding: 32 }}>
-              No hay datos disponibles
+            <div
+              style={{
+                textAlign: "center",
+                padding: 15,
+                color: "var(--text-2)",
+              }}
+            >
+              No hay pelis disponibles, jope..
             </div>
           )}
         </div>

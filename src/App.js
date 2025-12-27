@@ -8,6 +8,7 @@ import Layout from "./components/layout/Layout";
 import Inicio from "./components/pages/Inicio/Inicio";
 import Juegos from "./components/pages/Juegos/Juegos";
 import Pelis from "./components/pages/Pelis/Pelis";
+import Recomendar from "./components/pages/Recomendar/Recomendar";
 import Pokedex from "./components/pages/Pokedex/Pokedex";
 import Gacha from "./components/pages/Gacha/Gacha";
 import GameBoy from "./components/pages/GameBoy/GameBoy";
@@ -27,9 +28,11 @@ function App() {
 
           {/* La ruta de juegos */}
           <Route path="/juegos" element={<Juegos />} />
+          <Route path="/juegos/recomendar" element={<Recomendar />} />
 
           {/* La ruta de peliculas y series */}
           <Route path="/pelis" element={<Pelis />} />
+          <Route path="/pelis/recomendar" element={<Recomendar />} />
 
           {/* La ruta de pokedex con region opcional */}
           <Route path="/pokedex" element={<Pokedex />} />

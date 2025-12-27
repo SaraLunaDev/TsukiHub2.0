@@ -22,6 +22,7 @@ import { MaterialSymbolsWbSunnyOutlineRounded } from "../../icons/MaterialSymbol
 import { MaterialSymbolsDarkModeOutlineRounded } from "../../icons/MaterialSymbolsDarkModeOutlineRounded";
 import { MdiTwitch } from "../../icons/MdiTwitch";
 import { MingcuteExitLine } from "../../icons/MingcuteExitLine";
+import { MaterialSymbolsListsRounded } from "../../icons/MaterialSymbolsListsRounded";
 
 function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -224,61 +225,66 @@ function UserMenu() {
               </button>
             )}
 
-            {/* Botones de añadir para desarrollador en móvil */}
-            {window.innerWidth < 769 &&
-              twitchUser &&
-              ADMIN_USERS.includes(twitchUser.login.toLowerCase()) && (
-                <>
-                  {(window.location.pathname === "/juegos" ||
-                    window.location.pathname === "/pelis") && (
-                    <>
-                      {window.location.pathname === "/juegos" && (
-                        <>
-                          <button
-                            className="user-menu-option user-menu-option-primary user-menu-option-divider"
-                            onClick={() => {
-                              window.dispatchEvent(
-                                new CustomEvent("openAddGamePopup")
-                              );
-                              setIsOpen(false);
-                            }}
-                          >
-                            <MaterialSymbolsAddCircleOutlineRounded className="user-menu-option-icon" />
-                            <span className="user-menu-option-text">
-                              Añadir Juego
-                            </span>
-                          </button>
-                        </>
-                      )}
-                      {window.location.pathname === "/pelis" && (
-                        <>
-                          <button
-                            className="user-menu-option user-menu-option-primary user-menu-option-divider"
-                            onClick={() => {
-                              window.dispatchEvent(
-                                new CustomEvent("openAddMoviePopup")
-                              );
-                              setIsOpen(false);
-                            }}
-                          >
-                            <MaterialSymbolsAddCircleOutlineRounded className="user-menu-option-icon" />
-                            <span className="user-menu-option-text">
-                              Añadir Película/Serie
-                            </span>
-                          </button>
-                        </>
-                      )}
-                    </>
-                  )}
-                </>
-              )}
+            {/* Botón Recomendar y Añadir para móvil y PC (solo desarrollador) */}
+            {(window.location.pathname === "/juegos" || window.location.pathname === "/pelis") && (
+              <>
+                {window.innerWidth < 769 && (
+                  <button
+                    className={`user-menu-option user-menu-option-primary${twitchUser ? " user-menu-option-divider" : ""}`}
+                    onClick={() => {
+                      if (window.location.pathname === "/juegos")
+                        window.location.href = "/juegos/recomendar";
+                      else if (window.location.pathname === "/pelis")
+                        window.location.href = "/pelis/recomendar";
+                      setIsOpen(false);
+                    }}
+                  >
+                    <MaterialSymbolsListsRounded className="user-menu-option-icon" />
+                    <span className="user-menu-option-text">Recomendaciones</span>
+                  </button>
+                )}
+                {twitchUser && ADMIN_USERS.includes(twitchUser.login.toLowerCase()) && (
+                  <>
+                    {(window.location.pathname === "/juegos") && (
+                      <button
+                        className="user-menu-option user-menu-option-primary user-menu-option-divider"
+                        onClick={() => {
+                          window.dispatchEvent(new CustomEvent("openAddGamePopup"));
+                          setIsOpen(false);
+                        }}
+                      >
+                        <MaterialSymbolsAddCircleOutlineRounded className="user-menu-option-icon" />
+                        <span className="user-menu-option-text">Añadir Juego</span>
+                      </button>
+                    )}
+                    {(window.location.pathname === "/pelis") && (
+                      <button
+                        className="user-menu-option user-menu-option-primary user-menu-option-divider"
+                        onClick={() => {
+                          window.dispatchEvent(new CustomEvent("openAddMoviePopup"));
+                          setIsOpen(false);
+                        }}
+                      >
+                        <MaterialSymbolsAddCircleOutlineRounded className="user-menu-option-icon" />
+                        <span className="user-menu-option-text">Añadir Pelicula/Serie</span>
+                      </button>
+                    )}
+                  </>
+                )}
+              </>
+            )}
 
             {/* Tema */}
             {/* Tema y Login/Logout con divisores condicionales en móvil */}
             {window.innerWidth < 769 && !twitchUser ? (
               <>
                 <button
-                  className="user-menu-option user-menu-option-theme"
+                  className={`user-menu-option user-menu-option-theme${
+                    window.location.pathname === "/juegos" ||
+                    window.location.pathname === "/pelis"
+                      ? " user-menu-option-divider"
+                      : ""
+                  }`}
                   onClick={toggleTheme}
                 >
                   {darkMode ? (

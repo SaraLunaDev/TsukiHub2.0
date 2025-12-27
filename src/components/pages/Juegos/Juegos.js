@@ -64,6 +64,29 @@ function Juegos() {
     return Array.from(set).sort((a, b) => b - a);
   }, [data]);
 
+  const filteredJugados = data
+    ? data
+        .filter((row) => (row["Estado"] || "").toLowerCase() === "pasado")
+        .filter(
+          (row) =>
+            (!selectedYear ||
+              (row["Fecha"] && row["Fecha"].endsWith("/" + selectedYear))) &&
+            (!selectedType || cleanType(row["Tipo"]) === selectedType) &&
+            (!selectedGenre ||
+              (row["Generos"] &&
+                row["Generos"]
+                  .split(",")
+                  .map((g) => g.trim())
+                  .includes(selectedGenre))) &&
+            (!searchText ||
+              Object.values(row).some(
+                (v) =>
+                  v &&
+                  v.toString().toLowerCase().includes(searchText.toLowerCase())
+              ))
+        )
+    : [];
+
   return (
     <div className="main-container">
       {data &&
@@ -149,20 +172,8 @@ function Juegos() {
         <h2>Juegos Jugados</h2>
         <div className="top-section-h2-down">
           <span>
-            <b>
-              {data
-                ? data.filter(
-                    (row) => (row["Estado"] || "").toLowerCase() === "pasado"
-                  ).length
-                : 0}
-            </b>{" "}
-            entrada
-            {data &&
-            data.filter(
-              (row) => (row["Estado"] || "").toLowerCase() === "pasado"
-            ).length === 1
-              ? ""
-              : "s"}
+            <b>{filteredJugados.length}</b> entrada
+            {filteredJugados.length === 1 ? "" : "s"}
           </span>
           <FilterSection
             label="Filtrar"
@@ -206,35 +217,9 @@ function Juegos() {
         </div>
       ) : (
         <div className="inset-section">
-          {data && data.length > 0 ? (
+          {filteredJugados.length > 0 ? (
             <div className="juegos-grid">
-              {data
-                .filter(
-                  (row) => (row["Estado"] || "").toLowerCase() === "pasado"
-                )
-                .filter(
-                  (row) =>
-                    (!selectedYear ||
-                      (row["Fecha"] &&
-                        row["Fecha"].endsWith("/" + selectedYear))) &&
-                    (!selectedType ||
-                      cleanType(row["Tipo"]) === selectedType) &&
-                    (!selectedGenre ||
-                      (row["Generos"] &&
-                        row["Generos"]
-                          .split(",")
-                          .map((g) => g.trim())
-                          .includes(selectedGenre))) &&
-                    (!searchText ||
-                      Object.values(row).some(
-                        (v) =>
-                          v &&
-                          v
-                            .toString()
-                            .toLowerCase()
-                            .includes(searchText.toLowerCase())
-                      ))
-                )
+              {filteredJugados
                 .sort((a, b) => {
                   const parse = (d) => {
                     if (!d) return 0;
@@ -291,8 +276,14 @@ function Juegos() {
                 ))}
             </div>
           ) : (
-            <div style={{ textAlign: "center", padding: 32 }}>
-              No hay datos disponibles
+            <div
+              style={{
+                textAlign: "center",
+                padding: 15,
+                color: "var(--text-2)",
+              }}
+            >
+              No hay juegos disponibles, jope..
             </div>
           )}
         </div>

@@ -38,6 +38,19 @@ bower_components
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 
+# Ignore server.js
+server.js
+
+# Ignore vercel.json
+vercel.json
+
+# Ignore .gitignore itself
+.gitignore
+
+# Ignore .gitattributes
+.gitattributes
+
+
 # Dependency directories
 node_modules/
 jspm_packages/

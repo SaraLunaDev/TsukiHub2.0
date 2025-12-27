@@ -7,7 +7,11 @@ export const API_URLS = {
   TWITCH_TOKEN: "https://id.twitch.tv/oauth2/token",
   TWITCH_VALIDATE: "https://id.twitch.tv/oauth2/validate",
   TWITCH_USERS: "https://api.twitch.tv/helix/users",
+  IGDB_SEARCH: "/api/igdb-search",
+  TMDB_SEARCH: "/api/tmdb-search",
 };
+
+export const USER_SHEET_URL = process.env.REACT_APP_USER_SHEET_URL || "";
 
 const getRedirectUri = () => {
   if (process.env.REACT_APP_TWITCH_REDIRECT_URI) {
@@ -31,3 +35,37 @@ export const STORAGE_KEYS = {
 };
 
 export const ADMIN_USERS = ["tsukisoft", "tsukiwichan"];
+
+export const MOD_USERS = [
+  "TsukiSoft",
+  "vytoking",
+  "Rabam",
+  "dollanganger",
+  "unai9x",
+  "Vilexis98",
+  "Samuel_Pincel",
+  "el_capde",
+  "pubgdemont",
+  "AnaPandemonium",
+  "Daruz",
+  "alvaro_palmer",
+  "Emilio2772",
+  "enraid1",
+  "ShadouShot",
+  "oogiebuttie",
+  "Lintes96",
+  "Donramonrisas",
+  "IreNuska__",
+  "moon_defaultt",
+  "BasedTrolso",
+  "NucleoDeJuego",
+  "eiosoydev",
+  "maese_Javilon",
+  "JOSEtomas99",
+  "bigmacius",
+  "KaranirNoFake",
+  "Criis_joestar",
+  "Achachancha",
+  "TsukiwiChan",
+  "JoranEssed",
+];

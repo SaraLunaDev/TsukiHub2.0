@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { MaterialSymbolsAndroidMessages } from "../../icons/MaterialSymbolsAndroidMessages";
 import "./ItemCaratula.css";
 import { MaterialSymbolsPlayArrowRounded } from "../../icons/MaterialSymbolsPlayArrowRounded";
 import { MaterialSymbolsLightKidStar } from "../../icons/MaterialSymbolsLightKidStar";
@@ -12,15 +13,42 @@ export default function ItemCaratula({
   Duracion,
   Nota,
   URL,
+  Estado,
+  Usuario,
+  userSheet,
+  Comentario,
 }) {
   const [hover, setHover] = useState(false);
-  if (!Caratula) return null;
+  const caratulaClass =
+    Estado === "Recomendacion"
+      ? "item-caratula item-caratula-recomendacion"
+      : "item-caratula";
+
   return (
     <div
-      className="item-caratula"
+      className={caratulaClass}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
+      {Estado === "Recomendacion" && userSheet && (
+        <div className="item-nombre-superpuesta">
+          {userSheet.pfp ? (
+            <img
+              src={userSheet.pfp}
+              alt={userSheet.nombre || "Usuario"}
+              className="item-usuario-avatar"
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: "50%",
+                marginRight: 6,
+                verticalAlign: "middle",
+              }}
+            />
+          ) : null}
+          <span>{userSheet.nombre || "Usuario"}</span>
+        </div>
+      )}
       <div className="item-img-wrapper">
         {Duracion && (
           <div className="item-duracion-superpuesta">
@@ -49,14 +77,42 @@ export default function ItemCaratula({
             {Number(Nota).toFixed(1).replace(/\.0$/, "")}/10
           </div>
         )}
-        <img
-          src={Caratula}
-          alt={`Caratula de ${
-            Nombre ? Nombre.replace(/\s*\[[^\]]*\]$/, "") : ""
-          }`}
-          className="item-img"
-        />
-        <div className="item-img-overlay" />
+        <div style={{ position: "relative", width: "100%", height: "100%" }}>
+          <img
+            src={Caratula}
+            alt={`Caratula de ${
+              Nombre ? Nombre.replace(/\s*\[[^\]]*\]$/, "") : ""
+            }`}
+            className={
+              Estado === "Recomendacion"
+                ? "item-img item-img-recomendacion"
+                : "item-img"
+            }
+          />
+          {Estado === "Recomendacion" && hover && Comentario && (
+            <div className="item-comentario-overlay">
+              <MaterialSymbolsAndroidMessages
+                style={{
+                  fontSize: 18,
+                  marginBottom: 2,
+                  marginRight: 6,
+                  verticalAlign: "middle",
+                  color: "#fff",
+                }}
+              />
+              <span>{Comentario}</span>
+            </div>
+          )}
+        </div>
+        {(Duracion || Nota || (Estado === "Recomendacion" && Comentario)) && (
+          <div
+            className={
+              Estado === "Recomendacion"
+                ? "item-img-overlay-recomendacion"
+                : "item-img-overlay-normal"
+            }
+          />
+        )}
         {Fecha && <div className="item-fecha-superpuesta">{Fecha}</div>}
       </div>
       {Trailer && Nombre ? (
@@ -68,23 +124,14 @@ export default function ItemCaratula({
               window.open(Trailer, "_blank");
             }}
           >
-            <MaterialSymbolsPlayArrowRounded
-              style={{ fontSize: 18, marginRight: 4 }}
-            />
-            Trailer
+            <MaterialSymbolsPlayArrowRounded className="item-url-icon" />
+            <span style={{ marginLeft: 6 }}>Trailer</span>
           </button>
-        ) : (
-          <div className="item-nombre">
-            {Nombre ? Nombre.replace(/\s*\[[^\]]*\]$/, "") : ""}
-          </div>
-        )
-      ) : (
-        Nombre && (
-          <div className="item-nombre">
-            {Nombre ? Nombre.replace(/\s*\[[^\]]*\]$/, "") : ""}
-          </div>
-        )
-      )}
+        ) : null
+      ) : null}
+      <div className="item-nombre">
+        {Nombre ? Nombre.replace(/\s*\[[^\]]*\]$/, "") : ""}
+      </div>
     </div>
   );
 }
