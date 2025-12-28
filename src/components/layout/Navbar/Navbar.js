@@ -20,6 +20,14 @@ function Navbar() {
   const [darkMode, setDarkMode] = useLocalStorage(STORAGE_KEYS.DARK_MODE, true);
 
   const handleToggleJuegosPelis = () => {
+    if (location.pathname === "/juegos/recomendar") {
+      navigate("/juegos");
+      return;
+    }
+    if (location.pathname === "/pelis/recomendar") {
+      navigate("/pelis");
+      return;
+    }
     if (location.pathname === "/juegos") {
       navigate("/pelis");
     } else {
@@ -44,15 +52,21 @@ function Navbar() {
   };
 
   const isJuegosOrPelisActive =
-    location.pathname === "/juegos" || location.pathname === "/pelis";
+    location.pathname === "/juegos" ||
+    location.pathname === "/pelis" ||
+    location.pathname === "/juegos/recomendar" ||
+    location.pathname === "/pelis/recomendar";
+
   const isPokedexOrGachaActive =
     location.pathname.includes("/pokedex") ||
     location.pathname.includes("/gacha");
+
   const isGameBoyOrTTSActive =
     location.pathname === "/gameboy" || location.pathname === "/tts";
 
   const juegosOrPelisIcon =
-    location.pathname === "/pelis" ? (
+    location.pathname === "/pelis" ||
+    location.pathname === "/pelis/recomendar" ? (
       <MaterialSymbolsVideocamRounded className="nav-icon" />
     ) : (
       <MaterialSymbolsJoystick className="nav-icon" />
@@ -68,6 +82,12 @@ function Navbar() {
     ) : (
       <StreamlinePlumpGameboyRemix className="nav-icon nav-icon-gameboy" />
     );
+
+  const isJuegosMobileLeft =
+    location.pathname === "/juegos" ||
+    location.pathname === "/juegos/recomendar";
+  const isPelisMobileRight =
+    location.pathname === "/pelis" || location.pathname === "/pelis/recomendar";
 
   return (
     <nav className="navbar">
@@ -91,7 +111,12 @@ function Navbar() {
           <li>
             <Link
               to="/juegos"
-              className={location.pathname === "/juegos" ? "active" : ""}
+              className={
+                location.pathname === "/juegos" ||
+                location.pathname === "/juegos/recomendar"
+                  ? "active"
+                  : ""
+              }
               title="Juegos"
             >
               <span className="nav-text">Juegos</span>
@@ -100,7 +125,12 @@ function Navbar() {
           <li>
             <Link
               to="/pelis"
-              className={location.pathname === "/pelis" ? "active" : ""}
+              className={
+                location.pathname === "/pelis" ||
+                location.pathname === "/pelis/recomendar"
+                  ? "active"
+                  : ""
+              }
               title="Peliculas y Series"
             >
               <span className="nav-text">Pelis</span>
@@ -158,12 +188,15 @@ function Navbar() {
           <button
             className={`navbar-mobile-button ${
               isJuegosOrPelisActive ? "active" : ""
-            } ${location.pathname === "/juegos" ? "active-left" : ""} ${
-              location.pathname === "/pelis" ? "active-right" : ""
+            } ${isJuegosMobileLeft ? "active-left" : ""} ${
+              isPelisMobileRight ? "active-right" : ""
             }`}
             onClick={handleToggleJuegosPelis}
             title={
-              location.pathname === "/pelis" ? "Ver Juegos" : "Ver Peliculas"
+              location.pathname === "/pelis" ||
+              location.pathname === "/pelis/recomendar"
+                ? "Ver Juegos"
+                : "Ver Peliculas"
             }
           >
             {juegosOrPelisIcon}

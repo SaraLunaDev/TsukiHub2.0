@@ -29,7 +29,7 @@
 // ============================================ 
 */
 
-@media (min-width: 769px) {
+@media (min-width: 600px) {
     .user-profile-container {
         min-height: calc(100vh - 70px);
         padding: 0;

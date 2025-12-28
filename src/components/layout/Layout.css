@@ -19,7 +19,7 @@
 }
 
 /* PC */
-@media (min-width: 769px) {
+@media (min-width: 820px) {
   .layout-content {
     padding-top: 70px;
     padding-bottom: 10px;

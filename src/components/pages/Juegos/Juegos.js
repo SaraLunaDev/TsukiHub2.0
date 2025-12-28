@@ -1,6 +1,10 @@
 import React, { useState } from "react";
+import useLocalStorage from "../../../hooks/useLocalStorage";
 import "./Juegos.css";
 import ItemCaratula from "../../common/ItemCaratula/ItemCaratula";
+import ItemImagenList from "../../common/ItemImagenList/ItemImagenList";
+import { MaterialSymbolsListsRounded } from "../../icons/MaterialSymbolsListsRounded";
+import { TablerLayoutGridFilled } from "../../icons/TablerLayoutGridFilled";
 import { CarruselImagen } from "../../common/Carousel/CarruselImagen";
 import { Carousel } from "../../common/Carousel/Carousel";
 import "../../common/Carousel/Carousel.css";
@@ -18,6 +22,8 @@ const SHEET_URL = process.env.REACT_APP_JUEGOS_SHEET_URL;
 function Juegos() {
   const { data, loading, error } = useGoogleSheet(SHEET_URL);
   const [showFilter, setShowFilter] = useState(false);
+
+  const [isGrid, setIsGrid] = useLocalStorage("juegos_isGrid", false);
   const [selectedYear, setSelectedYear] = useState("");
   const [order, setOrder] = useState("desc");
   const [selectedType, setSelectedType] = useState("");
@@ -175,12 +181,35 @@ function Juegos() {
             <b>{filteredJugados.length}</b> entrada
             {filteredJugados.length === 1 ? "" : "s"}
           </span>
-          <FilterSection
-            label="Filtrar"
-            open={showFilter}
-            onClick={() => setShowFilter((v) => !v)}
-            divProps={{ style: { display: "none" } }}
-          />
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <FilterSection
+              label="Filtrar"
+              open={showFilter}
+              onClick={() => setShowFilter((v) => !v)}
+              divProps={{ style: { display: "none" } }}
+            />
+            <button
+              aria-label={isGrid ? "Vista lista" : "Vista grid"}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+              }}
+              onClick={() => setIsGrid((v) => !v)}
+            >
+              {isGrid ? (
+                <MaterialSymbolsListsRounded
+                  style={{ fontSize: 20, color: "var(--text-2)" }}
+                />
+              ) : (
+                <TablerLayoutGridFilled
+                  style={{ fontSize: 20, color: "var(--text-2)" }}
+                />
+              )}
+            </button>
+          </div>
         </div>
       </div>
       {showFilter && (
@@ -218,63 +247,125 @@ function Juegos() {
       ) : (
         <div className="inset-section">
           {filteredJugados.length > 0 ? (
-            <div className="juegos-grid">
-              {filteredJugados
-                .sort((a, b) => {
-                  const parse = (d) => {
-                    if (!d) return 0;
-                    const [day, month, year] = d.split("/").map(Number);
-                    return new Date(year, month - 1, day).getTime();
-                  };
-                  const parseDuration = (str) => {
-                    if (!str) return 0;
-                    str = str.replace(/\s+/g, "").toLowerCase();
-                    let h = 0,
-                      m = 0;
-                    const hMatch = str.match(/(\d+)h/);
-                    const mMatch = str.match(/(\d+)m/);
-                    if (hMatch) h = parseInt(hMatch[1], 10);
-                    if (mMatch) m = parseInt(mMatch[1], 10);
-                    return h * 60 + m;
-                  };
-                  switch (order) {
-                    case "asc":
-                      return parse(a["Fecha"]) - parse(b["Fecha"]);
-                    case "name-az":
-                      return (a["Nombre"] || "").localeCompare(
-                        b["Nombre"] || ""
-                      );
-                    case "name-za":
-                      return (b["Nombre"] || "").localeCompare(
-                        a["Nombre"] || ""
-                      );
-                    case "nota-desc":
-                      return (
-                        (Number(b["Nota"]) || 0) - (Number(a["Nota"]) || 0)
-                      );
-                    case "nota-asc":
-                      return (
-                        (Number(a["Nota"]) || 0) - (Number(b["Nota"]) || 0)
-                      );
-                    case "duracion-desc":
-                      return (
-                        parseDuration(b["Duracion"]) -
-                        parseDuration(a["Duracion"])
-                      );
-                    case "duracion-asc":
-                      return (
-                        parseDuration(a["Duracion"]) -
-                        parseDuration(b["Duracion"])
-                      );
-                    case "desc":
-                    default:
-                      return parse(b["Fecha"]) - parse(a["Fecha"]);
-                  }
-                })
-                .map((row, idx) => (
-                  <ItemCaratula key={idx} {...row} />
-                ))}
-            </div>
+            isGrid ? (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 16 }}
+              >
+                {filteredJugados
+                  .sort((a, b) => {
+                    const parse = (d) => {
+                      if (!d) return 0;
+                      const [day, month, year] = d.split("/").map(Number);
+                      return new Date(year, month - 1, day).getTime();
+                    };
+                    const parseDuration = (str) => {
+                      if (!str) return 0;
+                      str = str.replace(/\s+/g, "").toLowerCase();
+                      let h = 0,
+                        m = 0;
+                      const hMatch = str.match(/(\d+)h/);
+                      const mMatch = str.match(/(\d+)m/);
+                      if (hMatch) h = parseInt(hMatch[1], 10);
+                      if (mMatch) m = parseInt(mMatch[1], 10);
+                      return h * 60 + m;
+                    };
+                    switch (order) {
+                      case "asc":
+                        return parse(a["Fecha"]) - parse(b["Fecha"]);
+                      case "name-az":
+                        return (a["Nombre"] || "").localeCompare(
+                          b["Nombre"] || ""
+                        );
+                      case "name-za":
+                        return (b["Nombre"] || "").localeCompare(
+                          a["Nombre"] || ""
+                        );
+                      case "nota-desc":
+                        return (
+                          (Number(b["Nota"]) || 0) - (Number(a["Nota"]) || 0)
+                        );
+                      case "nota-asc":
+                        return (
+                          (Number(a["Nota"]) || 0) - (Number(b["Nota"]) || 0)
+                        );
+                      case "duracion-desc":
+                        return (
+                          parseDuration(b["Duracion"]) -
+                          parseDuration(a["Duracion"])
+                        );
+                      case "duracion-asc":
+                        return (
+                          parseDuration(a["Duracion"]) -
+                          parseDuration(b["Duracion"])
+                        );
+                      case "desc":
+                      default:
+                        return parse(b["Fecha"]) - parse(a["Fecha"]);
+                    }
+                  })
+                  .map((row, idx) => (
+                    <ItemImagenList key={idx} {...row} />
+                  ))}
+              </div>
+            ) : (
+              <div className="juegos-grid">
+                {filteredJugados
+                  .sort((a, b) => {
+                    const parse = (d) => {
+                      if (!d) return 0;
+                      const [day, month, year] = d.split("/").map(Number);
+                      return new Date(year, month - 1, day).getTime();
+                    };
+                    const parseDuration = (str) => {
+                      if (!str) return 0;
+                      str = str.replace(/\s+/g, "").toLowerCase();
+                      let h = 0,
+                        m = 0;
+                      const hMatch = str.match(/(\d+)h/);
+                      const mMatch = str.match(/(\d+)m/);
+                      if (hMatch) h = parseInt(hMatch[1], 10);
+                      if (mMatch) m = parseInt(mMatch[1], 10);
+                      return h * 60 + m;
+                    };
+                    switch (order) {
+                      case "asc":
+                        return parse(a["Fecha"]) - parse(b["Fecha"]);
+                      case "name-az":
+                        return (a["Nombre"] || "").localeCompare(
+                          b["Nombre"] || ""
+                        );
+                      case "name-za":
+                        return (b["Nombre"] || "").localeCompare(
+                          a["Nombre"] || ""
+                        );
+                      case "nota-desc":
+                        return (
+                          (Number(b["Nota"]) || 0) - (Number(a["Nota"]) || 0)
+                        );
+                      case "nota-asc":
+                        return (
+                          (Number(a["Nota"]) || 0) - (Number(b["Nota"]) || 0)
+                        );
+                      case "duracion-desc":
+                        return (
+                          parseDuration(b["Duracion"]) -
+                          parseDuration(a["Duracion"])
+                        );
+                      case "duracion-asc":
+                        return (
+                          parseDuration(a["Duracion"]) -
+                          parseDuration(b["Duracion"])
+                        );
+                      case "desc":
+                      default:
+                        return parse(b["Fecha"]) - parse(a["Fecha"]);
+                    }
+                  })
+                  .map((row, idx) => (
+                    <ItemCaratula key={idx} {...row} />
+                  ))}
+              </div>
+            )
           ) : (
             <div
               style={{

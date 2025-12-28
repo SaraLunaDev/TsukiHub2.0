@@ -35,11 +35,7 @@ export default function ItemImagenSmall({
           className="item-imagen-small-img"
         />
       ) : (
-        <div className="item-imagen-small-img item-imagen-small-img-placeholder">
-          <span className="item-imagen-small-placeholder-text">
-            {nombrePrincipal}
-          </span>
-        </div>
+        <div className="item-imagen-small-img item-imagen-small-img-placeholder" />
       )}
       <div className="item-imagen-small-overlay" />
       <div className="item-imagen-small-content-caratula">

@@ -30,6 +30,8 @@
   font-weight: 500;
   outline: none;
   box-shadow: none;
+  white-space: nowrap;
+  flex-wrap: nowrap;
 }
 .item-imagen-nota-fuente {
   color: var(--text-2);
@@ -44,12 +46,16 @@
   font-weight: 600;
   margin-left: 4px;
   gap: 2px;
+  white-space: nowrap;
+  flex-wrap: nowrap;
 }
 .item-imagen-nota-global .item-imagen-nota-estrella {
   color: #c2af53;
 }
 .item-imagen-nota-global .item-imagen-nota-texto {
   color: var(--text-2);
+  white-space: nowrap;
+  flex-wrap: nowrap;
 }
 
 .item-imagen-creador-sep {
@@ -144,7 +150,7 @@
   height: 100%;
   width: 100%;
   pointer-events: none;
-  padding: 16px 16px 12px 16px;
+  padding: 12px;
   box-sizing: border-box;
 }
 
@@ -183,11 +189,18 @@
 
 .item-imagen-generos {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
   align-items: center;
   margin-left: auto;
   justify-content: flex-end;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.item-imagen-generos::-webkit-scrollbar {
+  display: none;
 }
 
 .item-imagen-genero {

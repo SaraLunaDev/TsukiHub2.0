@@ -41,6 +41,9 @@ build/Release
 # Ignore server.js
 server.js
 
+# Ignore scripts
+scripts/
+
 # Ignore vercel.json
 vercel.json
 

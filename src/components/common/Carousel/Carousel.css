@@ -1,9 +1,64 @@
-/* Carousel styles */
+.carousel-controls-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 0;
+  min-height: 20px;
+  position: relative;
+}
+.carousel-arrow-btn {
+  background: none;
+  border: none;
+  padding: 0 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  height: 20px;
+  position: absolute;
+  top: 0;
+  z-index: 2;
+}
+.carousel-arrow-left {
+  left: 0;
+}
+.carousel-arrow-right {
+  right: 0;
+}
+/* ...existing code... */
+.carousel-dots {
+  display: flex;
+  gap: 8px;
+  margin: 0 auto;
+  position: relative;
+  left: 0;
+  right: 0;
+  justify-content: center;
+  width: 100%;
+}
+.carousel-dots button {
+  width: 4px !important;
+  height: 4px !important;
+  min-width: 4px;
+  min-height: 4px;
+  border-radius: 50%;
+  border: none;
+  background: var(--text-2);
+  cursor: pointer;
+  padding: 20;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.carousel-dots button[style*="scale(1.4)"] {
+  transform: scale(1.4);
+  background: var(--text);
+}
+
 .carousel-idle {
-	cursor: grab;
-	user-select: none;
+  cursor: grab;
+  user-select: none;
 }
 .carousel-dragging {
-	cursor: grabbing;
-	user-select: none;
+  cursor: grabbing;
+  user-select: none;
 }

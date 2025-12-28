@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import ItemCaratula from "../ItemCaratula/ItemCaratula";
+import { MdiChevronLeft } from "../../icons/MdiChevronLeft";
+import { MdiChevronRight } from "../../icons/MdiChevronRight";
 
 export function Carousel({ items }) {
   const [index, setIndex] = useState(0);
@@ -53,35 +55,73 @@ export function Carousel({ items }) {
       >
         <ItemCaratula {...items[index]} />
       </div>
-      <div style={{ display: "flex", gap: 8, marginTop: 0, minHeight: 20 }}>
-        {items.map((_, i) => {
-          return (
-            <button
-              key={i}
-              onClick={() => {
-                setIndex(i);
-                if (timerRef.current) {
-                  clearInterval(timerRef.current);
-                  timerRef.current = setInterval(() => {
-                    setIndex((idx) => (idx === items.length - 1 ? 0 : idx + 1));
-                  }, 10000);
-                }
-              }}
-              style={{
-                width: 4,
-                height: 4,
-                borderRadius: "50%",
-                border: "none",
-                background: i === index ? "var(--text)" : "var(--text-2)",
-                cursor: "pointer",
-                padding: 0,
-                transition: "all 0.2s cubic-bezier(.4,0,.2,1)",
-                transform: i === index ? "scale(1.4)" : "scale(1)",
-              }}
-              aria-label={`Ir al elemento ${i + 1}`}
-            />
-          );
-        })}
+      <div className="carousel-controls-row">
+        {items.length > 1 && (
+          <button
+            className="carousel-arrow-btn carousel-arrow-left"
+            onClick={() => {
+              setIndex(index === 0 ? items.length - 1 : index - 1);
+              if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = setInterval(() => {
+                  setIndex((i) => (i === items.length - 1 ? 0 : i + 1));
+                }, 10000);
+              }
+            }}
+            aria-label="Anterior"
+          >
+            <MdiChevronLeft style={{ fontSize: 24, color: "var(--text)" }} />
+          </button>
+        )}
+        <div className="carousel-dots">
+          {items.map((_, i) => {
+            return (
+              <button
+                key={i}
+                onClick={() => {
+                  setIndex(i);
+                  if (timerRef.current) {
+                    clearInterval(timerRef.current);
+                    timerRef.current = setInterval(() => {
+                      setIndex((idx) =>
+                        idx === items.length - 1 ? 0 : idx + 1
+                      );
+                    }, 10000);
+                  }
+                }}
+                style={{
+                  width: 4,
+                  height: 4,
+                  borderRadius: "50%",
+                  border: "none",
+                  background: i === index ? "var(--text)" : "var(--text-2)",
+                  cursor: "pointer",
+                  padding: 0,
+                  transition: "all 0.2s cubic-bezier(.4,0,.2,1)",
+                  transform: i === index ? "scale(1.4)" : "scale(1)",
+                }}
+                aria-label={`Ir al elemento ${i + 1}`}
+              />
+            );
+          })}
+        </div>
+        {items.length > 1 && (
+          <button
+            className="carousel-arrow-btn carousel-arrow-right"
+            onClick={() => {
+              setIndex(index === items.length - 1 ? 0 : index + 1);
+              if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = setInterval(() => {
+                  setIndex((i) => (i === items.length - 1 ? 0 : i + 1));
+                }, 10000);
+              }
+            }}
+            aria-label="Siguiente"
+          >
+            <MdiChevronRight style={{ fontSize: 24, color: "var(--text)" }} />
+          </button>
+        )}
       </div>
     </div>
   );

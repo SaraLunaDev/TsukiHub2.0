@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from "react";
 import "./Recomendar.css";
 import ItemCaratula from "../../common/ItemCaratula/ItemCaratula";
+import ItemImagenList from "../../common/ItemImagenList/ItemImagenList";
+import { MaterialSymbolsListsRounded } from "../../icons/MaterialSymbolsListsRounded";
+import { TablerLayoutGridFilled } from "../../icons/TablerLayoutGridFilled";
 import ItemImagenSmall from "../../common/ItemImagenSmall/ItemImagenSmall";
 import SearchBar from "../../common/SearchBar/SearchBar";
 import { useGoogleSheet } from "../../../hooks/useGoogleSheet";
@@ -45,7 +48,17 @@ function Recomendar() {
   const titleRecomendar = isJuegos
     ? "Recomendar Juego"
     : "Recomendar Pelicula o Serie";
-  const gridClass = isJuegos ? "juegos-grid" : "pelis-grid";
+    
+  // Forzar grid por defecto si no hay valor guardado
+  const [isGrid, setIsGrid] = useLocalStorage(
+    isJuegos ? "recomendar_juegos_isGrid" : "recomendar_pelis_isGrid",
+    true
+  );
+  const gridClass = isGrid
+    ? isJuegos
+      ? "juegos-grid"
+      : "pelis-grid"
+    : "recomendar-list";
 
   const [search, setSearch] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -373,11 +386,35 @@ function Recomendar() {
       )}
       <div className="top-section" style={{ marginTop: 8 }}>
         <h2>{title}</h2>
-        <div className="top-section-h2-down">
+        <div
+          className="top-section-h2-down"
+          style={{ display: "flex", alignItems: "center", gap: 8 }}
+        >
           <span>
             <b>{filteredData.length}</b> entrada
             {filteredData.length === 1 ? "" : "s"}
           </span>
+          <button
+            aria-label={isGrid ? "Vista lista" : "Vista grid"}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+            }}
+            onClick={() => setIsGrid((v) => !v)}
+          >
+            {isGrid ? (
+              <TablerLayoutGridFilled
+                style={{ fontSize: 20, color: "var(--text-2)" }}
+              />
+            ) : (
+              <MaterialSymbolsListsRounded
+                style={{ fontSize: 20, color: "var(--text-2)" }}
+              />
+            )}
+          </button>
         </div>
       </div>
       {loading ? (
@@ -389,15 +426,29 @@ function Recomendar() {
       ) : (
         <div className="inset-section">
           {filteredData.length > 0 ? (
-            <div className={gridClass}>
-              {filteredData.map((row, idx) => (
-                <ItemCaratula
-                  key={idx}
-                  {...row}
-                  userSheet={getUserById(row.Usuario)}
-                />
-              ))}
-            </div>
+            isGrid ? (
+              <div className={gridClass}>
+                {filteredData.map((row, idx) => (
+                  <ItemCaratula
+                    key={idx}
+                    {...row}
+                    userSheet={getUserById(row.Usuario)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 16 }}
+              >
+                {filteredData.map((row, idx) => (
+                  <ItemImagenList
+                    key={idx}
+                    {...row}
+                    userSheet={getUserById(row.Usuario)}
+                  />
+                ))}
+              </div>
+            )
           ) : (
             <div style={{ textAlign: "center", padding: 32 }}>
               No hay recomendaciones

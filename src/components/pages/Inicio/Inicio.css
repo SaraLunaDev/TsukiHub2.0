@@ -59,7 +59,7 @@
   line-height: 1.6;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 600px) {
   .inicio-container {
     padding: 20px;
   }
