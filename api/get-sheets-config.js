@@ -5,6 +5,7 @@ export default async function handler(req, res) {
 
   try {
     const config = {
+      version: "2.0.0",
       juegosSheetUrl: process.env.JUEGOS_SHEET_URL || "",
       pelisSheetUrl: process.env.PELIS_SHEET_URL || "",
       userdataSheetUrl: process.env.USERDATA_SHEET_URL || "",

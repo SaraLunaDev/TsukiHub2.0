@@ -12,16 +12,32 @@ export const API_URLS = {
   GET_SHEETS_CONFIG: "/api/get-sheets-config",
 };
 
+const CONFIG_VERSION = "2.0.0";
+
 let cachedConfig = null;
 let configPromise = null;
 
 try {
-  const stored = localStorage.getItem('sheets_config_cache');
+  const stored = localStorage.getItem("sheets_config_cache");
   if (stored) {
-    cachedConfig = JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+
+    if (!parsed.version || parsed.version !== CONFIG_VERSION) {
+      console.log("Limpiando caché obsoleto (versión antigua detectada)");
+      localStorage.removeItem("sheets_config_cache");
+
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("gsheet_cache_")) {
+          localStorage.removeItem(key);
+        }
+      });
+    } else {
+      cachedConfig = parsed;
+    }
   }
 } catch (e) {
-  // Ignorar errores
+  console.error("Error leyendo caché, limpiando...", e);
+  localStorage.removeItem("sheets_config_cache");
 }
 
 export const getConfig = async () => {
@@ -34,22 +50,22 @@ export const getConfig = async () => {
   }
 
   configPromise = fetch(API_URLS.GET_SHEETS_CONFIG)
-    .then(response => {
+    .then((response) => {
       if (response.ok) {
         return response.json();
       }
       throw new Error("Failed to load config");
     })
-    .then(config => {
+    .then((config) => {
       cachedConfig = config;
       try {
-        localStorage.setItem('sheets_config_cache', JSON.stringify(config));
+        localStorage.setItem("sheets_config_cache", JSON.stringify(config));
       } catch (e) {
         // Ignorar errores
       }
       return config;
     })
-    .catch(error => {
+    .catch((error) => {
       console.error("Error loading config:", error);
       return {
         juegosSheetUrl: "",
