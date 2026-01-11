@@ -55,7 +55,8 @@ export const getConfig = async () => {
         juegosSheetUrl: "",
         pelisSheetUrl: "",
         userdataSheetUrl: "",
-        userSheetUrl: "",
+        pokedexSheetUrl: "",
+        gachaSheetUrl: "",
         twitchClientId: "",
         twitchRedirectUri: window.location.origin,
       };
