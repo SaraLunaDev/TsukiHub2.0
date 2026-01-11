@@ -9,6 +9,7 @@ import { CarruselImagen } from "../../common/Carousel/CarruselImagen";
 import { Carousel } from "../../common/Carousel/Carousel";
 import "../../common/Carousel/Carousel.css";
 import { useGoogleSheet } from "../../../hooks/useGoogleSheet";
+import { useSheetConfig } from "../../../hooks/useSheetConfig";
 
 import FilterSection from "../../common/FilterSection/FilterSection";
 import YearFilter from "../../common/FilterSection/YearFilter";
@@ -17,10 +18,9 @@ import TypeFilter from "../../common/FilterSection/TypeFilter";
 import SearchBar from "../../common/FilterSection/SearchBar";
 import GenreFilter from "../../common/FilterSection/GenreFilter";
 
-const SHEET_URL = process.env.REACT_APP_JUEGOS_SHEET_URL;
-
 function Juegos() {
-  const { data, loading, error } = useGoogleSheet(SHEET_URL);
+  const { config } = useSheetConfig();
+  const { data, loading, error } = useGoogleSheet(config?.juegosSheetUrl || "");
   const [showFilter, setShowFilter] = useState(false);
 
   const [isGrid, setIsGrid] = useLocalStorage("juegos_isGrid", false);

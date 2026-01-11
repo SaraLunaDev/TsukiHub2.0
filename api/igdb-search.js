@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
   try {
     const tokenResp = await fetch(
-      `https://id.twitch.tv/oauth2/token?client_id=${process.env.REACT_APP_IGDB_CLIENT_ID}&client_secret=${process.env.REACT_APP_IGDB_CLIENT_SECRET}&grant_type=client_credentials`,
+      `https://id.twitch.tv/oauth2/token?client_id=${process.env.IGDB_CLIENT_ID}&client_secret=${process.env.IGDB_CLIENT_SECRET}&grant_type=client_credentials`,
       { method: "POST" }
     );
     const tokenData = await tokenResp.json();
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       const igdbResp = await fetch("https://api.igdb.com/v4/games", {
         method: "POST",
         headers: {
-          "Client-ID": process.env.REACT_APP_IGDB_CLIENT_ID,
+          "Client-ID": process.env.IGDB_CLIENT_ID,
           Authorization: `Bearer ${tokenData.access_token}`,
           Accept: "application/json",
           "Content-Type": "text/plain",
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
         const artworkResp = await fetch("https://api.igdb.com/v4/artworks", {
           method: "POST",
           headers: {
-            "Client-ID": process.env.REACT_APP_IGDB_CLIENT_ID,
+            "Client-ID": process.env.IGDB_CLIENT_ID,
             Authorization: `Bearer ${tokenData.access_token}`,
             Accept: "application/json",
             "Content-Type": "text/plain",

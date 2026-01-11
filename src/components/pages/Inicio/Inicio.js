@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { useGoogleSheet } from "../../../hooks/useGoogleSheet";
+import { useSheetConfig } from "../../../hooks/useSheetConfig";
 
 import { SolarCupBold } from "../../icons/SolarCupBold";
 import { MdiChevronUp } from "../../icons/MdiChevronUp";
@@ -22,6 +23,7 @@ const EXCLUDED_USERS = ["TsukiSoft", "TsukiwiChan"];
 
 function Inicio() {
   const [twitchUser] = useLocalStorage("twitchUser", null);
+  const { config } = useSheetConfig();
   const [expandedEmotesRow, setExpandedEmotesRow] = useState(null);
   const [expandedAchievements, setExpandedAchievements] = useState([]);
   const achievementsGridRef = useRef(null);
@@ -30,12 +32,11 @@ function Inicio() {
   const [mensajesView, setMensajesView] = useState(0);
   const [showTicketsTable, setShowTicketsTable] = useState(true);
   const [showEmotesTable, setShowEmotesTable] = useState(true);
-  const sheetUrl = process.env.REACT_APP_USERDATA_SHEET_URL;
   const {
     data: rawData,
     loading,
     error,
-  } = useGoogleSheet(sheetUrl, "userData");
+  } = useGoogleSheet(config?.userdataSheetUrl || "", "userData");
 
   const achievements = useMemo(() => {
     if (!rawData || !rawData.length) return {};

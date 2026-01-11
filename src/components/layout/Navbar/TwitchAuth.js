@@ -21,10 +21,6 @@ function TwitchAuth({ onLogin, onLogout }) {
     null
   );
   const [, setTwitchToken] = useLocalStorage(STORAGE_KEYS.TWITCH_TOKEN, null);
-  const [, setDeveloperMode] = useLocalStorage(
-    STORAGE_KEYS.DEVELOPER_MODE,
-    false
-  );
   const [loading, setLoading] = useState(false);
 
   // Verificar si hay token en la URL (callback de Twitch)
@@ -74,10 +70,6 @@ function TwitchAuth({ onLogin, onLogout }) {
                 setTwitchUser(userInfo);
                 setTwitchToken(accessToken);
 
-                // Activar modo desarrollador si es admin
-                const isAdmin = ADMIN_USERS.includes(user.login.toLowerCase());
-                setDeveloperMode(isAdmin);
-
                 // Callback opcional
                 if (onLogin) onLogin(userInfo);
 
@@ -95,7 +87,7 @@ function TwitchAuth({ onLogin, onLogout }) {
     };
 
     handleAuthCallback();
-  }, [setTwitchUser, setTwitchToken, setDeveloperMode, onLogin]);
+  }, [setTwitchUser, setTwitchToken, onLogin]);
 
   // Funcion para iniciar login con Twitch
   const handleLogin = () => {
@@ -117,7 +109,6 @@ function TwitchAuth({ onLogin, onLogout }) {
   const handleLogout = () => {
     setTwitchUser(null);
     setTwitchToken(null);
-    setDeveloperMode(false);
 
     if (onLogout) onLogout();
   };

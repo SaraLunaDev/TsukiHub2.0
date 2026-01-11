@@ -9,28 +9,79 @@ export const API_URLS = {
   TWITCH_USERS: "https://api.twitch.tv/helix/users",
   IGDB_SEARCH: "/api/igdb-search",
   TMDB_SEARCH: "/api/tmdb-search",
+  GET_SHEETS_CONFIG: "/api/get-sheets-config",
 };
 
-export const USER_SHEET_URL = process.env.REACT_APP_USER_SHEET_URL || "";
+let cachedConfig = null;
+let configPromise = null;
 
-const getRedirectUri = () => {
-  if (process.env.REACT_APP_TWITCH_REDIRECT_URI) {
-    return process.env.REACT_APP_TWITCH_REDIRECT_URI;
+try {
+  const stored = localStorage.getItem('sheets_config_cache');
+  if (stored) {
+    cachedConfig = JSON.parse(stored);
+  }
+} catch (e) {
+  // Ignorar errores
+}
+
+export const getConfig = async () => {
+  if (cachedConfig) {
+    return cachedConfig;
   }
 
-  return window.location.origin;
+  if (configPromise) {
+    return configPromise;
+  }
+
+  configPromise = fetch(API_URLS.GET_SHEETS_CONFIG)
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw new Error("Failed to load config");
+    })
+    .then(config => {
+      cachedConfig = config;
+      try {
+        localStorage.setItem('sheets_config_cache', JSON.stringify(config));
+      } catch (e) {
+        // Ignorar errores
+      }
+      return config;
+    })
+    .catch(error => {
+      console.error("Error loading config:", error);
+      return {
+        juegosSheetUrl: "",
+        pelisSheetUrl: "",
+        userdataSheetUrl: "",
+        userSheetUrl: "",
+        twitchClientId: "",
+        twitchRedirectUri: window.location.origin,
+      };
+    })
+    .finally(() => {
+      configPromise = null;
+    });
+
+  return configPromise;
 };
 
+getConfig();
+
 export const TWITCH_CONFIG = {
-  CLIENT_ID: process.env.REACT_APP_TWITCH_CLIENT_ID || "",
-  REDIRECT_URI: getRedirectUri(),
+  get CLIENT_ID() {
+    return cachedConfig?.twitchClientId || "";
+  },
+  get REDIRECT_URI() {
+    return cachedConfig?.twitchRedirectUri || window.location.origin;
+  },
   SCOPES: ["user:read:email"],
 };
 
 export const STORAGE_KEYS = {
   TWITCH_USER: "twitchUser",
   TWITCH_TOKEN: "twitchToken",
-  DEVELOPER_MODE: "developerMode",
   DARK_MODE: "darkMode",
 };
 

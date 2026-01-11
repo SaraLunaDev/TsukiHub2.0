@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { requireAuth } from "./auth-middleware.js";
 
 // Limpia texto para CSV
 const cleanTextForCSV = (text) => {
@@ -10,6 +11,12 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  const authResult = requireAuth(req, res);
+  if (authResult.error) {
+    return res.status(authResult.status).json({ error: authResult.error });
+  }
+
   const { item, user, comment, tipo } = req.body;
   console.log("[add-recommendation] Datos recibidos:", {
     item,

@@ -10,7 +10,7 @@ export function useGoogleSheet(sheetUrl, tabName = "default") {
 
   const fetchData = useCallback(async () => {
     if (!sheetUrl) {
-      setError("La URL no esta puesta");
+
       setLoading(false);
       return;
     }

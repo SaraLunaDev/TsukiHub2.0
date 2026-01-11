@@ -37,10 +37,6 @@ function UserMenu() {
   );
   const [, setTwitchToken] = useLocalStorage(STORAGE_KEYS.TWITCH_TOKEN, null);
   const [darkMode, setDarkMode] = useLocalStorage(STORAGE_KEYS.DARK_MODE, true);
-  const [, setDeveloperMode] = useLocalStorage(
-    STORAGE_KEYS.DEVELOPER_MODE,
-    false
-  );
 
   // Aplicar tema al body
   useEffect(() => {
@@ -115,10 +111,6 @@ function UserMenu() {
                 setTwitchUser(userInfo);
                 setTwitchToken(accessToken);
 
-                const isAdmin = ADMIN_USERS.includes(user.login.toLowerCase());
-
-                setDeveloperMode(isAdmin);
-
                 // Limpiar la URL del hash sin recargar la pagina
                 window.history.replaceState(
                   null,
@@ -136,7 +128,7 @@ function UserMenu() {
     };
 
     handleAuthCallback();
-  }, [setTwitchUser, setTwitchToken, setDeveloperMode]);
+  }, [setTwitchUser, setTwitchToken]);
 
   // Funciones de control
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -157,7 +149,6 @@ function UserMenu() {
   const handleLogout = () => {
     setTwitchUser(null);
     setTwitchToken(null);
-    setDeveloperMode(false);
     setIsOpen(false);
     navigate("/");
   };

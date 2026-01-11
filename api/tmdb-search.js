@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const { query, type = "multi" } = req.body;
   if (!query) return res.status(400).json({ error: "Missing query" });
   try {
-    const apiKey = process.env.REACT_APP_TMDB_API_KEY;
+    const apiKey = process.env.TMDB_API_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: "TMDB API key missing" });
     }

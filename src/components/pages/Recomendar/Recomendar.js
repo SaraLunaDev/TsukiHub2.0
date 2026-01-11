@@ -7,24 +7,21 @@ import { TablerLayoutGridFilled } from "../../icons/TablerLayoutGridFilled";
 import ItemImagenSmall from "../../common/ItemImagenSmall/ItemImagenSmall";
 import SearchBar from "../../common/SearchBar/SearchBar";
 import { useGoogleSheet } from "../../../hooks/useGoogleSheet";
+import { useSheetConfig } from "../../../hooks/useSheetConfig";
 import useLocalStorage from "../../../hooks/useLocalStorage";
 import { useLocation } from "react-router-dom";
 import { API_URLS } from "../../../constants/config";
 
-const SHEET_URLS = {
-  juegos: process.env.REACT_APP_JUEGOS_SHEET_URL,
-  pelis: process.env.REACT_APP_PELIS_SHEET_URL,
-};
 function Recomendar() {
+  const { config } = useSheetConfig();
   const handleSearchBarClick = () => {
     if (successMsg) setSuccessMsg("");
   };
   const location = useLocation();
   const isJuegos = location.pathname.includes("/juegos");
-  const SHEET_URL = isJuegos ? SHEET_URLS.juegos : SHEET_URLS.pelis;
+  const SHEET_URL = isJuegos ? (config?.juegosSheetUrl || "") : (config?.pelisSheetUrl || "");
   const { data, loading, error } = useGoogleSheet(SHEET_URL);
-  const userSheetUrl = process.env.REACT_APP_USERDATA_SHEET_URL;
-  const { data: usersData } = useGoogleSheet(userSheetUrl, "userData");
+  const { data: usersData } = useGoogleSheet(config?.userdataSheetUrl || "", "userData");
   const filteredData = useMemo(() => {
     if (!data) return [];
     return data.filter(
@@ -77,6 +74,7 @@ function Recomendar() {
   const [errorEnvio, setErrorEnvio] = useState("");
 
   const [user] = useLocalStorage("twitchUser", null);
+  const [token] = useLocalStorage("twitchToken", null);
 
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
@@ -319,7 +317,10 @@ function Recomendar() {
 
                     const res = await fetch("/api/add-recommendation", {
                       method: "POST",
-                      headers: { "Content-Type": "application/json" },
+                      headers: { 
+                        "Content-Type": "application/json",
+                        ...(token ? { "Authorization": `Bearer ${token}` } : {})
+                      },
                       body: JSON.stringify({
                         item: {
                           ...cleanResult,
