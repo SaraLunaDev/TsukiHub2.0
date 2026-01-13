@@ -19,9 +19,14 @@ function Recomendar() {
   };
   const location = useLocation();
   const isJuegos = location.pathname.includes("/juegos");
-  const SHEET_URL = isJuegos ? (config?.juegosSheetUrl || "") : (config?.pelisSheetUrl || "");
+  const SHEET_URL = isJuegos
+    ? config?.juegosSheetUrl || ""
+    : config?.pelisSheetUrl || "";
   const { data, loading, error } = useGoogleSheet(SHEET_URL);
-  const { data: usersData } = useGoogleSheet(config?.userdataSheetUrl || "", "userData");
+  const { data: usersData } = useGoogleSheet(
+    config?.userdataSheetUrl || "",
+    "userData"
+  );
   const filteredData = useMemo(() => {
     if (!data) return [];
     return data.filter(
@@ -45,7 +50,7 @@ function Recomendar() {
   const titleRecomendar = isJuegos
     ? "Recomendar Juego"
     : "Recomendar Pelicula o Serie";
-    
+
   // Forzar grid por defecto si no hay valor guardado
   const [isGrid, setIsGrid] = useLocalStorage(
     isJuegos ? "recomendar_juegos_isGrid" : "recomendar_pelis_isGrid",
@@ -317,16 +322,15 @@ function Recomendar() {
 
                     const res = await fetch("/api/add-recommendation", {
                       method: "POST",
-                      headers: { 
+                      headers: {
                         "Content-Type": "application/json",
-                        ...(token ? { "Authorization": `Bearer ${token}` } : {})
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
                       },
                       body: JSON.stringify({
                         item: {
                           ...cleanResult,
                           tipo: tipoValue,
                         },
-                        user: user?.id || user?.login || "anon",
                         comment: comentario,
                       }),
                     });

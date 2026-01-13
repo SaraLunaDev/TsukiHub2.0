@@ -1,10 +1,14 @@
 export default async function handler(req, res) {
-  const fetch = (await import('node-fetch')).default;
+  const fetch = (await import("node-fetch")).default;
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
   const { query, type = "multi" } = req.body;
   if (!query) return res.status(400).json({ error: "Missing query" });
+
+  const validTypes = ["multi", "movie", "tv"];
+  const sanitizedType = validTypes.includes(type) ? type : "multi";
+
   try {
     const apiKey = process.env.TMDB_API_KEY;
     if (!apiKey) {
@@ -12,7 +16,7 @@ export default async function handler(req, res) {
     }
 
     const tmdbResp = await fetch(
-      `https://api.themoviedb.org/3/search/${type}?api_key=${apiKey}&query=${encodeURIComponent(
+      `https://api.themoviedb.org/3/search/${sanitizedType}?api_key=${apiKey}&query=${encodeURIComponent(
         query
       )}&language=es-ES&page=1`
     );

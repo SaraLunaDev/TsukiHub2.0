@@ -1,4 +1,6 @@
-export function requireAuth(req, res) {
+import { getUserLists } from "./utils/jwt-utils.js";
+
+export async function requireAuth(req, res) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -6,16 +8,6 @@ export function requireAuth(req, res) {
   }
 
   const token = authHeader.replace("Bearer ", "");
-
-  return { token };
-}
-
-export async function requireAdmin(req, res) {
-  const { token, error, status } = requireAuth(req, res);
-
-  if (error) {
-    return { error, status };
-  }
 
   try {
     const validateResponse = await fetch(
@@ -33,17 +25,42 @@ export async function requireAdmin(req, res) {
 
     const data = await validateResponse.json();
     const username = data.login?.toLowerCase();
+    const userId = data.user_id;
 
-    const ADMIN_USERS = (
-      process.env.ADMIN_USERS || "tsukisoft,tsukiwichan"
-    ).split(",");
-
-    if (!ADMIN_USERS.includes(username)) {
-      return { error: "Forbidden - Admin access required", status: 403 };
-    }
-
-    return { username, token };
+    return { username, userId, token };
   } catch (error) {
     return { error: "Authentication failed", status: 500 };
   }
+}
+
+export async function requireAdmin(req, res) {
+  const authResult = await requireAuth(req, res);
+  if (authResult.error) {
+    return authResult;
+  }
+
+  const { username, token } = authResult;
+  const { adminUsers } = getUserLists();
+
+  if (!adminUsers.includes(username.toLowerCase())) {
+    return { error: "Forbidden - Admin access required", status: 403 };
+  }
+
+  return { username, token };
+}
+
+export async function requireMod(req, res) {
+  const authResult = await requireAuth(req, res);
+  if (authResult.error) {
+    return authResult;
+  }
+
+  const { username, token } = authResult;
+  const { modUsers } = getUserLists();
+
+  if (!modUsers.includes(username.toLowerCase())) {
+    return { error: "Forbidden - Moderator access required", status: 403 };
+  }
+
+  return { username, token };
 }

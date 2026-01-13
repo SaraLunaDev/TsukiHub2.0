@@ -12,19 +12,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const authResult = requireAuth(req, res);
+  const authResult = await requireAuth(req, res);
   if (authResult.error) {
     return res.status(authResult.status).json({ error: authResult.error });
   }
 
-  const { item, user, comment, tipo } = req.body;
-  console.log("[add-recommendation] Datos recibidos:", {
-    item,
-    user,
-    comment,
-    tipo,
-  });
-  if (!item || !user) return res.status(400).json({ error: "Missing data" });
+  const authenticatedUser = authResult.username;
+
+  const { item, comment, tipo } = req.body;
+  if (!item) return res.status(400).json({ error: "Missing data" });
 
   const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -86,19 +82,15 @@ export default async function handler(req, res) {
             item.fecha_salida || item.raw?.fecha_salida || "",
             item.nota_global || "",
             item.creador || "",
-            user,
+            authenticatedUser,
             cleanTextForCSV(comment || ""),
           ],
         ],
       },
     });
-    console.log(
-      "[add-recommendation] Respuesta de Google Sheets:",
-      appendResponse.data
-    );
+
     res.json({ success: true });
   } catch (e) {
-    console.error("[add-recommendation] Error:", e);
     res.status(500).json({ error: e.message });
   }
 }

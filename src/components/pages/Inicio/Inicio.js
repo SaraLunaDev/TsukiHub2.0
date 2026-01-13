@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { useGoogleSheet } from "../../../hooks/useGoogleSheet";
 import { useSheetConfig } from "../../../hooks/useSheetConfig";
+import { useAuth } from "../../../hooks/useAuth";
 
 import { SolarCupBold } from "../../icons/SolarCupBold";
 import { MdiChevronUp } from "../../icons/MdiChevronUp";
@@ -14,15 +15,13 @@ import { SolarFireBold } from "../../icons/SolarFireBold";
 import StatTable from "../../common/StatTable/StatTable";
 import AchievementSection from "../../common/AchievementSection/AchievementSection";
 import StatSection from "../../common/StatSection/StatSection";
-import useLocalStorage from "../../../hooks/useLocalStorage";
 import SearchBar from "../../common/SearchBar";
 import "./Inicio.css";
-import { MOD_USERS } from "../../../constants/config";
 
 const EXCLUDED_USERS = ["TsukiSoft", "TsukiwiChan"];
 
 function Inicio() {
-  const [twitchUser] = useLocalStorage("twitchUser", null);
+  const { user: isMod } = useAuth();
   const { config } = useSheetConfig();
   const [expandedEmotesRow, setExpandedEmotesRow] = useState(null);
   const [expandedAchievements, setExpandedAchievements] = useState([]);
@@ -200,12 +199,6 @@ function Inicio() {
       })
       .slice(0, limit);
   };
-
-  const isMod =
-    twitchUser &&
-    MOD_USERS.map((u) => u.toLowerCase()).includes(
-      (twitchUser.login || twitchUser.displayName || "").toLowerCase()
-    );
 
   return (
     <div className="main-container">

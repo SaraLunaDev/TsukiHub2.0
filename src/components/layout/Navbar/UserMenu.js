@@ -12,8 +12,8 @@ import {
   TWITCH_CONFIG,
   API_URLS,
   STORAGE_KEYS,
-  ADMIN_USERS,
 } from "../../../constants/config";
+import { getRolesFromToken } from "../../../utils/jwt-client";
 import "./UserMenu.css";
 
 import { MaterialSymbolsAccountCircleFull } from "../../icons/MaterialSymbolsAccountCircleFull";
@@ -35,8 +35,56 @@ function UserMenu() {
     STORAGE_KEYS.TWITCH_USER,
     null
   );
-  const [, setTwitchToken] = useLocalStorage(STORAGE_KEYS.TWITCH_TOKEN, null);
+  const [twitchToken, setTwitchToken] = useLocalStorage(
+    STORAGE_KEYS.TWITCH_TOKEN,
+    null
+  );
+  const [rolesToken, setRolesToken] = useLocalStorage(
+    STORAGE_KEYS.ROLES_TOKEN,
+    null
+  );
   const [darkMode, setDarkMode] = useLocalStorage(STORAGE_KEYS.DARK_MODE, true);
+
+  // Obtener roles SOLO del JWT (ignorar cualquier valor en twitchUser)
+  const getUserRoles = () => {
+    if (!rolesToken) {
+      return { isAdmin: false, isMod: false };
+    }
+    return getRolesFromToken(rolesToken);
+  };
+
+  const { isAdmin } = getUserRoles();
+
+  // ACTUALIZAR JWT DE ROLES SI ES NECESARIO
+  useEffect(() => {
+    const verifyRoles = async () => {
+      if (!twitchUser || !twitchToken) return;
+
+      if (rolesToken) {
+        return;
+      }
+
+      // Obtener nuevo token del servidor
+      try {
+        const response = await fetch(API_URLS.VERIFY_USER, {
+          headers: { Authorization: `Bearer ${twitchToken}` },
+        });
+
+        if (response.ok) {
+          const { rolesToken: newToken } = await response.json();
+          setRolesToken(newToken);
+        } else {
+          setRolesToken(null);
+        }
+      } catch (error) {
+        console.error("[UserMenu] Error obteniendo roles:", error);
+        setRolesToken(null);
+      }
+    };
+
+    verifyRoles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [twitchUser?.login, twitchToken, rolesToken]);
 
   // Aplicar tema al body
   useEffect(() => {
@@ -108,6 +156,26 @@ function UserMenu() {
                   email: user.email,
                 };
 
+                // Obtener JWT con roles (NO guardar en userInfo)
+                try {
+                  const rolesResponse = await fetch(API_URLS.VERIFY_USER, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                  });
+
+                  if (rolesResponse.ok) {
+                    const { rolesToken: newToken } = await rolesResponse.json();
+                    setRolesToken(newToken);
+                  } else {
+                    setRolesToken(null);
+                  }
+                } catch (roleError) {
+                  console.error(
+                    "[UserMenu] Error obteniendo roles:",
+                    roleError
+                  );
+                  setRolesToken(null);
+                }
+
                 setTwitchUser(userInfo);
                 setTwitchToken(accessToken);
 
@@ -128,6 +196,7 @@ function UserMenu() {
     };
 
     handleAuthCallback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setTwitchUser, setTwitchToken]);
 
   // Funciones de control
@@ -149,6 +218,7 @@ function UserMenu() {
   const handleLogout = () => {
     setTwitchUser(null);
     setTwitchToken(null);
+    setRolesToken(null);
     setIsOpen(false);
     navigate("/");
   };
@@ -217,11 +287,14 @@ function UserMenu() {
             )}
 
             {/* Botón Recomendar y Añadir para móvil y PC (solo desarrollador) */}
-            {(window.location.pathname === "/juegos" || window.location.pathname === "/pelis") && (
+            {(window.location.pathname === "/juegos" ||
+              window.location.pathname === "/pelis") && (
               <>
                 {window.innerWidth < 769 && (
                   <button
-                    className={`user-menu-option user-menu-option-primary${twitchUser ? " user-menu-option-divider" : ""}`}
+                    className={`user-menu-option user-menu-option-primary${
+                      twitchUser ? " user-menu-option-divider" : ""
+                    }`}
                     onClick={() => {
                       if (window.location.pathname === "/juegos")
                         window.location.href = "/juegos/recomendar";
@@ -231,33 +304,43 @@ function UserMenu() {
                     }}
                   >
                     <MaterialSymbolsListsRounded className="user-menu-option-icon" />
-                    <span className="user-menu-option-text">Recomendaciones</span>
+                    <span className="user-menu-option-text">
+                      Recomendaciones
+                    </span>
                   </button>
                 )}
-                {twitchUser && ADMIN_USERS.includes(twitchUser.login.toLowerCase()) && (
+                {isAdmin && (
                   <>
-                    {(window.location.pathname === "/juegos") && (
+                    {window.location.pathname === "/juegos" && (
                       <button
                         className="user-menu-option user-menu-option-primary user-menu-option-divider"
                         onClick={() => {
-                          window.dispatchEvent(new CustomEvent("openAddGamePopup"));
+                          window.dispatchEvent(
+                            new CustomEvent("openAddGamePopup")
+                          );
                           setIsOpen(false);
                         }}
                       >
                         <MaterialSymbolsAddCircleOutlineRounded className="user-menu-option-icon" />
-                        <span className="user-menu-option-text">Añadir Juego</span>
+                        <span className="user-menu-option-text">
+                          Añadir Juego
+                        </span>
                       </button>
                     )}
-                    {(window.location.pathname === "/pelis") && (
+                    {window.location.pathname === "/pelis" && (
                       <button
                         className="user-menu-option user-menu-option-primary user-menu-option-divider"
                         onClick={() => {
-                          window.dispatchEvent(new CustomEvent("openAddMoviePopup"));
+                          window.dispatchEvent(
+                            new CustomEvent("openAddMoviePopup")
+                          );
                           setIsOpen(false);
                         }}
                       >
                         <MaterialSymbolsAddCircleOutlineRounded className="user-menu-option-icon" />
-                        <span className="user-menu-option-text">Añadir Pelicula/Serie</span>
+                        <span className="user-menu-option-text">
+                          Añadir Pelicula/Serie
+                        </span>
                       </button>
                     )}
                   </>

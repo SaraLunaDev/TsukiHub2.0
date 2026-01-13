@@ -4,8 +4,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const config = {
-      version: "2.0.0",
+    return res.status(200).json({
+      version: "4.0.0",
       juegosSheetUrl: process.env.JUEGOS_SHEET_URL || "",
       pelisSheetUrl: process.env.PELIS_SHEET_URL || "",
       userdataSheetUrl: process.env.USERDATA_SHEET_URL || "",
@@ -13,11 +13,8 @@ export default async function handler(req, res) {
       gachaSheetUrl: process.env.GACHA_SHEET_URL || "",
       twitchClientId: process.env.TWITCH_CLIENT_ID || "",
       twitchRedirectUri: process.env.TWITCH_REDIRECT_URI || "",
-    };
-
-    return res.status(200).json(config);
+    });
   } catch (error) {
-    console.error("Error getting sheets config:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

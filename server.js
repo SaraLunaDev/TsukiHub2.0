@@ -2,11 +2,16 @@
 // SERVIDOR DE DESARROLLO LOCAL
 // ============================================
 
-require("dotenv").config();
+import dotenv from "dotenv";
+import express from "express";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 
-const express = require("express");
-const path = require("path");
-const fs = require("fs");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,13 +28,17 @@ app.use(express.urlencoded({ extended: true }));
 const apiDir = path.join(__dirname, "api");
 
 if (fs.existsSync(apiDir)) {
-  fs.readdirSync(apiDir).forEach((file) => {
+  const files = fs.readdirSync(apiDir);
+  
+  for (const file of files) {
     if (file.endsWith(".js")) {
       const route = "/api/" + file.replace(".js", "");
-      const handler = require(path.join(apiDir, file));
+      const modulePath = path.join(apiDir, file);
 
       app.all(route, async (req, res) => {
         try {
+          const handler = await import("file://" + modulePath);
+          
           if (typeof handler === "function") {
             await handler(req, res);
           } else if (typeof handler.default === "function") {
@@ -46,7 +55,7 @@ if (fs.existsSync(apiDir)) {
         }
       });
     }
-  });
+  }
 } else {
 }
 

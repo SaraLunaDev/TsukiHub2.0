@@ -38,21 +38,8 @@ bower_components
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 
-# Ignore server.js
-server.js
-
-# Ignore scripts
-scripts/
-
-# Ignore vercel.json
-vercel.json
-
-# Ignore .gitignore itself
-.gitignore
-
-# Ignore .gitattributes
-.gitattributes
-
+# Build folder (React production build)
+build/
 
 # Dependency directories
 node_modules/
@@ -94,6 +81,10 @@ web_modules/
 .env.test.local
 .env.production.local
 .env.local
+
+# Documentación interna (opcional, comentar si quieres subirla)
+# SECURITY_AUDIT.md
+# VERIFICATION_CHECKLIST.md
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache

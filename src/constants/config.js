@@ -10,9 +10,10 @@ export const API_URLS = {
   IGDB_SEARCH: "/api/igdb-search",
   TMDB_SEARCH: "/api/tmdb-search",
   GET_SHEETS_CONFIG: "/api/get-sheets-config",
+  VERIFY_USER: "/api/verify-user",
 };
 
-const CONFIG_VERSION = "2.0.0";
+const CONFIG_VERSION = "4.0.0";
 
 let cachedConfig = null;
 let configPromise = null;
@@ -23,20 +24,12 @@ try {
     const parsed = JSON.parse(stored);
 
     if (!parsed.version || parsed.version !== CONFIG_VERSION) {
-      console.log("Limpiando caché obsoleto (versión antigua detectada)");
-      localStorage.removeItem("sheets_config_cache");
-
-      Object.keys(localStorage).forEach((key) => {
-        if (key.startsWith("gsheet_cache_")) {
-          localStorage.removeItem(key);
-        }
-      });
+      localStorage.clear();
     } else {
       cachedConfig = parsed;
     }
   }
 } catch (e) {
-  console.error("Error leyendo caché, limpiando...", e);
   localStorage.removeItem("sheets_config_cache");
 }
 
@@ -66,7 +59,6 @@ export const getConfig = async () => {
       return config;
     })
     .catch((error) => {
-      console.error("Error loading config:", error);
       return {
         juegosSheetUrl: "",
         pelisSheetUrl: "",
@@ -99,41 +91,6 @@ export const TWITCH_CONFIG = {
 export const STORAGE_KEYS = {
   TWITCH_USER: "twitchUser",
   TWITCH_TOKEN: "twitchToken",
+  ROLES_TOKEN: "rolesToken",
   DARK_MODE: "darkMode",
 };
-
-export const ADMIN_USERS = ["tsukisoft", "tsukiwichan"];
-
-export const MOD_USERS = [
-  "TsukiSoft",
-  "vytoking",
-  "Rabam",
-  "dollanganger",
-  "unai9x",
-  "Vilexis98",
-  "Samuel_Pincel",
-  "el_capde",
-  "pubgdemont",
-  "AnaPandemonium",
-  "Daruz",
-  "alvaro_palmer",
-  "Emilio2772",
-  "enraid1",
-  "ShadouShot",
-  "oogiebuttie",
-  "Lintes96",
-  "Donramonrisas",
-  "IreNuska__",
-  "moon_defaultt",
-  "BasedTrolso",
-  "NucleoDeJuego",
-  "eiosoydev",
-  "maese_Javilon",
-  "JOSEtomas99",
-  "bigmacius",
-  "KaranirNoFake",
-  "Criis_joestar",
-  "Achachancha",
-  "TsukiwiChan",
-  "JoranEssed",
-];
