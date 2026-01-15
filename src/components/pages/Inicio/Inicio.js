@@ -5,13 +5,14 @@ import { useGoogleSheet } from "../../../hooks/useGoogleSheet";
 import { useSheetConfig } from "../../../hooks/useSheetConfig";
 import { useAuth } from "../../../hooks/useAuth";
 
-import { SolarCupBold } from "../../icons/SolarCupBold";
 import { MdiChevronUp } from "../../icons/MdiChevronUp";
 import { MdiChevronDown } from "../../icons/MdiChevronDown";
 import { MdiChevronDoubleDown } from "../../icons/MdiChevronDoubleDown";
+import { FluentChevronUpDown16Filled } from "../../icons/FluentChevronUpDown16Filled";
 import { MaterialSymbolsAndroidMessages } from "../../icons/MaterialSymbolsAndroidMessages";
 import { IonTicket } from "../../icons/IonTicket";
 import { SolarFireBold } from "../../icons/SolarFireBold";
+import { TablerDiamondFilled } from "../../icons/TablerDiamondFilled";
 import StatTable from "../../common/StatTable/StatTable";
 import AchievementSection from "../../common/AchievementSection/AchievementSection";
 import StatSection from "../../common/StatSection/StatSection";
@@ -23,10 +24,12 @@ const EXCLUDED_USERS = ["TsukiSoft", "TsukiwiChan"];
 function Inicio() {
   const { user: isMod } = useAuth();
   const { config } = useSheetConfig();
-  const [expandedEmotesRow, setExpandedEmotesRow] = useState(null);
+  const [emotesRowLines, setEmotesRowLines] = useState({});
   const [expandedAchievements, setExpandedAchievements] = useState([]);
   const achievementsGridRef = useRef(null);
+  const emotesTableRef = useRef(null);
   const [maxUsersMap, setMaxUsersMap] = useState({});
+  const [maxEmotesPerRow, setMaxEmotesPerRow] = useState({});
   const [showRachaTable, setShowRachaTable] = useState(true);
   const [mensajesView, setMensajesView] = useState(0);
   const [showTicketsTable, setShowTicketsTable] = useState(true);
@@ -137,6 +140,142 @@ function Inicio() {
           : [],
       }));
   }, [rawData]);
+
+  useEffect(() => {
+    const emotesTable = emotesTableRef.current;
+    if (!emotesTable || !showEmotesTable) return;
+
+    const updateMaxEmotes = () => {
+      const rows = emotesTable.querySelectorAll("tbody tr");
+      const newMap = {};
+
+      rows.forEach((row, rowIndex) => {
+        const emotesContainer = row.querySelector(".emotes-container");
+        if (!emotesContainer) return;
+
+        const emoteLinks = Array.from(emotesContainer.querySelectorAll("a"));
+        if (emoteLinks.length === 0) return;
+
+        const containerWidth = emotesContainer.offsetWidth;
+        const buttonWidth = 36;
+        const gap = 4;
+        const availableWidthFull = containerWidth;
+        const availableWidthWithButton = containerWidth - buttonWidth;
+
+        let accumulatedWidth = 0;
+        let allFit = true;
+
+        for (let i = 0; i < emoteLinks.length; i++) {
+          const link = emoteLinks[i];
+          const emote = link.querySelector(".emote-icon");
+          if (!emote) continue;
+
+          const originalDisplay = link.style.display;
+          link.style.display = "inline-block";
+
+          const emoteRect = emote.getBoundingClientRect();
+          const emoteWidth = emoteRect.width || 24;
+
+          link.style.display = originalDisplay;
+
+          const widthWithGap = emoteWidth + (i > 0 ? gap : 0);
+          accumulatedWidth += widthWithGap;
+
+          if (accumulatedWidth > availableWidthFull) {
+            allFit = false;
+            break;
+          }
+        }
+
+        if (allFit) {
+          newMap[rowIndex] = emoteLinks.length;
+        } else {
+          accumulatedWidth = 0;
+          let maxEmotes = 0;
+
+          for (let i = 0; i < emoteLinks.length; i++) {
+            const link = emoteLinks[i];
+            const emote = link.querySelector(".emote-icon");
+            if (!emote) continue;
+
+            const originalDisplay = link.style.display;
+            link.style.display = "inline-block";
+
+            const emoteRect = emote.getBoundingClientRect();
+            const emoteWidth = emoteRect.width || 24;
+
+            link.style.display = originalDisplay;
+
+            const widthWithGap = emoteWidth + (i > 0 ? gap : 0);
+            const newTotal = accumulatedWidth + widthWithGap;
+
+            if (newTotal <= availableWidthWithButton) {
+              maxEmotes++;
+              accumulatedWidth = newTotal;
+            } else {
+              break;
+            }
+          }
+
+          newMap[rowIndex] = Math.max(2, maxEmotes);
+        }
+      });
+
+      const hasChanges =
+        Object.keys(newMap).some(
+          (key) => newMap[key] !== maxEmotesPerRow[key]
+        ) || Object.keys(maxEmotesPerRow).length !== Object.keys(newMap).length;
+
+      if (hasChanges) {
+        setMaxEmotesPerRow(newMap);
+      }
+    };
+
+    const images = emotesTable.querySelectorAll(".emote-icon");
+    let loadedCount = 0;
+    const totalImages = images.length;
+
+    const checkAllLoaded = () => {
+      loadedCount++;
+      if (loadedCount >= totalImages) {
+        setTimeout(updateMaxEmotes, 50);
+      }
+    };
+
+    if (totalImages === 0) {
+      updateMaxEmotes();
+    } else {
+      images.forEach((img) => {
+        if (img.complete) {
+          checkAllLoaded();
+        } else {
+          img.addEventListener("load", checkAllLoaded);
+          img.addEventListener("error", checkAllLoaded);
+        }
+      });
+    }
+
+    let resizeTimer;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(updateMaxEmotes, 50);
+    };
+
+    window.addEventListener("resize", handleResize);
+    const observer = new window.ResizeObserver(handleResize);
+    observer.observe(emotesTable);
+
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener("resize", handleResize);
+      observer.disconnect();
+      images.forEach((img) => {
+        img.removeEventListener("load", checkAllLoaded);
+        img.removeEventListener("error", checkAllLoaded);
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showEmotesTable, userData, searchFilters.emotes, emotesRowLines]);
 
   if (loading && (!rawData || rawData.length === 0)) {
     return (
@@ -641,33 +780,37 @@ function Inicio() {
             )
           }
         >
-          <div className="table-container">
+          <div className="table-container" ref={emotesTableRef}>
             {showEmotesTable ? (
               <StatTable
                 type="emotes"
                 rowKey="id"
                 rows={getTopUsers("emotes", 10, searchFilters.emotes).map(
                   (user, index) => {
-                    const maxEmotes = 5;
-                    const hasMany =
-                      Array.isArray(user.emotes) &&
-                      user.emotes.length > maxEmotes;
-                    const emotesToShow =
-                      expandedEmotesRow === index || !hasMany
-                        ? Array.isArray(user.emotes)
-                          ? user.emotes
-                          : []
-                        : Array.isArray(user.emotes)
-                        ? user.emotes.slice(0, maxEmotes)
-                        : [];
-                    const emotesHidden =
-                      hasMany && expandedEmotesRow !== index
-                        ? user.emotes.length - maxEmotes
-                        : 0;
+                    const maxEmotesPerLine = maxEmotesPerRow[index] || 999;
+                    const allEmotes = Array.isArray(user.emotes)
+                      ? user.emotes
+                      : [];
+                    const currentLineIndex = emotesRowLines[index] || 0;
+                    const totalLinesNeeded = Math.ceil(
+                      allEmotes.length / maxEmotesPerLine
+                    );
+                    const hasMany = totalLinesNeeded > 1;
+
+                    const startIndex = currentLineIndex * maxEmotesPerLine;
+                    const endIndex = Math.min(
+                      startIndex + maxEmotesPerLine,
+                      allEmotes.length
+                    );
+
                     return {
                       ...user,
-                      emotesToShow,
-                      emotesHidden,
+                      allEmotes,
+                      startIndex,
+                      endIndex,
+                      maxEmotesPerLine,
+                      currentLineIndex,
+                      totalLinesNeeded,
                       hasMany,
                       rowIndex: index,
                     };
@@ -689,74 +832,117 @@ function Inicio() {
                   {
                     key: "emotes",
                     className: "emotes-cell",
-                    render: (row) => (
-                      <div className="emotes-container">
-                        {row.emotesToShow &&
-                          row.emotesToShow.map((emoteId, emoteIndex) => (
-                            <a
-                              key={emoteIndex}
-                              href={`https://7tv.app/emotes/${emoteId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ display: "inline-block" }}
+                    render: (row) => {
+                      const hasChevron = row.hasMany;
+                      const isFirstLine = row.currentLineIndex === 0;
+                      const isLastLine =
+                        row.currentLineIndex === row.totalLinesNeeded - 1;
+                      const isMiddleLine = !isFirstLine && !isLastLine;
+
+                      const handleCycle = () => {
+                        setEmotesRowLines((prev) => {
+                          const currentLine = prev[row.rowIndex] || 0;
+                          const nextLine =
+                            (currentLine + 1) % row.totalLinesNeeded;
+                          if (nextLine === 0) {
+                            const newState = { ...prev };
+                            delete newState[row.rowIndex];
+                            return newState;
+                          }
+                          return { ...prev, [row.rowIndex]: nextLine };
+                        });
+                      };
+
+                      let chevronIcon;
+                      let buttonClass;
+
+                      if (isLastLine) {
+                        chevronIcon = (
+                          <MdiChevronUp
+                            width={22}
+                            height={22}
+                            style={{ color: "var(--text-2)" }}
+                          />
+                        );
+                        buttonClass = "emotes-collapse-btn";
+                      } else if (isMiddleLine) {
+                        chevronIcon = (
+                          <FluentChevronUpDown16Filled
+                            width={22}
+                            height={22}
+                            style={{ color: "var(--text-2)" }}
+                          />
+                        );
+                        buttonClass = "emotes-expand-btn";
+                      } else {
+                        chevronIcon = (
+                          <MdiChevronDown
+                            width={22}
+                            height={22}
+                            style={{ color: "var(--text-2)" }}
+                          />
+                        );
+                        buttonClass = "emotes-expand-btn";
+                      }
+
+                      return (
+                        <div
+                          className={`emotes-container${
+                            hasChevron ? " has-chevron" : ""
+                          }`}
+                        >
+                          {row.allEmotes &&
+                            row.allEmotes.map((emoteId, emoteIndex) => {
+                              const isInCurrentLine =
+                                emoteIndex >= row.startIndex &&
+                                emoteIndex < row.endIndex;
+
+                              return (
+                                <a
+                                  key={emoteIndex}
+                                  href={`https://7tv.app/emotes/${emoteId}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    display: isInCurrentLine
+                                      ? "inline-block"
+                                      : "none",
+                                  }}
+                                >
+                                  <img
+                                    src={`https://cdn.7tv.app/emote/${emoteId}/1x.webp`}
+                                    alt={`Emote ${emoteIndex}`}
+                                    className="emote-icon"
+                                    onError={(e) => {
+                                      e.target.style.display = "none";
+                                    }}
+                                    title={`Emote ${emoteIndex + 1}`}
+                                  />
+                                </a>
+                              );
+                            })}
+                          {row.hasMany && (
+                            <button
+                              className={buttonClass}
+                              title={`${row.currentLineIndex + 1} de ${
+                                row.totalLinesNeeded
+                              }`}
+                              onClick={handleCycle}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                padding: 0,
+                                cursor: "pointer",
+                                verticalAlign: "middle",
+                                display: "inline-flex",
+                              }}
                             >
-                              <img
-                                src={`https://cdn.7tv.app/emote/${emoteId}/1x.webp`}
-                                alt={`Emote ${emoteIndex}`}
-                                className="emote-icon"
-                                onError={(e) => {
-                                  e.target.style.display = "none";
-                                }}
-                                title={`Emote ${emoteIndex + 1}`}
-                              />
-                            </a>
-                          ))}
-                        {row.emotesHidden > 0 && (
-                          <button
-                            className="emotes-expand-btn"
-                            title="Mostrar todos los emotes"
-                            onClick={() => setExpandedEmotesRow(row.rowIndex)}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              padding: 0,
-                              marginLeft: "4px",
-                              cursor: "pointer",
-                              verticalAlign: "middle",
-                              display: "inline-flex",
-                            }}
-                          >
-                            <MdiChevronDown
-                              width={22}
-                              height={22}
-                              style={{ color: "var(--text)" }}
-                            />
-                          </button>
-                        )}
-                        {row.hasMany && expandedEmotesRow === row.rowIndex && (
-                          <button
-                            className="emotes-collapse-btn"
-                            title="Ocultar emotes"
-                            onClick={() => setExpandedEmotesRow(null)}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              padding: 0,
-                              marginLeft: "4px",
-                              cursor: "pointer",
-                              verticalAlign: "middle",
-                              display: "inline-flex",
-                            }}
-                          >
-                            <MdiChevronUp
-                              width={22}
-                              height={22}
-                              style={{ color: "var(--text)" }}
-                            />
-                          </button>
-                        )}
-                      </div>
-                    ),
+                              {chevronIcon}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    },
                   },
                 ]}
               />
@@ -844,16 +1030,6 @@ function Inicio() {
               <span
                 style={{ display: "flex", alignItems: "center", gap: "6px" }}
               >
-                <SolarCupBold
-                  width={18}
-                  height={18}
-                  style={{
-                    color: "#ff8888",
-                    flexShrink: 0,
-                    verticalAlign: "text-bottom",
-                  }}
-                />
-                Platino:
                 {userData
                   .filter(
                     (user) =>
@@ -861,14 +1037,18 @@ function Inicio() {
                       user.l_platino.toString().toLowerCase() === "si"
                   )
                   .map((user, idx) => (
-                    <img
+                    <div
                       key={user.id || user.nombre || idx}
-                      src={user.pfp}
-                      alt={user.nombre}
-                      className="achievement-user-avatar"
-                      title={user.nombre}
-                      style={{ marginLeft: "2px" }}
-                    />
+                      className="platino-avatar-wrapper"
+                    >
+                      <img
+                        src={user.pfp}
+                        alt={user.nombre}
+                        className="achievement-user-avatar"
+                        title={user.nombre}
+                      />
+                      <TablerDiamondFilled className="platino-diamond-badge" />
+                    </div>
                   ))}
               </span>
             )}
