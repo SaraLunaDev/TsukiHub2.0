@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     return res.status(authResult.status).json({ error: authResult.error });
   }
 
-  const authenticatedUser = authResult.username;
+  const authenticatedUserId = authResult.userId;
 
   const { item, comment, tipo } = req.body;
   if (!item) return res.status(400).json({ error: "Missing data" });
@@ -82,7 +82,7 @@ export default async function handler(req, res) {
             item.fecha_salida || item.raw?.fecha_salida || "",
             item.nota_global || "",
             item.creador || "",
-            authenticatedUser,
+            authenticatedUserId,
             cleanTextForCSV(comment || ""),
           ],
         ],
