@@ -1,0 +1,70 @@
+.gacha-data {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.gacha-display-section {
+  padding: 6px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.gacha-data {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.gacha-display-section {
+  padding: 6px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.gacha-display-img {
+  max-width: 100%;
+  width: auto;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card__translater,
+.card__rotator {
+  width: 100%;
+  height: 100%;
+  display: grid;
+}
+
+.card__rotator img,
+.card__front {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  -webkit-transform: translate3d(0, 0, 0.01px);
+  transform: translate3d(0, 0, 0.01px);
+}
+
+.gacha-display-img {
+  max-width: 100%;
+  width: auto;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

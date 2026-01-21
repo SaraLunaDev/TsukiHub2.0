@@ -3,8 +3,8 @@ $baseDir = "C:\Users\black\Documents\Streams\SAMMI\TsukiSoft_Web\web\public\stat
 $quality = 100
 $height = 100 # Altura fija para todas las imágenes
 
-# Filtrar y procesar solo la carpeta 'ds'
-Get-ChildItem -Directory $baseDir | Where-Object { $_.Name -eq "ds" } | ForEach-Object {
+# Filtrar y procesar solo la carpeta 'fs'
+Get-ChildItem -Directory $baseDir | Where-Object { $_.Name -eq "fs" } | ForEach-Object {
     $folder = $_.FullName
     $highDir = Join-Path $folder "high"
     $lowDir = Join-Path $folder "low"
@@ -32,4 +32,4 @@ Get-ChildItem -Directory $baseDir | Where-Object { $_.Name -eq "ds" } | ForEach-
     }
 }
 
-Write-Host "Todas las imágenes en la carpeta 'ds' han sido procesadas con calidad $quality% y altura $height."
+Write-Host "Todas las imágenes en la carpeta 'fs' han sido procesadas con calidad $quality% y altura $height."

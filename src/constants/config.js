@@ -23,8 +23,13 @@ try {
   if (stored) {
     const parsed = JSON.parse(stored);
 
-    if (!parsed.version || parsed.version !== CONFIG_VERSION) {
-      localStorage.clear();
+    if (
+      !parsed.version ||
+      parsed.version !== CONFIG_VERSION ||
+      !parsed.gachaSheetUrl ||
+      !parsed.gachaCharSheetUrl
+    ) {
+      localStorage.removeItem("sheets_config_cache");
     } else {
       cachedConfig = parsed;
     }
@@ -65,6 +70,7 @@ export const getConfig = async () => {
         userdataSheetUrl: "",
         pokedexSheetUrl: "",
         gachaSheetUrl: "",
+        gachaCharSheetUrl: "",
         twitchClientId: "",
         twitchRedirectUri: window.location.origin,
       };

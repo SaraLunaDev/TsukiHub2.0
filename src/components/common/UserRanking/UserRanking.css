@@ -15,6 +15,12 @@
   width: 100%;
   border-collapse: collapse;
   background: none;
+  table-layout: fixed;
+}
+
+.user-ranking-table,
+.user-ranking-table td {
+  box-sizing: border-box;
 }
 
 .user-ranking-table td {
@@ -47,6 +53,9 @@
 .user-ranking-pfp {
   border-radius: 50%;
   height: 24px;
+  width: 24px;
+  display: inline-block;
+  object-fit: cover;
 }
 
 .user-ranking-rank-cell {
@@ -55,7 +64,15 @@
 }
 
 .user-ranking-name-cell {
-  flex: 1;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.user-ranking-name {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .user-ranking-count-cell {

@@ -37,7 +37,7 @@ function Navbar() {
 
   const handleTogglePokedexGacha = () => {
     if (location.pathname.includes("/pokedex")) {
-      navigate("/gacha/Dragon-Ball");
+      navigate("/gacha/db");
     } else {
       navigate("/pokedex/kanto");
     }
@@ -147,7 +147,7 @@ function Navbar() {
           </li>
           <li>
             <Link
-              to="/gacha/Dragon-Ball"
+              to="/gacha/gs"
               className={location.pathname.includes("/gacha") ? "active" : ""}
               title="Gacha"
             >

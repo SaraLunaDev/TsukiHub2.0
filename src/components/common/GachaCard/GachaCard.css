@@ -1,0 +1,72 @@
+.gacha-card {
+  --banner-thumb-scale: 1;
+  --banner-thumb-hover-scale: 1.03;
+  position: relative;
+  aspect-ratio: 2/3;
+  width: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.gacha-card.empty-slot {
+  cursor: default;
+}
+
+.gacha-card.empty-slot .gacha-img {
+  opacity: 0.1;
+}
+
+.gacha-card.default {
+  cursor: default;
+}
+
+.gacha-card.default .gacha-img {
+  filter: grayscale(100%);
+  opacity: 0.1;
+}
+
+.gacha-card.owned .gacha-img {
+  filter: none;
+}
+
+.gacha-placeholder {
+  position: absolute;
+  width: 40%;
+  height: 40%;
+  color: var(--text-2);
+  opacity: 0.3;
+}
+
+.gacha-img {
+  height: 100%;
+  width: auto;
+  object-fit: cover;
+  transition:
+    opacity 0.2s,
+    transform 0.22s ease;
+  transform-origin: center;
+  transform: scale(var(--banner-thumb-scale));
+  opacity: 0;
+  border: 4px solid var(--dark);
+  border-radius: 8px;
+}
+
+.gacha-card[data-banner="op"] .gacha-img {
+  height: 112%;
+}
+
+.gacha-img.loaded {
+  opacity: 0.9;
+}
+
+@media (max-width: 600px) {
+  .gacha-card {
+    width: 64px;
+    border-radius: 10px;
+  }
+}

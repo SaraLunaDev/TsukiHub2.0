@@ -11,6 +11,7 @@ export default async function handler(req, res) {
       userdataSheetUrl: process.env.USERDATA_SHEET_URL || "",
       pokedexSheetUrl: process.env.POKEDEX_SHEET_URL || "",
       gachaSheetUrl: process.env.GACHA_SHEET_URL || "",
+      gachaCharSheetUrl: process.env.GACHACHAR_SHEET_URL || "",
       twitchClientId: process.env.TWITCH_CLIENT_ID || "",
       twitchRedirectUri: process.env.TWITCH_REDIRECT_URI || "",
     });

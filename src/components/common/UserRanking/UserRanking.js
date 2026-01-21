@@ -9,6 +9,7 @@ const UserRanking = ({
   activeGenerations,
   pokemonList,
   GENERATION_RANGES,
+  totalCharacters,
   className = "",
 }) => {
   const sortedUsers = users.sort((a, b) => {
@@ -18,6 +19,13 @@ const UserRanking = ({
   });
 
   const calculateUserPercentage = (userId) => {
+    if (totalCharacters) {
+      const count = pokemonCount.get(userId) || 0;
+      return totalCharacters > 0
+        ? Math.round((count / totalCharacters) * 100)
+        : 0;
+    }
+
     let captured = 0;
     let totalPossible = 0;
 
