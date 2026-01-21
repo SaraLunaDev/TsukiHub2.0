@@ -1,0 +1,266 @@
+.pokemon-data {
+  margin-top: 16px;
+}
+
+.region-stats {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.region-stats-box {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.region-stats-box.header-box {
+  padding-top: 0;
+}
+
+.region-stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.region-stat-label {
+  color: var(--text-2);
+  margin-right: 4px;
+}
+
+.region-stat-value {
+  color: var(--text-2);
+}
+
+.pokemon-display-section {
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+  display: block;
+}
+
+.pokemon-display {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 18px;
+  padding: 10px;
+  text-align: left;
+}
+
+.pokemon-display-img {
+  width: 124px;
+  height: 124px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pokemon-display-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 0 1 auto;
+  max-width: 260px;
+}
+
+.pokemon-display-info .pokemon-name-types {
+  align-items: center;
+  justify-content: flex-start;
+  align-self: flex-start;
+}
+
+.pokemon-name-types {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pokemon-display-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pokemon-types {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.pokemon-type-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.pokemon-moves {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-top: 8px;
+  min-width: 0;
+}
+
+.pokemon-move {
+  position: relative;
+  min-width: 0;
+  width: 138px;
+}
+
+.pokemon-move-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.2;
+  border-radius: 6px;
+  z-index: 0;
+}
+
+.pokemon-move-content {
+  position: relative;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  z-index: 1;
+  z-index: 0;
+}
+
+.pokemon-move-name {
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.pokemon-display-number {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.pokemon-display-shiny {
+  font-size: 16px;
+  margin-top: 4px;
+}
+
+.pokemon-display-container {
+  flex: 0 0 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pokemon-display-shiny {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pokemon-stats {
+  padding: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.stat-label {
+  min-width: 70px;
+  font-weight: 500;
+  color: var(--text-2);
+  text-align: left;
+  height: 18px;
+}
+
+.stat-bar-container {
+  flex: 1;
+  height: 8px;
+  background-color: var(--row-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.stat-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.stat-bar.hp {
+  background-color: #c98585;
+}
+
+.stat-bar.attack {
+  background-color: #c9a885;
+}
+
+.stat-bar.defense {
+  background-color: #c9bc85;
+}
+
+.stat-bar.sp-atk {
+  background-color: #8598c9;
+}
+
+.stat-bar.sp-def {
+  background-color: #98c985;
+}
+
+.stat-bar.speed {
+  background-color: #c98598;
+}
+
+.stat-bar.total {
+  background-color: #85adc9;
+}
+
+.stat-value {
+  min-width: 54px;
+  font-weight: bold;
+  color: var(--text-2);
+  text-align: right;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.stat-iv {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-2);
+  min-width: 24px;
+  display: inline-block;
+  text-align: right;
+}

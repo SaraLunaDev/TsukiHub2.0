@@ -1,5 +1,26 @@
+.user-search-container-top .search-icon {
+  font-size: 15px !important;
+  width: 12px !important;
+  height: 12px !important;
+  left: 8px !important;
+}
+.user-search-container-top {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.user-search-container-top .search-bar {
+  margin-bottom: 0 !important;
+  margin-top: auto;
+  transform: translateY(3px);
+}
 .search-bar {
-  margin-bottom: 15px;
+  margin-bottom: 16px;
+}
+
+.search-bar-mobile-pokedex {
+  margin-bottom: 0 !important;
 }
 
 .search-input-container {
@@ -33,4 +54,45 @@
 
 .search-input-field::placeholder {
   color: var(--text-2);
+}
+
+.search-chevron-button {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--text-2);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+@media (max-width: 600px) {
+  .search-chevron-button {
+    display: flex;
+  }
+}
+
+.search-chevron-button:hover {
+  background-color: var(--dark-2);
+}
+.search-chevron-icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.search-chevron-icon.open {
+  transform: rotate(180deg);
+}
+.search-chevron-icon {
+  transition: transform 0.2s;
+}
+
+.search-chevron-button.active .search-chevron-icon {
+  transform: rotate(180deg);
 }

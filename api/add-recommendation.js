@@ -3,7 +3,7 @@ import { requireAuth } from "./auth-middleware.js";
 
 // Limpia texto para CSV
 const cleanTextForCSV = (text) => {
-  if (!text) return "";
+  if (!text) return "";http://localhost:3000/juegos/recomendar
   return text.replace(/[\r\n]+/g, " ").trim();
 };
 

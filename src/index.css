@@ -9,14 +9,30 @@
   box-sizing: border-box;
 }
 
+html {
+  height: 100%;
+}
+
 body {
-  font-family: "JetBrains Mono", monospace, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
-    "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family:
+    "JetBrains Mono",
+    monospace,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--dark);
   color: var(--text);
+  height: 100%;
 }
 
 /* Modo oscuro (por defecto) */
@@ -32,8 +48,8 @@ body:not(.dark-mode) {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 .inset-section {
@@ -48,6 +64,33 @@ code {
   border-radius: 8px;
   padding: 10px;
   margin-bottom: 4px;
+}
+
+.normal-section {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--box-shadow-inset);
+  background: var(--row-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Estilo para la sección ranking (superior) */
+.ranking {
+  padding: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ranking-content h3 {
+  margin: 0 0 6px 0;
+  font-size: 1.05em;
+}
+
+.ranking-content p {
+  margin: 0;
+  color: var(--text-2);
 }
 
 .top-section h2 {
@@ -70,6 +113,7 @@ code {
   padding: 16px;
   max-width: 1300px;
   margin: 0 auto;
+  height: auto;
 }
 
 @media (min-width: 600px) {
@@ -108,9 +152,19 @@ code {
 */
 
 .table-markdown {
-  font-family: "JetBrains Mono", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
-    "Helvetica Neue", sans-serif;
+  font-family:
+    "JetBrains Mono",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    sans-serif;
   font-size: 15px;
   color: var(--text-2);
   background: var(--bg-2);
@@ -264,5 +318,3 @@ th,
 td {
   text-align: left;
 }
-
-/* El bloque de estilos item-caratula ha sido movido a ItemCaratula.css */
