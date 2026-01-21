@@ -71,99 +71,21 @@ export default function HoverCard({
     tier,
     holo,
   });
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [showFront, setShowFront] = useState(isFlipped);
-  const flippingRef = useRef(false);
-  const pendingUpdateRef = useRef(null);
-  const isFlippedRef = useRef(false);
-  const lockToBackRef = useRef(!!lockToBack);
 
-  const performFlip = (targetFront) => {
-    if (lockToBackRef.current) {
-      const back = false;
-      setIsFlipped(back);
-      isFlippedRef.current = back;
-      setShowFront(back);
-      return Promise.resolve();
-    }
+  // Mostrar dorso hasta que todas las imagenes carguen
+  const [imagesReady, setImagesReady] = useState(false);
+  const loadIdRef = useRef(0);
 
-    return new Promise((resolve) => {
-      if (flippingRef.current) {
-        resolve();
-        return;
-      }
-
-      const el = cardRef.current;
-      if (!el) {
-        const next =
-          typeof targetFront === "boolean"
-            ? targetFront
-            : !isFlippedRef.current;
-        setIsFlipped(next);
-        isFlippedRef.current = next;
-        setShowFront(next);
-        resolve();
-        return;
-      }
-
-      const inner = el.querySelector(".card__flip-inner");
-      if (!inner) {
-        const next =
-          typeof targetFront === "boolean"
-            ? targetFront
-            : !isFlippedRef.current;
-        setIsFlipped(next);
-        isFlippedRef.current = next;
-        setShowFront(next);
-        resolve();
-        return;
-      }
-
-      flippingRef.current = true;
-      if (cardRef.current) cardRef.current.classList.add("is-flipping");
-
-      const flippedToFront =
-        typeof targetFront === "boolean" ? targetFront : !isFlippedRef.current;
-
-      const firstTarget = "rotateY(90deg)";
-      const secondTarget = flippedToFront ? "rotateY(180deg)" : "rotateY(0deg)";
-
-      const onFirst = (e) => {
-        if (e.propertyName !== "transform") return;
-        inner.removeEventListener("transitionend", onFirst);
-
-        setShowFront(flippedToFront);
-
-        requestAnimationFrame(() => {
-          inner.addEventListener("transitionend", onSecond);
-          inner.style.transition =
-            "transform 300ms cubic-bezier(0.22,1,0.36,1)";
-          inner.style.transform = secondTarget;
-        });
-      };
-
-      const onSecond = (e) => {
-        if (e.propertyName !== "transform") return;
-        inner.removeEventListener("transitionend", onSecond);
-
-        inner.style.transition = "";
-        inner.style.transform = "";
-        setIsFlipped(flippedToFront);
-        isFlippedRef.current = flippedToFront;
-        flippingRef.current = false;
-        if (cardRef.current) cardRef.current.classList.remove("is-flipping");
-        resolve();
-      };
-
-      inner.addEventListener("transitionend", onFirst);
-      inner.style.transition = "transform 300ms cubic-bezier(0.22,1,0.36,1)";
-      inner.style.transform = firstTarget;
-    });
-  };
+  // Control de fade out del dorso
+  const [backVisible, setBackVisible] = useState(true);
+  const [backFading, setBackFading] = useState(false);
+  const backFadeTimeoutRef = useRef(null);
+  const backFadeDelayRef = useRef(null);
+  const backNoTransitionTimeoutRef = useRef(null);
+  const backShownAtRef = useRef(0); // timestamp cuando se mostro el dorso
 
   useEffect(() => {
-    lockToBackRef.current = !!lockToBack;
-    if (lockToBackRef.current) {
+    if (lockToBack) {
       setDisplayData({
         src: undefined,
         alt: undefined,
@@ -171,7 +93,7 @@ export default function HoverCard({
         tier: undefined,
         holo: undefined,
       });
-      if (isFlippedRef.current) performFlip(false);
+      setImagesReady(false);
     }
 
     return () => {
@@ -248,7 +170,14 @@ export default function HoverCard({
   }, [displayData.banner, displayData.tier]);
 
   useEffect(() => {
-    if (lockToBackRef.current) {
+    const el = cardRef.current;
+    // Pre-cargar la carta entrante antes de aplicarla. Esto evita que, al cambiar
+    // de carta dentro del mismo banner, se muestren partes incompletas.
+    const incoming = { src, alt, banner, tier, holo };
+
+    if (lockToBack) {
+      // cancelar cualquier pre-carga en curso y enseñar dorso
+      loadIdRef.current++;
       setDisplayData({
         src: undefined,
         alt: undefined,
@@ -256,42 +185,231 @@ export default function HoverCard({
         tier: undefined,
         holo: undefined,
       });
-      if (isFlippedRef.current) performFlip(false);
+      setImagesReady(false);
       return;
     }
 
-    const incoming = { src, alt, banner, tier, holo };
     const same =
       incoming.src === displayData.src &&
       incoming.alt === displayData.alt &&
       incoming.banner === displayData.banner &&
       incoming.tier === displayData.tier &&
       incoming.holo === displayData.holo;
-    if (same) return;
+    if (same) {
+      // Si la misma carta es clicada de nuevo, forzamos que el dorso se muestre
+      // al menos MIN_MS y luego hacemos el fade de FADE_MS (sin cambiar displayData).
+      const MIN_MS = 200; // minimo 200ms de dorso visible
+      const FADE_MS = 1000; // fade-out de 1s
 
-    pendingUpdateRef.current = incoming;
+      // limpiar timers previos para evitar interferencias
+      if (backFadeDelayRef.current) {
+        clearTimeout(backFadeDelayRef.current);
+        backFadeDelayRef.current = null;
+      }
+      if (backFadeTimeoutRef.current) {
+        clearTimeout(backFadeTimeoutRef.current);
+        backFadeTimeoutRef.current = null;
+      }
 
-    const processPending = async () => {
-      if (flippingRef.current) return;
-
-      while (pendingUpdateRef.current) {
-        const next = pendingUpdateRef.current;
-        pendingUpdateRef.current = null;
-
-        if (isFlippedRef.current) {
-          await performFlip(false);
+      // cancelar fade en curso y mostrar dorso al completo sin transicion
+      const backEl = el && el.querySelector(".card__back-overlay");
+      if (backEl) {
+        backEl.style.transition = "none";
+      }
+      setBackFading(false);
+      setBackVisible(true);
+      backShownAtRef.current = Date.now();
+      if (backEl) {
+        if (backNoTransitionTimeoutRef.current) {
+          clearTimeout(backNoTransitionTimeoutRef.current);
+          backNoTransitionTimeoutRef.current = null;
         }
+        backNoTransitionTimeoutRef.current = setTimeout(() => {
+          if (backEl) backEl.style.transition = "";
+          backNoTransitionTimeoutRef.current = null;
+        }, 40);
+      }
 
-        setDisplayData(next);
+      // programar inicio del fade una vez transcurrido el minimo
+      backFadeDelayRef.current = setTimeout(() => {
+        backFadeDelayRef.current = null;
+        setBackFading(true);
+        backFadeTimeoutRef.current = setTimeout(() => {
+          setBackFading(false);
+          setBackVisible(false);
+          backFadeTimeoutRef.current = null;
+        }, FADE_MS);
+      }, MIN_MS);
 
-        await new Promise((r) => setTimeout(r, 250));
+      return;
+    }
 
-        await performFlip(true);
+    // Si no hay src, aplicar inmediatamente (mostrara dorso)
+    if (!incoming.src) {
+      setDisplayData(incoming);
+      setImagesReady(false);
+      return;
+    }
+
+    // Mostrar dorso mientras pre-cargamos la nueva carta
+    setImagesReady(false);
+    // cancelar cualquier animacion previa y forzar dorso visible al completo
+    setBackVisible(true);
+    // limpiar timers previos para evitar que un fade anterior afecte
+    if (backFadeDelayRef.current) {
+      clearTimeout(backFadeDelayRef.current);
+      backFadeDelayRef.current = null;
+    }
+    if (backFadeTimeoutRef.current) {
+      clearTimeout(backFadeTimeoutRef.current);
+      backFadeTimeoutRef.current = null;
+    }
+    // quitar transicion temporalmente para que vuelva a opacidad completa sin animacion
+    const backEl = el && el.querySelector(".card__back-overlay");
+    if (backEl) {
+      backEl.style.transition = "none";
+    }
+    setBackFading(false);
+    backShownAtRef.current = Date.now();
+    if (backEl) {
+      if (backNoTransitionTimeoutRef.current) {
+        clearTimeout(backNoTransitionTimeoutRef.current);
+        backNoTransitionTimeoutRef.current = null;
+      }
+      backNoTransitionTimeoutRef.current = setTimeout(() => {
+        if (backEl) backEl.style.transition = "";
+        backNoTransitionTimeoutRef.current = null;
+      }, 40);
+    }
+    const id = ++loadIdRef.current;
+
+    const urls = new Set();
+    urls.add(incoming.src);
+
+    if (typeof incoming.tier !== "undefined" && incoming.tier !== null) {
+      urls.add(`/static/resources/gacha/tier${incoming.tier}.webp`);
+      urls.add(`/static/resources/gacha/tier${incoming.tier}_low.webp`);
+      if (incoming.tier === 5) urls.add(`/img/glitter.png`);
+      if (incoming.tier === 4) urls.add(`/img/illusion.png`);
+      if (incoming.banner)
+        urls.add(
+          `/static/resources/gacha/${incoming.banner}/tier${incoming.tier}.jpg`,
+        );
+    }
+
+    const urlsArr = Array.from(urls);
+    let remaining = urlsArr.length;
+    if (remaining === 0) {
+      setDisplayData(incoming);
+      setImagesReady(true);
+      return;
+    }
+
+    let cancelledLoad = false;
+    const imgs = [];
+
+    // utilidades para aplicar CSS cuando cargan las imagenes (para que
+    // la carta quede totalmente preparada antes de mostrarla)
+    const applyBannerBg = (url) => {
+      const el = cardRef.current;
+      if (!el) return;
+      el.style.setProperty("--tier-bg", `url("${url}")`);
+
+      const adj =
+        (BANNER_TIER_IMAGE_ADJUST[incoming.banner] &&
+          BANNER_TIER_IMAGE_ADJUST[incoming.banner][incoming.tier]) ||
+        null;
+      if (adj) {
+        if (typeof adj.offsetY === "number")
+          el.style.setProperty("--banner-image-offset-y", `${adj.offsetY}px`);
+        if (typeof adj.scale === "number")
+          el.style.setProperty("--banner-image-scale", `${adj.scale}`);
+      } else {
+        el.style.removeProperty("--banner-image-offset-y");
+        el.style.removeProperty("--banner-image-scale");
       }
     };
 
-    processPending();
-  }, [src, alt, banner, tier, holo, lockToBack, displayData.src, displayData.alt, displayData.banner, displayData.tier, displayData.holo]);
+    const applyOverlayTop = (url) => {
+      const el = cardRef.current;
+      if (!el) return;
+      el.style.setProperty("--tier-overlay-top", `url("${url}")`);
+    };
+    const applyOverlayBottom = (url) => {
+      const el = cardRef.current;
+      if (!el) return;
+      el.style.setProperty("--tier-overlay-bottom", `url("${url}")`);
+    };
+    const applyIllusion = (kind) => {
+      const el = cardRef.current;
+      if (!el) return;
+      if (kind === "glitter") {
+        el.style.setProperty("--tier-illusion", `url('/img/glitter.png')`);
+        el.style.setProperty("--illusion-size", "cover");
+        el.style.setProperty("--illusion-opacity", "0.03");
+      } else if (kind === "illusion") {
+        el.style.setProperty("--tier-illusion", `url('/img/illusion.png')`);
+        el.style.setProperty("--illusion-size", "65%");
+        el.style.setProperty("--illusion-opacity", "0.03");
+      }
+    };
+
+    urlsArr.forEach((url) => {
+      const img = new Image();
+      const done = () => {
+        if (cancelledLoad) return;
+        remaining -= 1;
+        if (remaining <= 0 && loadIdRef.current === id) {
+          // todas listas: aplicar la nueva carta y mostrar frente
+          setDisplayData(incoming);
+          setImagesReady(true);
+        }
+      };
+
+      img.onload = () => {
+        if (cancelledLoad) return;
+        // aplicar variables CSS relevantes segun la url cargada
+        if (incoming.banner && url.endsWith(`/tier${incoming.tier}.jpg`)) {
+          applyBannerBg(url);
+        } else if (url.endsWith(`tier${incoming.tier}.webp`)) {
+          applyOverlayTop(url);
+        } else if (url.endsWith(`tier${incoming.tier}_low.webp`)) {
+          applyOverlayBottom(url);
+        } else if (url.endsWith("glitter.png")) {
+          applyIllusion("glitter");
+        } else if (url.endsWith("illusion.png")) {
+          applyIllusion("illusion");
+        }
+        done();
+      };
+      img.onerror = () => {
+        // tratar error como 'done' para no bloquear la transicion
+        done();
+      };
+      img.src = url;
+      imgs.push(img);
+    });
+
+    return () => {
+      cancelledLoad = true;
+      imgs.forEach((i) => {
+        i.onload = null;
+        i.onerror = null;
+      });
+    };
+  }, [
+    src,
+    alt,
+    banner,
+    tier,
+    holo,
+    lockToBack,
+    displayData.src,
+    displayData.alt,
+    displayData.banner,
+    displayData.tier,
+    displayData.holo,
+  ]);
 
   useEffect(() => {
     const el = cardRef.current;
@@ -312,51 +430,170 @@ export default function HoverCard({
       return;
     }
 
+    // Pre-cargar overlays y aplicar al cargarse
     const topUrl = `/static/resources/gacha/tier${dTier}.webp`;
     const bottomUrl = `/static/resources/gacha/tier${dTier}_low.webp`;
 
-    el.style.setProperty("--tier-overlay-top", `url("${topUrl}")`);
-    el.style.setProperty("--tier-overlay-bottom", `url("${bottomUrl}")`);
+    let topDone = false;
+    let bottomDone = false;
+    let cancelled = false;
 
-    const pos = (TIER_OVERLAY_POS[dBanner] &&
-      TIER_OVERLAY_POS[dBanner][dTier]) ||
-      TIER_OVERLAY_POS.default[dTier] || {
-        top: { x: 50, y: 50 },
-        bottom: { x: 50, y: 50 },
-      };
-    el.style.setProperty("--tier-overlay-pos-x", `${pos.top.x}%`);
-    el.style.setProperty("--tier-overlay-pos-y", `${pos.top.y}%`);
-    el.style.setProperty("--tier-overlay-bottom-pos-x", `${pos.bottom.x}%`);
-    el.style.setProperty("--tier-overlay-bottom-pos-y", `${pos.bottom.y}%`);
+    const setPos = () => {
+      const pos = (TIER_OVERLAY_POS[dBanner] &&
+        TIER_OVERLAY_POS[dBanner][dTier]) ||
+        TIER_OVERLAY_POS.default[dTier] || {
+          top: { x: 50, y: 50 },
+          bottom: { x: 50, y: 50 },
+        };
+      el.style.setProperty("--tier-overlay-pos-x", `${pos.top.x}%`);
+      el.style.setProperty("--tier-overlay-pos-y", `${pos.top.y}%`);
+      el.style.setProperty("--tier-overlay-bottom-pos-x", `${pos.bottom.x}%`);
+      el.style.setProperty("--tier-overlay-bottom-pos-y", `${pos.bottom.y}%`);
+    };
 
-    if (dTier === 5) {
-      el.style.setProperty("--tier-illusion", `url('/img/glitter.png')`);
-      el.style.setProperty("--illusion-size", "cover");
-      el.style.setProperty("--illusion-opacity", "0.03");
-    } else if (dTier === 4) {
-      el.style.removeProperty("--foil");
-      el.style.removeProperty("--imgsize");
-      el.style.removeProperty("--mask");
-      el.style.setProperty("--tier-illusion", `url('/img/illusion.png')`);
-      el.style.setProperty("--illusion-size", "65%");
-      el.style.setProperty("--illusion-opacity", "0.03");
-    } else if (dTier === 3) {
-      el.style.removeProperty("--foil");
-      el.style.removeProperty("--imgsize");
-      el.style.removeProperty("--mask");
+    setPos();
 
-      el.style.removeProperty("--tier-illusion");
-      el.style.removeProperty("--illusion-size");
-      el.style.removeProperty("--illusion-opacity");
-    } else {
-      el.style.removeProperty("--foil");
-      el.style.removeProperty("--imgsize");
-      el.style.removeProperty("--mask");
-      el.style.removeProperty("--tier-illusion");
-      el.style.removeProperty("--illusion-size");
-      el.style.removeProperty("--illusion-opacity");
+    const imgTop = new Image();
+    imgTop.onload = () => {
+      if (cancelled) return;
+      topDone = true;
+      el.style.setProperty("--tier-overlay-top", `url("${topUrl}")`);
+      maybeFinish();
+    };
+    imgTop.onerror = () => {
+      if (cancelled) return;
+      topDone = true;
+      el.style.removeProperty("--tier-overlay-top");
+      maybeFinish();
+    };
+    imgTop.src = topUrl;
+
+    const imgBottom = new Image();
+    imgBottom.onload = () => {
+      if (cancelled) return;
+      bottomDone = true;
+      el.style.setProperty("--tier-overlay-bottom", `url("${bottomUrl}")`);
+      maybeFinish();
+    };
+    imgBottom.onerror = () => {
+      if (cancelled) return;
+      bottomDone = true;
+      el.style.removeProperty("--tier-overlay-bottom");
+      maybeFinish();
+    };
+    imgBottom.src = bottomUrl;
+
+    function maybeFinish() {
+      if (topDone && bottomDone) {
+        if (dTier === 5) {
+          el.style.setProperty("--tier-illusion", `url('/img/glitter.png')`);
+          el.style.setProperty("--illusion-size", "cover");
+          el.style.setProperty("--illusion-opacity", "0.03");
+        } else if (dTier === 4) {
+          el.style.removeProperty("--foil");
+          el.style.removeProperty("--imgsize");
+          el.style.removeProperty("--mask");
+          el.style.setProperty("--tier-illusion", `url('/img/illusion.png')`);
+          el.style.setProperty("--illusion-size", "65%");
+          el.style.setProperty("--illusion-opacity", "0.03");
+        } else if (dTier === 3) {
+          el.style.removeProperty("--foil");
+          el.style.removeProperty("--imgsize");
+          el.style.removeProperty("--mask");
+
+          el.style.removeProperty("--tier-illusion");
+          el.style.removeProperty("--illusion-size");
+          el.style.removeProperty("--illusion-opacity");
+        } else {
+          el.style.removeProperty("--foil");
+          el.style.removeProperty("--imgsize");
+          el.style.removeProperty("--mask");
+          el.style.removeProperty("--tier-illusion");
+          el.style.removeProperty("--illusion-size");
+          el.style.removeProperty("--illusion-opacity");
+        }
+      }
     }
-  }, [displayData.banner, displayData.tier]);
+
+    return () => {
+      cancelled = true;
+      imgTop.onload = null;
+      imgTop.onerror = null;
+      imgBottom.onload = null;
+      imgBottom.onerror = null;
+    };
+  }, [displayData, displayData.banner, displayData.tier]);
+
+  // Cuando imagesReady cambia, gestionar el fade del dorso (min 200ms de visibilidad tras click)
+  // Cuando imagesReady cambia, gestionar el fade del dorso (min 200ms de visibilidad tras click)
+  useEffect(() => {
+    const FADE_MS = 200; // 1s duracion del fade-out
+    const MIN_BACK_MS = 250; // minimo 200ms de dorso visible desde el momento de mostrarlo
+    const el = cardRef.current;
+    if (imagesReady) {
+      // cancelar timers previos
+      if (backFadeDelayRef.current) {
+        clearTimeout(backFadeDelayRef.current);
+        backFadeDelayRef.current = null;
+      }
+      if (backFadeTimeoutRef.current) {
+        clearTimeout(backFadeTimeoutRef.current);
+        backFadeTimeoutRef.current = null;
+      }
+      // determinar cuanto falta para cubrir MIN_BACK_MS desde que se mostro el dorso
+      const elapsed = Date.now() - (backShownAtRef.current || 0);
+      const wait = Math.max(0, MIN_BACK_MS - elapsed);
+      // iniciar fade cuando se cumpla el minimo (si wait==0, inicia ya)
+      backFadeDelayRef.current = setTimeout(() => {
+        backFadeDelayRef.current = null;
+        setBackFading(true);
+        backFadeTimeoutRef.current = setTimeout(() => {
+          setBackFading(false);
+          setBackVisible(false);
+          backFadeTimeoutRef.current = null;
+        }, FADE_MS);
+      }, wait);
+    } else {
+      // cancelar cualquier timer y mostrar dorso de inmediato
+      if (backFadeDelayRef.current) {
+        clearTimeout(backFadeDelayRef.current);
+        backFadeDelayRef.current = null;
+      }
+      if (backFadeTimeoutRef.current) {
+        clearTimeout(backFadeTimeoutRef.current);
+        backFadeTimeoutRef.current = null;
+      }
+      // limpiar no-transicion si existe y restaurar transicion
+      if (backNoTransitionTimeoutRef.current) {
+        clearTimeout(backNoTransitionTimeoutRef.current);
+        backNoTransitionTimeoutRef.current = null;
+      }
+      const backEl = el && el.querySelector(".card__back-overlay");
+      if (backEl) backEl.style.transition = "";
+      setBackFading(false);
+      setBackVisible(true);
+      backShownAtRef.current = Date.now(); // re-marcar inicio de visibilidad
+    }
+    return () => {
+      if (backFadeDelayRef.current) {
+        clearTimeout(backFadeDelayRef.current);
+        backFadeDelayRef.current = null;
+      }
+      if (backFadeTimeoutRef.current) {
+        clearTimeout(backFadeTimeoutRef.current);
+        backFadeTimeoutRef.current = null;
+      }
+      if (backNoTransitionTimeoutRef.current) {
+        clearTimeout(backNoTransitionTimeoutRef.current);
+        backNoTransitionTimeoutRef.current = null;
+      }
+      const backEl = el && el.querySelector(".card__back-overlay");
+      if (backEl) backEl.style.transition = "";
+    };
+  }, [imagesReady]);
+
+  // Pre-carga trasladada al efecto que maneja la llegada de la carta entrante.
+  // Esto evita duplicar logica y controla mejor el cambio de carta dentro del mismo banner.
 
   const scheduleRAF = () => {
     if (rafRef.current) return;
@@ -581,7 +818,7 @@ export default function HoverCard({
   return (
     <div
       ref={cardRef}
-      className={`card simple-card ${isFlipped ? "is-flipped" : ""}`}
+      className="card simple-card"
       data-banner={displayData.banner}
       data-tier={displayData.tier}
       data-holo={
@@ -602,17 +839,9 @@ export default function HoverCard({
     >
       <div className="card__translater">
         <div className="card__rotator">
-          <div className="card__flip-inner">
-            <div
-              className="card__side card__side--back"
-              aria-hidden={showFront}
-            >
-              <HoverCardBack src="/static/resources/gacha/back.webp" />
-            </div>
-            <div
-              className="card__side card__side--front"
-              aria-hidden={!showFront}
-            >
+          {/* Front: solo cuando las imagenes estan listas */}
+          {imagesReady && displayData.src ? (
+            <>
               <img
                 src={displayData.src}
                 alt={displayData.alt}
@@ -624,8 +853,17 @@ export default function HoverCard({
               <div className="card__name" aria-hidden={false}>
                 {displayData.alt}
               </div>
-            </div>
-          </div>
+            </>
+          ) : null}
+
+          {/* Dorso: siempre visible al click y durante al menos 200ms. Si la imagen necesita
+              cargarse, mantener el dorso hasta que termine; una vez lista, iniciar fade-out de 1s para mostrar la carta. */}
+          {backVisible ? (
+            <HoverCardBack
+              src="/static/resources/gacha/back.webp"
+              className={backFading ? "is-fading" : ""}
+            />
+          ) : null}
         </div>
       </div>
     </div>

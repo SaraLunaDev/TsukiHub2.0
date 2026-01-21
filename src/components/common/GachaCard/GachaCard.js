@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "./GachaCard.css";
-import { StreamlineFlexGamblingRemix } from "../../icons/StreamlineFlexGamblingRemix";
 
 function GachaCard({ character, onClick }) {
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -27,12 +26,20 @@ function GachaCard({ character, onClick }) {
       style={{ cursor: character.owned ? "pointer" : "default" }}
     >
       {!imageLoaded && (
-        <StreamlineFlexGamblingRemix className="gacha-placeholder" />
+        <img
+          src="/static/resources/gacha/back.webp"
+          alt="back"
+          className="gacha-placeholder gacha-placeholder-img"
+        />
       )}
       <img
-        src={character.lowUrl}
-        alt={character.name}
-        className={`gacha-img ${imageLoaded ? "loaded" : ""}`}
+        src={
+          character.owned
+            ? character.lowUrl
+            : "/static/resources/gacha/back.webp"
+        }
+        alt={character.owned ? character.name : "back"}
+        className={`gacha-img ${imageLoaded ? "loaded" : ""} ${character.owned ? "" : "back-img"}`}
         onLoad={handleLoad}
       />
     </div>

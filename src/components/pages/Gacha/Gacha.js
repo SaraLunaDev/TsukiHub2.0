@@ -390,7 +390,7 @@ function Gacha() {
                   />
                 </div>
               </div>
-            )} 
+            )}
           </div>
 
           <UserRanking
@@ -422,9 +422,7 @@ function Gacha() {
                       }`}
                       onClick={() => handleBannerChange(b.name)}
                     >
-                      {IconComponent && (
-                        <IconComponent className="nav-icon" />
-                      )}
+                      {IconComponent && <IconComponent className="nav-icon" />}
                       <span className="nav-text">{b.displayName}</span>
                     </button>
                   );
