@@ -29,6 +29,7 @@
         "remark-breaks": "^4.0.0",
         "remark-gfm": "^4.0.1",
         "string-similarity": "^4.0.4",
+        "svelte": "^5.48.2",
         "web-vitals": "^2.1.4"
     },
     "scripts": {
