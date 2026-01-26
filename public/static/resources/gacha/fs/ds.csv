@@ -1,15 +1,15 @@
 ID,Nombre,Estrellas
 1,Demonio del Refugio,3
-2,Demonio de Tauro,3
-3,Demonio de Aries,3
+2,Dama Mariposa,3
+3,Lecho del Caos,3
 4,Dragon boquiabierto,3
 5,Mariposa lunar,3
 6,Golem de hierro,3
 7,Priscilla la Mestiza,3
 8,Molinete,3
 9,Descarga incesante,3
-10,Sabio de fuego demoniaco,3
-11,Demonio ciempies,3
+10,Gyobu Masataka Oniwa,3
+11,Elizabeth la Seta,3
 12,Guardian del Santuario,3
 13,Iudex Gundyr,3
 14,Vordt del Valle Boreal,3
@@ -22,22 +22,22 @@ ID,Nombre,Estrellas
 21,Armadura de Asesino de dragones,3
 22,Oceiros el Rey Consumido,3
 23,Campeon Gundyr,3
-24,Custodio de la tumba y Gran lobo,3
+24,Simio Guardian,3
 25,Principe demonio,3
-26,PenumbraLanza de la iglesia,3
-27,Laurentius del Gran Pantano,3
-28,Greirat,3
-29,Elizabeth la Seta,3
+26,Andre de Astora,3
+27,Caballero Cebolla,3
+28,Patches,3
+29,Gargolas Campana,3
 30,Gwynevere Princesa de la Luz Solar,3
-31,Gargolas,4
+31,Genichiro Ashina,4
 32,Quelaag la Bruja del caos,4
 33,Sif el Gran lobo gris,4
-34,Ornstein el Asesino de dragones,4
-35,Smough el Verdugo,4
+34,Ornstein y Smough,4
+35,Gran Shinobi Buho,4
 36,Seath el Descamado,4
 37,Nito el Rey del Cementerio,4
 38,Cuatro Reyes,4
-39,Lecho del Caos,4
+39,Demonio del Odio,4
 40,Kalameet el Dragon Negro,4
 41,Manus Padre del Abismo,4
 42,Vigilantes del Abismo,4
@@ -46,9 +46,9 @@ ID,Nombre,Estrellas
 45,Yhorm el Gigante,4
 46,Lorian y Lothric los principes,4
 47,Midir el devorador de oscuridad,4
-48,Patches,4
-49,Lautrec,4
-50,Guardiana de Fuego DS3,4
+48,Dragon Divino,4
+49,Monja Corrupta,4
+50,Guardiana de Fuego,4
 51,Caballero Artorias,5
 52,Gwyn Señor de la ceniza,5
 53,Gwyndolin el Sol Oscuro,5
@@ -57,5 +57,5 @@ ID,Nombre,Estrellas
 56,Hermana Friede,5
 57,Caballero esclavo Gael,5
 58,Solaire de Astora,5
-59,Caballero Cebolla,5
-60,Andre el herrero,5
+59,Sekiro,5
+60,Isshin Ashina,5

@@ -1,0 +1,40 @@
+export function SmashBros(props) {
+	return (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="1em"
+			height="1em"
+			viewBox="0 0 24 24"
+			{...props}
+		>
+			<circle
+				cx="12"
+				cy="12"
+				r="10"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="2.8"
+			/>
+			<line
+				x1="3"
+				y1="13"
+				x2="20"
+				y2="13"
+				stroke="currentColor"
+				strokeWidth="3"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+			<line
+				x1="11"
+				y1="3"
+				x2="11"
+				y2="21"
+				stroke="currentColor"
+				strokeWidth="3"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+}

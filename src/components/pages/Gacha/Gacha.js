@@ -13,6 +13,7 @@ import * as FromSoftwareIcon from "../../icons/Gacha/FromSoftware";
 import * as GenshinImpactIcon from "../../icons/Gacha/GenshinImpact";
 import * as MonsterHunterIcon from "../../icons/Gacha/MonsterHunter";
 import * as OnePieceIcon from "../../icons/Gacha/OnePiece";
+import * as SmashBrosIcon from "../../icons/Gacha/SmashBros";
 import "./Gacha.css";
 
 function resolveIcon(mod, preferredName) {
@@ -29,6 +30,7 @@ const BANNER_ICONS = {
 	gs: resolveIcon(GenshinImpactIcon, "GenshinImpact"),
 	mh: resolveIcon(MonsterHunterIcon, "MonsterHunter"),
 	op: resolveIcon(OnePieceIcon, "OnePiece"),
+	sb: resolveIcon(SmashBrosIcon, "SmashBros"),
 };
 
 const BANNERS = [
@@ -37,6 +39,7 @@ const BANNERS = [
 	{ name: "gs", displayName: "Genshin Impact" },
 	{ name: "mh", displayName: "Monster Hunter" },
 	{ name: "op", displayName: "One Piece" },
+	{ name: "sb", displayName: "Smash Bros" },
 ];
 
 const BANNER_TO_FOLDER = {
@@ -45,6 +48,7 @@ const BANNER_TO_FOLDER = {
 	gs: "gs",
 	mh: "mh",
 	op: "op",
+	sb: "sb",
 };
 
 function Gacha() {
@@ -116,6 +120,9 @@ function Gacha() {
 				db_ID: row["db_ID"]?.toString().trim(),
 				db_Nombre: row["db_Nombre"]?.toString().trim(),
 				db_Tier: row["db_Tier"]?.toString().trim(),
+				sb_ID: row["sb_ID"]?.toString().trim(),
+				sb_Nombre: row["sb_Nombre"]?.toString().trim(),
+				sb_Tier: row["sb_Tier"]?.toString().trim(),
 			}));
 
 			let totalCharactersGlobal = 0;

@@ -417,6 +417,14 @@
 		contrast(2.2) saturate(3);
 }
 
+.simple-card[data-tier="5"] .card__glare,
+.simple-card[data-tier="5"] .card__glare:before,
+.simple-card[data-tier="5"] .card__glare:after {
+	opacity: calc(var(--card-opacity) * 0.15) !important;
+	pointer-events: none !important;
+	visibility: visible !important;
+}
+
 .simple-card[data-tier="5"] .card__shine:after {
 	background-image:
 		var(--tier-illusion, none),
