@@ -1,316 +1,317 @@
 /* ============================================
 // CONTENEDOR DEL MENU
-// ============================================ 
+// ============================================
 */
 .user-menu {
-  position: relative;
+	position: relative;
 }
 
 /* ============================================
 // BOTON DEL MENU
-// ============================================ 
+// ============================================
 */
 .user-menu-button {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
 }
 
 .user-menu-avatar {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	object-fit: cover;
 }
 
 .user-menu-icon {
-  font-size: 24px;
-  color: var(--text);
+	font-size: 24px;
+	color: var(--text);
 }
 
 @media (max-width: 600px) {
-  .user-menu-icon {
-    font-size: 28px;
-    color: var(--text-2);
-  }
+	.user-menu-icon {
+		font-size: 28px;
+		color: var(--text-2);
+	}
 }
 
 .user-menu-loading {
-  color: var(--text-2);
-  font-size: 14px;
+	color: var(--text-2);
+	font-size: 14px;
 }
 
 /* ============================================
 // DROPDOWN - MOVIL
-// ============================================ 
+// ============================================
 */
 .user-menu-dropdown {
-  position: fixed;
-  bottom: 70px;
-  left: 0;
-  right: 0;
-  background-color: var(--navbar);
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -10px 20px -10px rgba(0, 0, 0, 0.4);
-  z-index: 999;
-  overflow: hidden;
-  border-top: 1px solid rgba(160, 168, 178, 0.25);
-  padding-top: 8px;
+	position: fixed;
+	bottom: 70px;
+	left: 0;
+	right: 0;
+	background-color: var(--navbar);
+	border-radius: 16px 16px 0 0;
+	box-shadow: 0 -10px 20px -10px rgba(0, 0, 0, 0.4);
+	z-index: 999;
+	overflow: hidden;
+	border-top: 1px solid rgba(160, 168, 178, 0.25);
+	padding-top: 8px;
 }
 
 body:not(.dark-mode) .user-menu-dropdown {
-  border-top-color: rgba(102, 102, 102, 0.25);
+	border-top-color: rgba(102, 102, 102, 0.25);
 }
 
 /* ============================================
 // HEADER DEL DROPDOWN
-// ============================================ 
+// ============================================
 */
 .user-menu-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 15px;
-  background-color: var(--mid-2);
-  border-bottom: 1px solid var(--divider);
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 15px;
+	background-color: var(--mid-2);
+	border-bottom: 1px solid var(--divider);
 }
 
 .user-menu-dropdown-avatar {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  border: 2px solid var(--color-mid);
+	width: 45px;
+	height: 45px;
+	border-radius: 50%;
+	border: 2px solid var(--color-mid);
 }
 
 .user-menu-username {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text);
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--text);
 }
 
 /* ============================================
 // OPCIONES DEL MENU
-// ============================================ 
+// ============================================
 */
 .user-menu-options {
-  padding: 0;
-  padding-bottom: 8px;
+	padding: 0;
+	padding-bottom: 8px;
 }
 
 /* Boton de perfil especial */
 .user-menu-profile-button {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  background-color: transparent;
-  color: var(--text);
-  border: none;
-  border-radius: 0;
-  cursor: pointer;
-  margin-bottom: 8px;
-  text-align: left;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 16px;
+	background-color: transparent;
+	color: var(--text);
+	border: none;
+	border-radius: 0;
+	cursor: pointer;
+	margin-bottom: 8px;
+	text-align: left;
 }
 
 body:not(.dark-mode) .user-menu-profile-button {
-  border-bottom-color: rgba(102, 102, 102, 0.5);
+	border-bottom-color: rgba(102, 102, 102, 0.5);
 }
 
 /* Barra divisoria para el tema en movil */
 .user-menu-option-divider {
-  padding-top: 18px !important;
-  margin-top: 8px !important;
-  border-top: 1px solid rgba(160, 168, 178, 0.25) !important;
+	padding-top: 18px !important;
+	margin-top: 8px !important;
+	border-top: 1px solid rgba(160, 168, 178, 0.25) !important;
 }
 
 body:not(.dark-mode) .user-menu-option-divider {
-  border-top-color: rgba(102, 102, 102, 0.25) !important;
+	border-top-color: rgba(102, 102, 102, 0.25) !important;
 }
 
 .user-menu-profile-button:active {
-  transform: none;
-  background-color: var(--mid-2);
+	transform: none;
+	background-color: var(--mid-2);
 }
 
 .user-menu-profile-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	object-fit: cover;
+	flex-shrink: 0;
 }
 
 .user-menu-profile-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	flex: 1;
 }
 
 .user-menu-profile-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--text);
 }
 
 .user-menu-profile-link {
-  font-size: 12px;
-  color: var(--text-2);
+	font-size: 12px;
+	color: var(--text-2);
 }
 
 .user-menu-option {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  background-color: transparent;
-  color: var(--text);
-  border: none;
-  border-radius: 0;
-  font-size: 16px;
-  cursor: pointer;
-  margin-bottom: 0;
-  text-align: left;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 16px;
+	background-color: transparent;
+	color: var(--text);
+	border: none;
+	border-radius: 0;
+	font-size: 16px;
+	cursor: pointer;
+	margin-bottom: 0;
+	text-align: left;
 }
 
 .user-menu-option:last-child {
-  margin-bottom: 0;
+	margin-bottom: 0;
 }
 
 .user-menu-option:active {
-  transform: none;
-  background-color: var(--mid-2);
+	transform: none;
+	background-color: var(--mid-2);
 }
 
 .user-menu-option-primary {
-  color: var(--text);
+	color: var(--text);
 }
 
 .user-menu-option-primary:active {
-  background-color: var(--mid-2);
+	background-color: var(--mid-2);
 }
 
 .user-menu-option-danger {
-  color: var(--text);
+	color: var(--text);
 }
 
 .user-menu-option-danger:active {
-  background-color: var(--mid-2);
+	background-color: var(--mid-2);
 }
 
 .user-menu-option-icon {
-  font-size: 22px;
-  min-width: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+	font-size: 22px;
+	min-width: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .user-menu-twitch-icon {
-  color: #6441a5;
+	color: #6441a5;
 }
 
 .user-menu-option-text {
-  flex: 1;
-  font-weight: 500;
+	flex: 1;
+	font-weight: 500;
 }
 
 /* Opcion solo visible en movil */
 .user-menu-option-mobile {
-  display: flex;
+	display: flex;
 }
 
 /* Ocultar boton de tema en PC (esta fuera del menu) */
 @media (min-width: 769px) {
-  .user-menu-option-theme {
-    display: none;
-  }
+	.user-menu-option-theme {
+		display: none;
+	}
 }
 
 /* ============================================
 // PC
-// ============================================ 
+// ============================================
 */
 @media (min-width: 769px) {
-  /* Dropdown en PC - desde arriba */
-  .user-menu-dropdown {
-    position: absolute;
-    top: calc(100% + 19px);
-    right: -10px;
-    left: auto;
-    bottom: auto;
-    min-width: 250px;
-    border-radius: 0 0 8px 8px;
-    box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.25),
-      -10px 10px 20px -10px rgba(0, 0, 0, 0.25),
-      10px 10px 20px -10px rgba(0, 0, 0, 0.25);
-    z-index: 999;
-    border-top: none;
-    border-bottom: 1px solid rgba(160, 168, 178, 0.25);
-    border-left: 1px solid rgba(160, 168, 178, 0.25);
-    border-right: 1px solid rgba(160, 168, 178, 0.25);
-  }
+	/* Dropdown en PC - desde arriba */
+	.user-menu-dropdown {
+		position: absolute;
+		top: calc(100% + 16px);
+		right: -10px;
+		left: auto;
+		bottom: auto;
+		min-width: 250px;
+		border-radius: 0 0 8px 8px;
+		box-shadow:
+			0 10px 20px -10px rgba(0, 0, 0, 0.25),
+			-10px 10px 20px -10px rgba(0, 0, 0, 0.25),
+			10px 10px 20px -10px rgba(0, 0, 0, 0.25);
+		z-index: 999;
+		border-top: none;
+		border-bottom: 1px solid rgba(160, 168, 178, 0.25);
+		border-left: 1px solid rgba(160, 168, 178, 0.25);
+		border-right: 1px solid rgba(160, 168, 178, 0.25);
+	}
 
-  /* Boton de perfil en PC */
-  .user-menu-profile-button {
-    padding: 10px 12px;
-  }
+	/* Boton de perfil en PC */
+	.user-menu-profile-button {
+		padding: 10px 12px;
+	}
 
-  .user-menu-profile-avatar {
-    width: 35px;
-    height: 35px;
-  }
+	.user-menu-profile-avatar {
+		width: 35px;
+		height: 35px;
+	}
 
-  .user-menu-profile-name {
-    font-size: 13px;
-  }
+	.user-menu-profile-name {
+		font-size: 13px;
+	}
 
-  .user-menu-profile-link {
-    font-size: 11px;
-  }
+	.user-menu-profile-link {
+		font-size: 11px;
+	}
 
-  /* Boton mas pequeno en PC */
-  .user-menu-button {
-    width: 32px;
-    height: 32px;
-  }
+	/* Boton mas pequeno en PC */
+	.user-menu-button {
+		width: 32px;
+		height: 32px;
+	}
 
-  /* Header del dropdown */
-  .user-menu-header {
-    padding: 12px;
-  }
+	/* Header del dropdown */
+	.user-menu-header {
+		padding: 12px;
+	}
 
-  .user-menu-dropdown-avatar {
-    width: 40px;
-    height: 40px;
-  }
+	.user-menu-dropdown-avatar {
+		width: 40px;
+		height: 40px;
+	}
 
-  .user-menu-username {
-    font-size: 14px;
-  }
+	.user-menu-username {
+		font-size: 14px;
+	}
 
-  /* Opciones en PC */
-  .user-menu-option {
-    padding: 10px 12px;
-    font-size: 14px;
-  }
+	/* Opciones en PC */
+	.user-menu-option {
+		padding: 10px 12px;
+		font-size: 14px;
+	}
 
-  .user-menu-option-icon {
-    font-size: 18px;
-    min-width: 24px;
-  }
+	.user-menu-option-icon {
+		font-size: 18px;
+		min-width: 24px;
+	}
 
-  /* Ocultar opcion de inicio en PC */
-  .user-menu-option-mobile {
-    display: none;
-  }
+	/* Ocultar opcion de inicio en PC */
+	.user-menu-option-mobile {
+		display: none;
+	}
 }

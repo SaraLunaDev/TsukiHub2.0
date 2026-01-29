@@ -4,174 +4,174 @@
 */
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
 }
 
 html {
-  height: 100%;
+	height: 100%;
 }
 
 body {
-  font-family:
-    "JetBrains Mono",
-    monospace,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    "Roboto",
-    "Oxygen",
-    "Ubuntu",
-    "Cantarell",
-    "Fira Sans",
-    "Droid Sans",
-    "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--dark);
-  color: var(--text);
-  height: 100%;
+	font-family:
+		"JetBrains Mono",
+		monospace,
+		-apple-system,
+		BlinkMacSystemFont,
+		"Segoe UI",
+		"Roboto",
+		"Oxygen",
+		"Ubuntu",
+		"Cantarell",
+		"Fira Sans",
+		"Droid Sans",
+		"Helvetica Neue",
+		sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	background-color: var(--dark);
+	color: var(--text);
+	height: 100%;
 }
 
 /* Modo oscuro (por defecto) */
 body.dark-mode {
-  background-color: var(--dark);
-  color: var(--text);
+	background-color: var(--dark);
+	color: var(--text);
 }
 
 /* Modo claro */
 body:not(.dark-mode) {
-  background-color: #f5f5f5;
-  color: #333;
+	background-color: #f5f5f5;
+	color: #333;
 }
 
 code {
-  font-family:
-    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+	font-family:
+		source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 .inset-section {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: var(--box-shadow-inset);
-  padding: 10px;
-  background: var(--row-bg);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	box-shadow: var(--box-shadow-inset);
+	padding: 10px;
+	background: var(--row-bg);
 }
 
 .top-section {
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 4px;
+	border-radius: 8px;
+	padding: 10px;
+	margin-bottom: 4px;
 }
 
 .normal-section {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: var(--box-shadow-inset);
-  background: var(--row-bg);
-  display: flex;
-  flex-direction: column;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	box-shadow: var(--box-shadow-inset);
+	background: var(--row-bg);
+	display: flex;
+	flex-direction: column;
 }
 
 /* Estilo para la sección ranking (superior) */
 .ranking {
-  padding: 12px;
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
+	padding: 12px;
+	margin-bottom: 10px;
+	display: flex;
+	flex-direction: column;
 }
 
 .ranking-content h3 {
-  margin: 0 0 6px 0;
-  font-size: 1.05em;
+	margin: 0 0 6px 0;
+	font-size: 1.05em;
 }
 
 .ranking-content p {
-  margin: 0;
-  color: var(--text-2);
+	margin: 0;
+	color: var(--text-2);
 }
 
 .top-section h2 {
-  margin: 0 0 6px 0;
-  font-size: 1.2em;
-  color: var(--text);
+	margin: 0 0 6px 0;
+	font-size: 1.1em;
+	color: var(--text);
 }
 
 .top-section-h2-down {
-  font-weight: 500;
-  color: var(--text-2);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
+	font-weight: 500;
+	color: var(--text-2);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
 }
 
 .main-container {
-  padding: 16px;
-  max-width: 1300px;
-  margin: 0 auto;
-  height: auto;
+	padding: 16px;
+	max-width: 1300px;
+	margin: 0 auto;
+	height: auto;
 }
 
 @media (min-width: 600px) {
-  .main-container {
-    padding: 10px;
-  }
+	.main-container {
+		padding: 10px;
+	}
 }
 
 .main-container h1 {
-  font-size: 24px;
-  margin-bottom: 15px;
-  color: var(--text);
+	font-size: 24px;
+	margin-bottom: 15px;
+	color: var(--text);
 }
 
 .main-container p {
-  font-size: 14px;
-  color: var(--text-2);
-  line-height: 1.6;
+	font-size: 14px;
+	color: var(--text-2);
+	line-height: 1.6;
 }
 
 /* PC */
 @media (min-width: 600px) {
-  .main-container h1 {
-    font-size: 32px;
-    margin-bottom: 20px;
-  }
+	.main-container h1 {
+		font-size: 32px;
+		margin-bottom: 20px;
+	}
 
-  .main-container p {
-    font-size: 16px;
-  }
+	.main-container p {
+		font-size: 16px;
+	}
 }
 
 /* ============================================
 // MARKDOWN
-// ============================================ 
+// ============================================
 */
 
 .table-markdown {
-  font-family:
-    "JetBrains Mono",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    "Roboto",
-    "Oxygen",
-    "Ubuntu",
-    "Cantarell",
-    "Fira Sans",
-    "Droid Sans",
-    "Helvetica Neue",
-    sans-serif;
-  font-size: 15px;
-  color: var(--text-2);
-  background: var(--bg-2);
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin: 0;
-  line-height: 1.7;
+	font-family:
+		"JetBrains Mono",
+		-apple-system,
+		BlinkMacSystemFont,
+		"Segoe UI",
+		"Roboto",
+		"Oxygen",
+		"Ubuntu",
+		"Cantarell",
+		"Fira Sans",
+		"Droid Sans",
+		"Helvetica Neue",
+		sans-serif;
+	font-size: 15px;
+	color: var(--text-2);
+	background: var(--bg-2);
+	border-radius: 8px;
+	padding: 12px 16px;
+	margin: 0;
+	line-height: 1.7;
 }
 
 .table-markdown h1,
@@ -180,141 +180,141 @@ code {
 .table-markdown h4,
 .table-markdown h5,
 .table-markdown h6 {
-  color: var(--text);
-  font-weight: 600;
-  margin: 12px 0 8px 0;
-  font-size: 1.1em;
+	color: var(--text);
+	font-weight: 600;
+	margin: 12px 0 8px 0;
+	font-size: 1.1em;
 }
 
 .table-markdown ul,
 .table-markdown ol {
-  margin: 8px 0 8px 18px;
-  padding: 0 0 0 18px;
-  list-style: disc inside;
+	margin: 8px 0 8px 18px;
+	padding: 0 0 0 18px;
+	list-style: disc inside;
 }
 
 .table-markdown ul li,
 .table-markdown ol li {
-  margin-bottom: 6px !important;
-  color: var(--text-2) !important;
-  border: none !important;
-  font-size: 13px !important;
-  padding: 0 !important;
-  list-style: disc inside !important;
-  line-height: 1.4;
+	margin-bottom: 6px !important;
+	color: var(--text-2) !important;
+	border: none !important;
+	font-size: 13px !important;
+	padding: 0 !important;
+	list-style: disc inside !important;
+	line-height: 1.4;
 }
 
 .table-markdown strong {
-  color: var(--text);
+	color: var(--text);
 }
 
 .table-markdown em {
-  color: var(--text-2);
+	color: var(--text-2);
 }
 
 .table-markdown hr {
-  border: none;
-  border-top: 1px solid var(--divider);
-  margin: 12px 0;
+	border: none;
+	border-top: 1px solid var(--divider);
+	margin: 12px 0;
 }
 
 .table-markdown p {
-  margin: 10px 0 8px 0;
-  font-size: 13px;
-  color: var(--text-2);
+	margin: 10px 0 8px 0;
+	font-size: 13px;
+	color: var(--text-2);
 }
 
 .table-markdown a {
-  color: var(--text-url);
-  font-weight: 500;
+	color: var(--text-url);
+	font-weight: 500;
 }
 
 .table-markdown ul ul,
 .table-markdown ol ol,
 .table-markdown ul ol,
 .table-markdown ol ul {
-  padding: 2px 12px 2px 16px;
-  font-size: 0.97em;
+	padding: 2px 12px 2px 16px;
+	font-size: 0.97em;
 }
 
 .table-markdown ul ul li,
 .table-markdown ol ol li,
 .table-markdown ul ol li,
 .table-markdown.ol ul li {
-  color: var(--text-2);
-  font-size: 13px;
-  margin-bottom: 4px !important;
-  background: none;
-  border: none;
-  position: relative;
-  list-style: none !important;
-  margin-left: 16px !important;
+	color: var(--text-2);
+	font-size: 13px;
+	margin-bottom: 4px !important;
+	background: none;
+	border: none;
+	position: relative;
+	list-style: none !important;
+	margin-left: 16px !important;
 }
 
 .table-markdown ul ul li::before,
 .table-markdown ol ol li::before,
 .table-markdown ul ol li::before,
 .table-markdown.ol ul li::before {
-  content: "‣";
-  color: var(--text-2);
-  font-weight: bold;
-  position: absolute;
-  left: -1em;
+	content: "‣";
+	color: var(--text-2);
+	font-weight: bold;
+	position: absolute;
+	left: -1em;
 }
 
 /* ============================================
 // OCULTAR SCROLLBAR EN TODA LA PAGINA
-// ============================================ 
+// ============================================
 */
 html {
-  scrollbar-width: none;
-  /* Firefox */
+	scrollbar-width: none;
+	/* Firefox */
 }
 
 body::-webkit-scrollbar {
-  display: none;
-  /* Chrome, Safari, Edge */
+	display: none;
+	/* Chrome, Safari, Edge */
 }
 
 /* ============================================
 // ESTILOS PARA ENLACES
-// ============================================ 
+// ============================================
 */
 a {
-  color: inherit;
-  text-decoration: none;
+	color: inherit;
+	text-decoration: none;
 }
 
 /* ============================================
 // ESTILOS PARA IMAGENES
-// ============================================ 
+// ============================================
 */
 img {
-  max-width: 100%;
-  height: auto;
-  display: block;
+	max-width: 100%;
+	height: auto;
+	display: block;
 }
 
 /* ============================================
 // UTILIDADES COMUNES
-// ============================================ 
+// ============================================
 */
 .flex {
-  display: flex;
+	display: flex;
 }
 
 .flex-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .flex-column {
-  display: flex;
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
 
 th,
 td {
-  text-align: left;
+	text-align: left;
 }

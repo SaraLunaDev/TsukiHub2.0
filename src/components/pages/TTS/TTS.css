@@ -1,4 +1,510 @@
 /* ============================================
 // ESTILOS DE LA PAGINA TTS
-// ============================================ 
+// ============================================
 */
+
+/* ============================================
+   ASSET BUTTONS (voices & sounds)
+   - Visual style inspired by the provided snippet
+   - Uses app color variables from src/App.css (eg. --button, --text, --text-2)
+   ============================================ */
+
+.tts-assets-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: 0.6rem;
+	padding-top: 8px;
+}
+
+.favorites-container {
+	padding-top: 8px;
+	padding-bottom: 8px;
+	margin-bottom: 8px;
+	border-bottom: 1px solid var(--divider);
+}
+
+.tts-asset-button {
+	--button_radius: 0.75em;
+	--button_color: var(--button);
+	--button_outline_color: var(--button-3d);
+	font-size: 14px;
+	font-weight: bold;
+	border: none;
+	cursor: pointer;
+	border-radius: var(--button_radius);
+	background: var(--button_outline_color);
+	padding: 0;
+	display: inline-block;
+	width: 100%;
+	text-align: left;
+	outline: none;
+}
+
+.tts-button-top {
+	display: block;
+	box-sizing: border-box;
+	border: 2px solid var(--button_outline_color);
+	border-radius: var(--button_radius);
+	padding: 0.44em 0.64em;
+	background: var(--button_color);
+	color: var(--button_outline_color);
+	transform: translateY(-0.4em);
+	transition:
+		transform 0.1s ease,
+		box-shadow 0.15s ease,
+		border-color 0.15s ease;
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	justify-content: flex-start;
+}
+
+.tts-asset-button.playing .tts-button-top {
+	transform: translateY(0);
+	background-color: var(--dark-2);
+}
+
+.tts-asset-button.playing .tts-asset-id {
+	opacity: 0.25;
+}
+
+.tts-asset-button.playing .tts-asset-name {
+	opacity: 0.25;
+}
+
+.tts-asset-button.playing .tts-asset-star {
+	opacity: 0.25;
+}
+
+.tts-asset-id {
+	background: var(--color-voice);
+	padding: 2px 5px;
+	border-radius: 0.25em;
+	font-size: 0.95em;
+	color: var(--text);
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 1);
+	min-width: 2.2em;
+	text-align: center;
+	flex: 0 0 auto;
+}
+
+.voces-section .tts-asset-id {
+	background: var(--color-voice);
+}
+.sonidos-section .tts-asset-id {
+	background: var(--color-sound);
+}
+
+.tts-asset-name {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--text-2);
+	flex: 1 1 auto;
+}
+
+/* Position for star (replace ID on hover), and responsive behavior */
+.asset-item {
+	position: relative;
+	/* ensure children absolute positioning is relative to this item */
+}
+
+/* Ensure the button content stays above the star when needed */
+.tts-button-top {
+	position: relative;
+	z-index: 1;
+}
+
+/* Favorite toggle (inline, sits at row end) - hidden by default, visible on hover and always visible for favorites */
+.fav-toggle {
+	background: transparent;
+	border: none;
+	padding: 0;
+	margin: 0;
+	width: 1.6em;
+	height: 1.6em;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-2);
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		opacity 0.12s ease,
+		color 0.12s ease,
+		visibility 0.12s;
+	cursor: pointer;
+	margin-left: auto; /* push to the right inside the flex row */
+}
+
+/* Star SVG sizing inside the fav button */
+.fav-toggle .tts-asset-star {
+	width: 1em;
+	height: 1em;
+	display: block;
+}
+
+/* Show star on hover; keep ID visible. Favorite items show star always */
+.asset-item:hover .fav-toggle {
+	opacity: 1;
+	visibility: visible;
+}
+.asset-item.favorite .fav-toggle {
+	opacity: 1;
+	visibility: visible;
+}
+
+/* Favorite color (when it's actually favorited) - use type colors */
+.voces-section .fav-toggle.fav {
+	color: var(--color-voice);
+}
+.sonidos-section .fav-toggle.fav {
+	color: var(--color-sound);
+}
+
+.searchbar-tts {
+	padding-top: 2px;
+	padding-bottom: 14px;
+	margin-bottom: 8px;
+	border-bottom: 1px solid var(--divider);
+}
+
+/* Small screens: keep grid responsive, but hide the hover-star (use long-press instead) */
+@media (max-width: 728px) {
+	.tts-assets-list {
+		grid-template-columns: repeat(2, 1fr);
+	}
+	.tts-asset-name {
+		max-width: 8ch;
+	}
+	.fav-toggle {
+		display: none; /* star hidden on touch devices (long-press behavior in JS) */
+	}
+}
+
+/* Left-column layout for TTS page */
+.tts-wrapper {
+	position: relative;
+	display: flex;
+	gap: 16px;
+	align-items: stretch;
+}
+
+.tts-data-container {
+	position: relative;
+	flex: 0 0 300px;
+	width: 300px;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	max-width: 300px;
+}
+
+.tts-data-container .top-section h2 {
+	display: flex;
+	align-items: center;
+}
+
+.tts-data-container .inset-section {
+	flex: 1;
+	overflow: auto;
+}
+
+.inset-section.text-validator-section {
+	flex: 0 0 auto;
+	min-height: 100px;
+	box-sizing: border-box;
+	padding: 6px;
+	margin-bottom: 16px;
+}
+
+.text-validator {
+	position: relative;
+	width: 100%;
+	height: auto;
+	border-radius: 8px;
+	background: var(--dark);
+	padding: 6px;
+	box-sizing: border-box;
+	overflow: visible;
+	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.25);
+}
+
+.text-validator .highlight {
+	position: absolute;
+	inset: 0;
+	color: var(--text);
+	white-space: pre-wrap;
+	overflow: visible;
+	pointer-events: none;
+	font-family: inherit;
+	line-height: 1.385;
+	font-size: 13px;
+	padding: 12px;
+	z-index: 1;
+	font-weight: 800;
+}
+
+.text-validator .textarea {
+	position: relative;
+	z-index: 2;
+	display: block;
+	width: 100%;
+	border: none;
+	outline: none;
+	background: transparent;
+	color: transparent;
+	-webkit-text-fill-color: transparent;
+	caret-color: var(--text);
+	resize: none;
+	min-height: 88px;
+	height: auto;
+	box-sizing: border-box;
+	font-family: inherit;
+	line-height: 18px;
+	font-size: 13px;
+	overflow: hidden;
+	padding: 6px 6px 10px 6px;
+	margin: 0;
+	z-index: 2;
+	font-weight: 800;
+}
+
+.text-validator .textarea::placeholder {
+	color: var(--text-2);
+	-webkit-text-fill-color: var(--text-2);
+	opacity: 0.9;
+}
+
+.text-validator .textarea::-webkit-input-placeholder {
+	color: var(--text-2);
+	-webkit-text-fill-color: var(--text-2);
+	opacity: 0.9;
+}
+
+.text-validator .textarea:-ms-input-placeholder {
+	color: var(--text-2);
+	-webkit-text-fill-color: var(--text-2);
+	opacity: 0.9;
+}
+
+.text-validator .textarea::selection {
+	background: rgba(255, 255, 255, 0.12);
+	color: inherit;
+}
+.text-validator .textarea::-moz-selection {
+	background: rgba(255, 255, 255, 0.12);
+	color: inherit;
+}
+
+.text-validator .progress-bar {
+	position: absolute;
+	left: 6px;
+	right: 6px;
+	bottom: 6px;
+	height: 6px;
+	background: rgba(255, 255, 255, 0.06);
+	border-radius: 999px;
+	overflow: hidden;
+	z-index: 4;
+}
+
+.text-validator .progress-fill {
+	height: 100%;
+	width: 0%;
+	background: var(--color-voice);
+	transition:
+		width 120ms linear,
+		background 120ms linear;
+	border-radius: 999px;
+}
+
+.text-validator .progress-fill.limit {
+	background: var(--error);
+}
+
+.text-validator .token-voice {
+	color: var(--color-voice);
+}
+
+.text-validator .token-sound {
+	color: var(--color-sound);
+}
+
+.tts-container {
+	flex: 1;
+	width: auto;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+@media (max-width: 600px) {
+	.tts-wrapper {
+		flex-direction: column;
+	}
+	.tts-data-container {
+		position: static;
+		flex: 0 0 auto;
+		width: 100%;
+		max-width: 100%;
+		order: -1; /* Ensure it appears first */
+	}
+	.tts-container {
+		width: 100%;
+		margin-left: 0;
+		order: 1; /* Ensure it appears second */
+	}
+	.tts-container .top-section {
+		padding: 4px;
+	}
+}
+
+@media (min-width: 600px) {
+	.user-search-container {
+		display: none;
+	}
+
+	.voces-section {
+		flex: 0 0 auto;
+	}
+
+	.sonidos-section {
+		display: flex;
+		flex-direction: column;
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+
+	.sonidos-section .inset-section.muelle-sonido {
+		flex: 1 1 auto;
+		min-height: 0;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+	}
+	.sonidos-section .inset-section.muelle-sonido .searchbar-tts {
+		position: static;
+		z-index: auto;
+		background: inherit;
+	}
+	.sonidos-section .inset-section.muelle-sonido .muelle-sonido-scroll {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow: auto;
+		scrollbar-width: none;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+	}
+	.sonidos-section
+		.inset-section.muelle-sonido
+		.muelle-sonido-scroll::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+@media (min-width: 600px) {
+	.tts-container {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: calc(300px + 16px);
+		right: 0;
+		display: flex;
+		flex-direction: column;
+		width: auto;
+		min-height: 0;
+	}
+
+	.sonidos-section {
+		display: flex;
+		flex-direction: column;
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+
+	.sonidos-section .inset-section.muelle-sonido {
+		flex: 1 1 auto;
+		min-height: 0;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+	}
+	.sonidos-section .inset-section.muelle-sonido .searchbar-tts {
+		position: static;
+		z-index: auto;
+		background: inherit;
+	}
+	.sonidos-section .inset-section.muelle-sonido .muelle-sonido-scroll {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow: auto;
+		scrollbar-width: none;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+	}
+	.sonidos-section
+		.inset-section.muelle-sonido
+		.muelle-sonido-scroll::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+.tts-tutorial-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 8px;
+}
+
+.tutorial-section {
+	margin: 0;
+}
+.tutorial-section.spaced {
+	margin-top: 8px;
+}
+
+.tutorial-title {
+	margin: 0 0 6px;
+	font-size: 14px !important;
+}
+
+.tutorial-text {
+	margin: 0;
+	color: var(--text-2);
+	font-size: 13px !important;
+}
+
+.tutorial-example {
+	background: var(--dark);
+	border-radius: 8px;
+	padding: 6px 10px;
+	margin-top: 8px;
+	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.25);
+}
+
+.tutorial-code {
+	margin: 0;
+	font-family:
+		ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono",
+		"Courier New", monospace;
+	font-size: 14px;
+	color: var(--text-2);
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+.tutorial-voice-tag {
+	color: var(--color-voice);
+	font-weight: 700;
+}
+.tutorial-voice-tag.sound {
+	color: var(--color-sound);
+}
+
+.tutorial-divider {
+	margin-top: 8px;
+	border-top: 1px solid var(--border);
+}

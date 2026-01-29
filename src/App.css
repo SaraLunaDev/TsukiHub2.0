@@ -5,62 +5,64 @@
 
 /* ============================================
 // MODO OSCURO
-// ============================================ 
+// ============================================
 */
 :root {
-  --navbar: #20262d;
-  --dark: #13181d;
-  --dark-2: #181d23;
-  --item: #20262d;
-  --text: #e6e6e6;
-  --text-2: #a0a8b2;
-  --button: #20262d;
-  --genero: #20262d7c;
-  --text-url: #ca6e6e;
-  --divider: #ffffff1e;
-  --border: #33363a;
-  --row-bg: #161c22;
-  --row-bg2: #1b2229;
-  --box-shadow-inset: inset 0 0 10px rgba(0, 0, 0, 0.25);
-  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  --font-main: "JetBrains Mono", monospace;
-  --color-mid: #ff8888;
-  --error: #a02f2f;
-  --shiny-glow: drop-shadow(0 0 2px rgb(255, 244, 180));
+	--navbar: #20262d;
+	--dark: #13181d;
+	--dark-2: #181d23;
+	--item: #20262d;
+	--text: #e6e6e6;
+	--text-2: #a0a8b2;
+	--button: #20262d;
+	--button-3d: #10151a;
+	--text-url: #ca6e6e;
+	--divider: #ffffff1e;
+	--border: #33363a;
+	--row-bg: #161c22;
+	--row-bg2: #1b2229;
+	--box-shadow-inset: inset 0 0 10px rgba(0, 0, 0, 0.25);
+	--box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+	--font-main: "JetBrains Mono", monospace;
+	--color-mid: #ff8888;
+	--error: #a02f2f;
+	--color-voice: #ff8888;
+	--color-sound: #8888ff;
+	--shiny-glow: drop-shadow(0 0 2px rgb(255, 244, 180));
 }
 
 /* ============================================
 // MODO CLARO
-// ============================================ 
+// ============================================
 */
 body:not(.dark-mode) {
-  --navbar: #ffffff;
-  --dark: #f5f5f5;
-  --dark-2: #eeeeee;
-  --item: #ffffff;
-  --text: #333333;
-  --text-2: #666666;
-  --text-url: #ff8888;
-  --button: #ffffff;
-  --genero: #ffffff7c;
-  --divider: #e0e0e0;
-  --border: #c0c0c0;
-  --row-bg: #ffffff;
-  --row-bg2: #f9f9f9;
-  --box-shadow-inset: inset 0 0 10px rgba(0, 0, 0, 0.25);
-  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  --font-main: "JetBrains Mono", monospace;
-  --color-mid: #ff8888;
-  --error: #a02f2f;
-  --shiny-glow: drop-shadow(0 0 2px rgb(255, 217, 0));
+	--navbar: #ffffff;
+	--dark: #f5f5f5;
+	--dark-2: #eeeeee;
+	--item: #ffffff;
+	--text: #333333;
+	--text-2: #666666;
+	--text-url: #ff8888;
+	--button: #ffffff;
+	--button-3d: #f5f5f5;
+	--divider: #e0e0e0;
+	--border: #c0c0c0;
+	--row-bg: #ffffff;
+	--row-bg2: #f9f9f9;
+	--box-shadow-inset: inset 0 0 10px rgba(0, 0, 0, 0.25);
+	--box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+	--font-main: "JetBrains Mono", monospace;
+	--color-mid: #ff8888;
+	--error: #a02f2f;
+	--shiny-glow: drop-shadow(0 0 2px rgb(255, 217, 0));
 }
 
 /* ============================================
 // ESTILOS BASE DEL APP
-// ============================================ 
+// ============================================
 */
 .App {
-  min-height: 100vh;
-  background-color: var(--dark);
-  color: var(--text);
+	min-height: 100vh;
+	background-color: var(--dark);
+	color: var(--text);
 }
