@@ -242,8 +242,10 @@ export default function TTS() {
 	};
 
 	const isFavorite = (type, name) => {
-		if (type === "voice") return favVoices.some((f) => f.name === name);
-		return favSounds.some((f) => f.name === name);
+		const norm = nameWithoutId(name);
+		if (type === "voice")
+			return favVoices.some((f) => nameWithoutId(f.name) === norm);
+		return favSounds.some((f) => nameWithoutId(f.name) === norm);
 	};
 
 	const toggleFavorite = (type, asset) => {
@@ -251,9 +253,12 @@ export default function TTS() {
 		const isVoice = type === "voice";
 		const setter = isVoice ? setFavVoices : setFavSounds;
 		setter((prev) => {
-			const exists = prev.some((f) => f.name === asset.name);
+			const normalized = nameWithoutId(asset.name);
+			const exists = prev.some(
+				(f) => nameWithoutId(f.name) === normalized,
+			);
 			const next = exists
-				? prev.filter((f) => f.name !== asset.name)
+				? prev.filter((f) => nameWithoutId(f.name) !== normalized)
 				: sortById([...prev, normalizeFavItem(type, asset)]);
 			if (isVoice) persistToServer(next, favSounds);
 			else persistToServer(favVoices, next);
