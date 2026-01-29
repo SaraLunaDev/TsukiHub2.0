@@ -19,6 +19,18 @@ const nameWithoutId = (name = "") => {
 	return idx === -1 ? base : base.slice(idx + 1);
 };
 
+const getIdFromUrl = (url = "") => {
+	if (!url) return Infinity;
+	try {
+		const parts = String(url).split("/");
+		const last = parts[parts.length - 1] || "";
+		const decoded = decodeURIComponent(last);
+		return getIdFromName(decoded);
+	} catch (e) {
+		return Infinity;
+	}
+};
+
 const normalizeFavItem = (type, raw) => {
 	if (!raw) return null;
 	if (typeof raw === "string") {
@@ -29,6 +41,9 @@ const normalizeFavItem = (type, raw) => {
 		return {
 			name: raw.name,
 			url: raw.url || `/static/${type}s/${encodeURIComponent(raw.name)}`,
+			...(typeof raw.id !== "undefined" && raw.id !== null
+				? { id: raw.id }
+				: {}),
 		};
 	}
 	return null;
@@ -36,8 +51,27 @@ const normalizeFavItem = (type, raw) => {
 
 const sortById = (arr = []) =>
 	(arr || [])
+		.filter(Boolean)
 		.slice()
-		.sort((a, b) => getIdFromName(a.name) - getIdFromName(b.name));
+		.sort((a, b) => {
+			const urlA = getIdFromUrl(a?.url);
+			const urlB = getIdFromUrl(b?.url);
+			const idA =
+				typeof a?.id !== "undefined" && a.id !== null
+					? a.id
+					: Number.isFinite(urlA)
+						? urlA
+						: getIdFromName(a.name);
+			const idB =
+				typeof b?.id !== "undefined" && b.id !== null
+					? b.id
+					: Number.isFinite(urlB)
+						? urlB
+						: getIdFromName(b.name);
+			const valA = idA === Infinity ? Number.MAX_SAFE_INTEGER : idA;
+			const valB = idB === Infinity ? Number.MAX_SAFE_INTEGER : idB;
+			return valA - valB;
+		});
 
 export default function TTS() {
 	const [voices, setVoices] = useState([]);
@@ -53,7 +87,7 @@ export default function TTS() {
 	const longPressTriggeredRef = useRef(false);
 	const LONG_PRESS_MS = 1200;
 
-	const matchesItem = (name = "", idx, search = "") => {
+	const matchesItem = (name = "", idCandidate, search = "") => {
 		const q = String(search || "")
 			.toLowerCase()
 			.trim();
@@ -62,10 +96,10 @@ export default function TTS() {
 		if (namePart.includes(q)) return true;
 		const idNum = getIdFromName(name);
 		if (idNum === Infinity) {
-			if (typeof idx === "number") {
-				const fileIdPadded = String(idx + 1).padStart(2, "0");
+			if (typeof idCandidate === "number") {
+				const fileIdPadded = String(idCandidate).padStart(2, "0");
 				if (fileIdPadded.includes(q)) return true;
-				if (String(idx + 1).includes(q)) return true;
+				if (String(idCandidate).includes(q)) return true;
 			} else {
 				if (name.toLowerCase().includes(q)) return true;
 			}
@@ -86,10 +120,31 @@ export default function TTS() {
 				const mapAndSort = (arr = [], type) =>
 					(arr || [])
 						.map((x) => normalizeFavItem(type, x))
-						.sort(
-							(a, b) =>
-								getIdFromName(a.name) - getIdFromName(b.name),
-						);
+						.sort((a, b) => {
+							const urlA = getIdFromUrl(a?.url);
+							const urlB = getIdFromUrl(b?.url);
+							const idA =
+								typeof a?.id !== "undefined" && a.id !== null
+									? a.id
+									: Number.isFinite(urlA)
+										? urlA
+										: getIdFromName(a.name);
+							const idB =
+								typeof b?.id !== "undefined" && b.id !== null
+									? b.id
+									: Number.isFinite(urlB)
+										? urlB
+										: getIdFromName(b.name);
+							const valA =
+								idA === Infinity
+									? Number.MAX_SAFE_INTEGER
+									: idA;
+							const valB =
+								idB === Infinity
+									? Number.MAX_SAFE_INTEGER
+									: idB;
+							return valA - valB;
+						});
 				if (data.voices) setVoices(mapAndSort(data.voices, "voice"));
 				if (data.sounds) setSounds(mapAndSort(data.sounds, "sound"));
 			})
@@ -241,11 +296,46 @@ export default function TTS() {
 		}
 	};
 
-	const isFavorite = (type, name) => {
-		const norm = nameWithoutId(name);
-		if (type === "voice")
-			return favVoices.some((f) => nameWithoutId(f.name) === norm);
-		return favSounds.some((f) => nameWithoutId(f.name) === norm);
+	const isFavorite = (type, nameOrItem) => {
+		const list = type === "voice" ? favVoices : favSounds;
+		if (!nameOrItem) return false;
+		let idCandidate;
+		let nameCandidate;
+		if (typeof nameOrItem === "string") {
+			nameCandidate = nameOrItem;
+		} else {
+			nameCandidate = nameOrItem.name;
+			if (
+				typeof nameOrItem.id !== "undefined" &&
+				nameOrItem.id !== null
+			) {
+				idCandidate = nameOrItem.id;
+			} else {
+				const urlId = getIdFromUrl(nameOrItem.url);
+				if (Number.isFinite(urlId)) idCandidate = urlId;
+				else {
+					const nId = getIdFromName(nameOrItem.name);
+					if (Number.isFinite(nId)) idCandidate = nId;
+				}
+			}
+		}
+		return list.some((f) => {
+			if (typeof idCandidate !== "undefined") {
+				if (
+					typeof f.id !== "undefined" &&
+					f.id !== null &&
+					f.id === idCandidate
+				)
+					return true;
+				const fUrlId = getIdFromUrl(f.url);
+				if (Number.isFinite(fUrlId) && fUrlId === idCandidate)
+					return true;
+			}
+			if (f.name === nameCandidate) return true;
+			if (nameWithoutId(f.name) === nameWithoutId(nameCandidate))
+				return true;
+			return false;
+		});
 	};
 
 	const toggleFavorite = (type, asset) => {
@@ -253,12 +343,32 @@ export default function TTS() {
 		const isVoice = type === "voice";
 		const setter = isVoice ? setFavVoices : setFavSounds;
 		setter((prev) => {
-			const normalized = nameWithoutId(asset.name);
-			const exists = prev.some(
-				(f) => nameWithoutId(f.name) === normalized,
-			);
+			const matches = (f, a) => {
+				if (!f || !a) return false;
+				const fId =
+					typeof f.id !== "undefined" && f.id !== null
+						? f.id
+						: Number.isFinite(getIdFromUrl(f.url))
+							? getIdFromUrl(f.url)
+							: getIdFromName(f.name);
+				const aId =
+					typeof a.id !== "undefined" && a.id !== null
+						? a.id
+						: Number.isFinite(getIdFromUrl(a.url))
+							? getIdFromUrl(a.url)
+							: getIdFromName(a.name);
+				if (Number.isFinite(fId) && Number.isFinite(aId))
+					return fId === aId;
+				if (nameWithoutId(f.name) === nameWithoutId(a.name))
+					return true;
+				return (
+					(f.name || "").toLowerCase() ===
+					(a.name || "").toLowerCase()
+				);
+			};
+			const exists = prev.some((f) => matches(f, asset));
 			const next = exists
-				? prev.filter((f) => nameWithoutId(f.name) !== normalized)
+				? prev.filter((f) => !matches(f, asset))
 				: sortById([...prev, normalizeFavItem(type, asset)]);
 			if (isVoice) persistToServer(next, favSounds);
 			else persistToServer(favVoices, next);
@@ -369,20 +479,29 @@ export default function TTS() {
 							{favVoices && favVoices.length > 0 && (
 								<div className="favorites-container tts-assets-list">
 									{favVoices.map((f) => {
+										const urlFid = getIdFromUrl(f.url);
+										const fidNumber =
+											typeof f.id !== "undefined" &&
+											f.id !== null
+												? f.id
+												: Number.isFinite(urlFid)
+													? urlFid
+													: getIdFromName(f.name);
 										if (
 											!matchesItem(
 												f.name,
-												undefined,
+												fidNumber,
 												voiceSearch,
 											)
 										)
 											return null;
 										const fid =
-											getIdFromName(f.name) === Infinity
+											fidNumber === Infinity
 												? f.name
-												: String(
-														getIdFromName(f.name),
-													).padStart(2, "0");
+												: String(fidNumber).padStart(
+														2,
+														"0",
+													);
 										const id = `voice-${fid}`;
 										return (
 											<div
@@ -474,49 +593,90 @@ export default function TTS() {
 							)}
 
 							<div className="tts-assets-list">
-								{voices.map((v, idx) => {
-									if (isFavorite("voice", v.name))
-										return null;
-									if (!matchesItem(v.name, idx, voiceSearch))
-										return null;
-									const fileId =
-										getIdFromName(v.name) === Infinity
-											? String(idx + 1).padStart(2, "0")
-											: String(
-													getIdFromName(v.name),
-												).padStart(2, "0");
-									const id = `voice-${fileId}`;
-									const fav = isFavorite("voice", v.name);
-									return (
-										<div key={id} className="asset-item">
-											<div
-												className={`tts-asset-button ${playingId === id ? "playing" : ""}`}
-												role="button"
-												tabIndex={0}
-												onTouchStart={() =>
-													handleTouchStart(v, "voice")
-												}
-												onTouchEnd={handleTouchEnd}
-												onClick={(e) => {
-													if (
-														longPressTriggeredRef.current
-													) {
-														longPressTriggeredRef.current = false;
-														return;
-													}
-													playAsset(
-														v,
-														"voice",
-														fileId,
+								{(voices || [])
+									.slice()
+									.sort((a, b) => {
+										const urlA = getIdFromUrl(a?.url);
+										const urlB = getIdFromUrl(b?.url);
+										const idA =
+											typeof a?.id !== "undefined" &&
+											a.id !== null
+												? a.id
+												: Number.isFinite(urlA)
+													? urlA
+													: getIdFromName(a.name);
+										const idB =
+											typeof b?.id !== "undefined" &&
+											b.id !== null
+												? b.id
+												: Number.isFinite(urlB)
+													? urlB
+													: getIdFromName(b.name);
+										const valA =
+											idA === Infinity
+												? Number.MAX_SAFE_INTEGER
+												: idA;
+										const valB =
+											idB === Infinity
+												? Number.MAX_SAFE_INTEGER
+												: idB;
+										return valA - valB;
+									})
+									.map((v, idx) => {
+										if (isFavorite("voice", v.name))
+											return null;
+										const urlId = getIdFromUrl(v.url);
+										const idCandidate =
+											typeof v.id !== "undefined" &&
+											v.id !== null
+												? v.id
+												: Number.isFinite(urlId)
+													? urlId
+													: idx + 1;
+										if (
+											!matchesItem(
+												v.name,
+												idCandidate,
+												voiceSearch,
+											)
+										)
+											return null;
+										const idNum =
+											typeof v.id !== "undefined" &&
+											v.id !== null
+												? v.id
+												: Number.isFinite(urlId)
+													? urlId
+													: getIdFromName(v.name);
+										const fileId =
+											idNum === Infinity
+												? String(idx + 1).padStart(
+														2,
+														"0",
+													)
+												: String(idNum).padStart(
+														2,
+														"0",
 													);
-												}}
-												onKeyDown={(e) => {
-													if (
-														e.key === "Enter" ||
-														e.key === " " ||
-														e.key === "Spacebar"
-													) {
-														e.preventDefault();
+										const id = `voice-${fileId}`;
+										const fav = isFavorite("voice", v.name);
+										return (
+											<div
+												key={id}
+												className="asset-item"
+											>
+												<div
+													className={`tts-asset-button ${playingId === id ? "playing" : ""}`}
+													role="button"
+													tabIndex={0}
+													onTouchStart={() =>
+														handleTouchStart(
+															v,
+															"voice",
+														)
+													}
+													onTouchEnd={handleTouchEnd}
+													onClick={(e) => {
 														if (
 															longPressTriggeredRef.current
 														) {
@@ -528,44 +688,69 @@ export default function TTS() {
 															"voice",
 															fileId,
 														);
-													}
-												}}
-												aria-label={`Play voice ${nameWithoutId(v.name)}`}
-												aria-pressed={playingId === id}
-												title={nameWithoutId(v.name)}
-											>
-												<span className="tts-button-top">
-													<span className="tts-asset-id">
-														{fileId}
-													</span>
-													<span className="tts-asset-name">
-														{nameWithoutId(v.name)}
-													</span>
-													<button
-														className={`fav-toggle ${fav ? "fav" : ""}`}
-														onClick={(e) => {
-															e.stopPropagation();
-															toggleFavorite(
-																"voice",
+													}}
+													onKeyDown={(e) => {
+														if (
+															e.key === "Enter" ||
+															e.key === " " ||
+															e.key === "Spacebar"
+														) {
+															e.preventDefault();
+															if (
+																longPressTriggeredRef.current
+															) {
+																longPressTriggeredRef.current = false;
+																return;
+															}
+															playAsset(
 																v,
+																"voice",
+																fileId,
 															);
-														}}
-														aria-label={
-															fav
-																? "Remove from favorites"
-																: "Add to favorites"
 														}
-													>
-														<MaterialSymbolsLightKidStar
-															className="tts-asset-star"
-															aria-hidden="true"
-														/>
-													</button>
-												</span>
+													}}
+													aria-label={`Play voice ${nameWithoutId(v.name)}`}
+													aria-pressed={
+														playingId === id
+													}
+													title={nameWithoutId(
+														v.name,
+													)}
+												>
+													<span className="tts-button-top">
+														<span className="tts-asset-id">
+															{fileId}
+														</span>
+														<span className="tts-asset-name">
+															{nameWithoutId(
+																v.name,
+															)}
+														</span>
+														<button
+															className={`fav-toggle ${fav ? "fav" : ""}`}
+															onClick={(e) => {
+																e.stopPropagation();
+																toggleFavorite(
+																	"voice",
+																	v,
+																);
+															}}
+															aria-label={
+																fav
+																	? "Remove from favorites"
+																	: "Add to favorites"
+															}
+														>
+															<MaterialSymbolsLightKidStar
+																className="tts-asset-star"
+																aria-hidden="true"
+															/>
+														</button>
+													</span>
+												</div>
 											</div>
-										</div>
-									);
-								})}
+										);
+									})}
 							</div>
 						</div>
 					</div>
@@ -590,22 +775,27 @@ export default function TTS() {
 								{favSounds && favSounds.length > 0 && (
 									<div className="favorites-container tts-assets-list">
 										{favSounds.map((f) => {
+											const urlFid = getIdFromUrl(f.url);
+											const fidNumber =
+												typeof f.id !== "undefined" &&
+												f.id !== null
+													? f.id
+													: Number.isFinite(urlFid)
+														? urlFid
+														: getIdFromName(f.name);
 											if (
 												!matchesItem(
 													f.name,
-													undefined,
+													fidNumber,
 													soundSearch,
 												)
 											)
 												return null;
 											const fid =
-												getIdFromName(f.name) ===
-												Infinity
+												fidNumber === Infinity
 													? f.name
 													: String(
-															getIdFromName(
-																f.name,
-															),
+															fidNumber,
 														).padStart(2, "0");
 											const id = `sound-${fid}`;
 											return (
@@ -704,64 +894,95 @@ export default function TTS() {
 								)}
 
 								<div className="tts-assets-list">
-									{sounds.map((s, idx) => {
-										if (isFavorite("sound", s.name))
-											return null;
-										if (
-											!matchesItem(
-												s.name,
-												idx,
-												soundSearch,
+									{(sounds || [])
+										.slice()
+										.sort((a, b) => {
+											const urlA = getIdFromUrl(a?.url);
+											const urlB = getIdFromUrl(b?.url);
+											const idA =
+												typeof a?.id !== "undefined" &&
+												a.id !== null
+													? a.id
+													: Number.isFinite(urlA)
+														? urlA
+														: getIdFromName(a.name);
+											const idB =
+												typeof b?.id !== "undefined" &&
+												b.id !== null
+													? b.id
+													: Number.isFinite(urlB)
+														? urlB
+														: getIdFromName(b.name);
+											const valA =
+												idA === Infinity
+													? Number.MAX_SAFE_INTEGER
+													: idA;
+											const valB =
+												idB === Infinity
+													? Number.MAX_SAFE_INTEGER
+													: idB;
+											return valA - valB;
+										})
+										.map((s, idx) => {
+											if (isFavorite("sound", s.name))
+												return null;
+											const urlId = getIdFromUrl(s.url);
+											const idCandidate =
+												typeof s.id !== "undefined" &&
+												s.id !== null
+													? s.id
+													: Number.isFinite(urlId)
+														? urlId
+														: idx + 1;
+											if (
+												!matchesItem(
+													s.name,
+													idCandidate,
+													soundSearch,
+												)
 											)
-										)
-											return null;
-										const fileId =
-											getIdFromName(s.name) === Infinity
-												? String(idx + 1).padStart(
-														2,
-														"0",
-													)
-												: String(
-														getIdFromName(s.name),
-													).padStart(2, "0");
-										const id = `sound-${fileId}`;
-										const fav = isFavorite("sound", s.name);
-										return (
-											<div
-												key={id}
-												className="asset-item"
-											>
-												<div
-													className={`tts-asset-button ${playingId === id ? "playing" : ""}`}
-													role="button"
-													tabIndex={0}
-													onTouchStart={() =>
-														handleTouchStart(
-															s,
-															"sound",
+												return null;
+											const idNum =
+												typeof s.id !== "undefined" &&
+												s.id !== null
+													? s.id
+													: Number.isFinite(urlId)
+														? urlId
+														: getIdFromName(s.name);
+											const fileId =
+												idNum === Infinity
+													? String(idx + 1).padStart(
+															2,
+															"0",
 														)
-													}
-													onTouchEnd={handleTouchEnd}
-													onClick={(e) => {
-														if (
-															longPressTriggeredRef.current
-														) {
-															longPressTriggeredRef.current = false;
-															return;
-														}
-														playAsset(
-															s,
-															"sound",
-															fileId,
+													: String(idNum).padStart(
+															2,
+															"0",
 														);
-													}}
-													onKeyDown={(e) => {
-														if (
-															e.key === "Enter" ||
-															e.key === " " ||
-															e.key === "Spacebar"
-														) {
-															e.preventDefault();
+											const id = `sound-${fileId}`;
+											const fav = isFavorite(
+												"sound",
+												s.name,
+											);
+											return (
+												<div
+													key={id}
+													className="asset-item"
+												>
+													<div
+														className={`tts-asset-button ${playingId === id ? "playing" : ""}`}
+														role="button"
+														tabIndex={0}
+														onTouchStart={() =>
+															handleTouchStart(
+																s,
+																"sound",
+															)
+														}
+														onTouchEnd={
+															handleTouchEnd
+														}
+														onClick={(e) => {
 															if (
 																longPressTriggeredRef.current
 															) {
@@ -773,50 +994,73 @@ export default function TTS() {
 																"sound",
 																fileId,
 															);
-														}
-													}}
-													aria-label={`Play sound ${nameWithoutId(s.name)}`}
-													aria-pressed={
-														playingId === id
-													}
-													title={nameWithoutId(
-														s.name,
-													)}
-												>
-													<span className="tts-button-top">
-														<span className="tts-asset-id">
-															{fileId}
-														</span>
-														<span className="tts-asset-name">
-															{nameWithoutId(
-																s.name,
-															)}
-														</span>
-														<button
-															className={`fav-toggle ${fav ? "fav" : ""}`}
-															onClick={(e) => {
-																e.stopPropagation();
-																toggleFavorite(
-																	"sound",
+														}}
+														onKeyDown={(e) => {
+															if (
+																e.key ===
+																	"Enter" ||
+																e.key === " " ||
+																e.key ===
+																	"Spacebar"
+															) {
+																e.preventDefault();
+																if (
+																	longPressTriggeredRef.current
+																) {
+																	longPressTriggeredRef.current = false;
+																	return;
+																}
+																playAsset(
 																	s,
+																	"sound",
+																	fileId,
 																);
-															}}
-															aria-label={
-																fav
-																	? "Remove from favorites"
-																	: "Add to favorites"
 															}
-														>
-															<MaterialSymbolsLightKidStar
-																className={`tts-asset-star ${fav ? "fav" : ""}`}
-																aria-hidden="true"
-															/>
-														</button>
-													</span>
+														}}
+														aria-label={`Play sound ${nameWithoutId(s.name)}`}
+														aria-pressed={
+															playingId === id
+														}
+														title={nameWithoutId(
+															s.name,
+														)}
+													>
+														<span className="tts-button-top">
+															<span className="tts-asset-id">
+																{fileId}
+															</span>
+															<span className="tts-asset-name">
+																{nameWithoutId(
+																	s.name,
+																)}
+															</span>
+															<button
+																className={`fav-toggle ${fav ? "fav" : ""}`}
+																onClick={(
+																	e,
+																) => {
+																	e.stopPropagation();
+																	toggleFavorite(
+																		"sound",
+																		s,
+																	);
+																}}
+																aria-label={
+																	fav
+																		? "Remove from favorites"
+																		: "Add to favorites"
+																}
+															>
+																<MaterialSymbolsLightKidStar
+																	className={`tts-asset-star ${fav ? "fav" : ""}`}
+																	aria-hidden="true"
+																/>
+															</button>
+														</span>
+													</div>
 												</div>
-											</div>
-										);
-									})}
+											);
+										})}
 								</div>
 							</div>
 						</div>
