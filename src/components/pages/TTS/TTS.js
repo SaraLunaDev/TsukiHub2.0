@@ -346,7 +346,7 @@ export default function TTS() {
 				<div className="tts-container">
 					<div className="voces-section">
 						<div className="top-section">
-							<h2>Voces</h2>
+							<h2>Lista de voces</h2>
 							<div className="top-section-h2-down">
 								<span>
 									<b>{voices.length}</b> voces
@@ -566,7 +566,7 @@ export default function TTS() {
 					</div>
 					<div className="sonidos-section">
 						<div className="top-section" style={{ marginTop: 16 }}>
-							<h2>Sonidos</h2>
+							<h2>Lista de sonidos</h2>
 							<div className="top-section-h2-down">
 								<span>
 									<b>{sounds.length}</b> sonidos

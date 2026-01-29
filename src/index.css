@@ -107,6 +107,7 @@ code {
 	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: 8px;
+	font-size: 0.94em;
 }
 
 .main-container {
