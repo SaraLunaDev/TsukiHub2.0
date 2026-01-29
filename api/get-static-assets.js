@@ -16,8 +16,30 @@ export default async function handler(req, res) {
 			? path.join(projectRoot, "build")
 			: path.join(projectRoot, "public");
 
-		const voicesDir = path.join(staticDirPath, "static", "voices");
-		const soundsDir = path.join(staticDirPath, "static", "sounds");
+		const readManifest = (manifestName, urlSegment) => {
+			const manifestPath = path.join(
+				staticDirPath,
+				"static",
+				manifestName,
+			);
+			if (!fs.existsSync(manifestPath)) return null;
+			try {
+				const raw = fs.readFileSync(manifestPath, "utf8");
+				const data = JSON.parse(raw);
+				if (!Array.isArray(data)) return null;
+				return data
+					.filter((it) => it && (it.file || it.name))
+					.map((it) => ({
+						name:
+							it.name ||
+							(it.file ? it.file.replace(/\.[^.]+$/, "") : ""),
+						url: `/static/${urlSegment}/${encodeURIComponent(it.file || it.name)}`,
+					}));
+			} catch (e) {
+				// On parse/read error, fall back to directory scan
+				return null;
+			}
+		};
 
 		const readDirList = (dir, urlSegment) => {
 			if (!fs.existsSync(dir)) return [];
@@ -32,8 +54,12 @@ export default async function handler(req, res) {
 				}));
 		};
 
-		const voices = readDirList(voicesDir, "voices");
-		const sounds = readDirList(soundsDir, "sounds");
+		const voices =
+			readManifest("voices-list.json", "voices") ||
+			readDirList(path.join(staticDirPath, "static", "voices"), "voices");
+		const sounds =
+			readManifest("sounds-list.json", "sounds") ||
+			readDirList(path.join(staticDirPath, "static", "sounds"), "sounds");
 
 		return res.status(200).json({
 			voicesCount: voices.length,
