@@ -54,6 +54,54 @@ export default async function handler(req, res) {
 				}));
 		};
 
+		// Prefer a small local manifest shipped with the function bundle to avoid
+		// scanning large directories at runtime (and to handle environments where
+		// the public/build tree is not available to functions).
+		try {
+			const localManifestPath = path.join(
+				__dirname,
+				"static-assets-manifest.json",
+			);
+			if (fs.existsSync(localManifestPath)) {
+				const raw = fs.readFileSync(localManifestPath, "utf8");
+				const manifest = JSON.parse(raw);
+
+				const voices = Array.isArray(manifest.voices)
+					? manifest.voices
+							.filter((it) => it && (it.file || it.name))
+							.map((it) => ({
+								name:
+									it.name ||
+									(it.file
+										? it.file.replace(/\.[^.]+$/, "")
+										: ""),
+								url: `/static/voices/${encodeURIComponent(it.file || it.name)}`,
+							}))
+					: [];
+				const sounds = Array.isArray(manifest.sounds)
+					? manifest.sounds
+							.filter((it) => it && (it.file || it.name))
+							.map((it) => ({
+								name:
+									it.name ||
+									(it.file
+										? it.file.replace(/\.[^.]+$/, "")
+										: ""),
+								url: `/static/sounds/${encodeURIComponent(it.file || it.name)}`,
+							}))
+					: [];
+
+				return res.status(200).json({
+					voicesCount: voices.length,
+					soundsCount: sounds.length,
+					voices,
+					sounds,
+				});
+			}
+		} catch (e) {
+			// If manifest parsing fails, fall back to directory scanning below.
+		}
+
 		const voices =
 			readManifest("voices-list.json", "voices") ||
 			readDirList(path.join(staticDirPath, "static", "voices"), "voices");
