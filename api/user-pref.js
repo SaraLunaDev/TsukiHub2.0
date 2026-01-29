@@ -1,4 +1,4 @@
-import { google } from "googleapis";
+import { getValues, appendValues, updateValues } from "./sheets-client.js";
 import { requireAuth } from "./auth-middleware.js";
 
 /**
@@ -36,29 +36,12 @@ export default async function handler(req, res) {
 		return res.status(500).json({ error: "Google credentials missing" });
 	}
 
-	const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
-	const auth = new google.auth.JWT({
-		email,
-		key: privateKey,
-		scopes: SCOPES,
-	});
-	const sheets = google.sheets({ version: "v4", auth });
+	// Using sheets-client.js for lightweight Sheets REST calls
 
 	try {
-		await new Promise((resolve, reject) => {
-			auth.authorize((err, tokens) => {
-				if (err) return reject(err);
-				resolve(tokens);
-			});
-		});
-
 		// Read all rows from 'User Pref' (A:C -> id, nombre, pref)
-		const getRes = await sheets.spreadsheets.values.get({
-			spreadsheetId: sheetId,
-			range: "User Pref!A:C",
-		});
-
-		const rows = getRes.data.values || [];
+		const getRes = await getValues(sheetId, "User Pref!A:C");
+		const rows = getRes.values || [];
 
 		// Find row where column A exactly matches authenticated user id
 		const rowIndex = rows.findIndex((r) => {
@@ -98,28 +81,16 @@ export default async function handler(req, res) {
 
 			if (rowIndex === -1) {
 				// Append a new row [id, nombre, pref]
-				await sheets.spreadsheets.values.append({
-					spreadsheetId: sheetId,
-					range: "User Pref!A:C",
-					valueInputOption: "USER_ENTERED",
-					requestBody: {
-						values: [[String(userId), username || "", prefString]],
-					},
-				});
+				await appendValues(sheetId, "User Pref!A:C", [
+					[String(userId), username || "", prefString],
+				]);
 			} else {
 				// Update existing user's pref cell (column C)
 				// rows array is 0-based and corresponds to sheet rows starting at 1
 				// so rowNumber = rowIndex + 1
 				const rowNumber = rowIndex + 1;
 				const updateRange = `User Pref!C${rowNumber}`;
-				await sheets.spreadsheets.values.update({
-					spreadsheetId: sheetId,
-					range: updateRange,
-					valueInputOption: "USER_ENTERED",
-					requestBody: {
-						values: [[prefString]],
-					},
-				});
+				await updateValues(sheetId, updateRange, [[prefString]]);
 			}
 
 			return res.status(200).json({ success: true });

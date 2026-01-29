@@ -1,62 +1,61 @@
 {
-    "name": "newweb",
-    "version": "1.0.0",
-    "private": true,
-    "description": "Web personal refactorizada con React - Juegos, Pelis, Pokedex, Gacha, TTS",
-    "dependencies": {
-        "@iconify/react": "^6.0.2",
-        "@testing-library/jest-dom": "^5.17.0",
-        "@testing-library/react": "^13.4.0",
-        "@testing-library/user-event": "^13.5.0",
-        "@uiw/react-md-editor": "^4.0.11",
-        "axios": "^1.7.8",
-        "cors": "^2.8.5",
-        "dotenv": "^16.6.1",
-        "express": "^4.22.1",
-        "googleapis": "^150.0.1",
-        "jsonwebtoken": "^9.0.3",
-        "node-fetch": "^3.3.2",
-        "papaparse": "^5.4.1",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
-        "react-helmet": "^6.1.0",
-        "react-markdown": "^10.1.0",
-        "react-router-dom": "^7.0.2",
-        "react-scripts": "5.0.1",
-        "readline-sync": "^1.4.10",
-        "rehype-raw": "^7.0.0",
-        "rehype-react": "^8.0.0",
-        "remark-breaks": "^4.0.0",
-        "remark-gfm": "^4.0.1",
-        "string-similarity": "^4.0.4",
-        "svelte": "^5.48.2",
-        "web-vitals": "^2.1.4"
-    },
-    "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build",
-        "vercel-build": "react-scripts build",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject",
-        "server": "node server.js"
-    },
-    "eslintConfig": {
-        "extends": [
-            "react-app",
-            "react-app/jest"
-        ]
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    },
-    "proxy": "http://localhost:5000"
+	"name": "newweb",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Web personal refactorizada con React - Juegos, Pelis, Pokedex, Gacha, TTS",
+	"dependencies": {
+		"@iconify/react": "^6.0.2",
+		"@testing-library/jest-dom": "^5.17.0",
+		"@testing-library/react": "^13.4.0",
+		"@testing-library/user-event": "^13.5.0",
+		"@uiw/react-md-editor": "^4.0.11",
+		"axios": "^1.7.8",
+		"cors": "^2.8.5",
+		"dotenv": "^16.6.1",
+		"express": "^4.22.1",
+		"jsonwebtoken": "^9.0.3",
+		"node-fetch": "^3.3.2",
+		"papaparse": "^5.4.1",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"react-helmet": "^6.1.0",
+		"react-markdown": "^10.1.0",
+		"react-router-dom": "^7.0.2",
+		"react-scripts": "5.0.1",
+		"readline-sync": "^1.4.10",
+		"rehype-raw": "^7.0.0",
+		"rehype-react": "^8.0.0",
+		"remark-breaks": "^4.0.0",
+		"remark-gfm": "^4.0.1",
+		"string-similarity": "^4.0.4",
+		"svelte": "^5.48.2",
+		"web-vitals": "^2.1.4"
+	},
+	"scripts": {
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"vercel-build": "react-scripts build",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject",
+		"server": "node server.js"
+	},
+	"eslintConfig": {
+		"extends": [
+			"react-app",
+			"react-app/jest"
+		]
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	},
+	"proxy": "http://localhost:5000"
 }
