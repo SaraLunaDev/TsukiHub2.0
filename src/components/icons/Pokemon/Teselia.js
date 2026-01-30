@@ -7,7 +7,7 @@ export function Teselia(props) {
       viewBox="0 0 48 48"
       {...props}
     >
-      {/* Icon from IconPark Outline by ByteDance - https://github.com/bytedance/IconPark/blob/master/LICENSE */}
+      {}
       <g fill="none">
         <path
           stroke="currentColor"

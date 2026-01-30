@@ -7,7 +7,7 @@ export function Sinnoh(props) {
       viewBox="0 0 48 48"
       {...props}
     >
-      {/* Icon from IconPark Outline by ByteDance - https://github.com/bytedance/IconPark/blob/master/LICENSE */}
+      {}
       <g fill="none" stroke="currentColor" strokeWidth="4">
         <path strokeLinecap="round" strokeLinejoin="round" d="M4 44h40" />
         <path strokeLinejoin="round" d="M8 8.364L24 4l16 4.364V14H8z" />

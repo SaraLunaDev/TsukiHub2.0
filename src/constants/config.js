@@ -1,6 +1,4 @@
-// ============================================
-// CONSTANTES DE CONFIGURACION
-// ============================================
+
 
 export const API_URLS = {
   TWITCH_AUTH: "https://id.twitch.tv/oauth2/authorize",
@@ -59,7 +57,7 @@ export const getConfig = async () => {
       try {
         localStorage.setItem("sheets_config_cache", JSON.stringify(config));
       } catch (e) {
-        // Ignorar errores
+        
       }
       return config;
     })

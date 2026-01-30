@@ -1,8 +1,6 @@
-// ============================================
-// CUSTOM HOOK: useLocalStorage
-// ============================================
 
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 
 function useLocalStorage(key, initialValue) {
 	const [storedValue, setStoredValue] = useState(() => {
@@ -14,28 +12,32 @@ function useLocalStorage(key, initialValue) {
 		}
 	});
 
-	const setValue = (value) => {
+	const setValue = useCallback((value) => {
 		try {
-			const valueToStore =
-				value instanceof Function ? value(storedValue) : value;
+			setStoredValue((prevStoredValue) => {
+				const valueToStore =
+					value instanceof Function ? value(prevStoredValue) : value;
 
-			const isSame =
-				typeof valueToStore === "object"
-					? JSON.stringify(valueToStore) ===
-						JSON.stringify(storedValue)
-					: valueToStore === storedValue;
+				const isSame =
+					typeof valueToStore === "object"
+						? JSON.stringify(valueToStore) ===
+							JSON.stringify(prevStoredValue)
+						: valueToStore === prevStoredValue;
 
-			if (isSame) {
-				return;
-			}
+				if (isSame) {
+					return prevStoredValue;
+				}
 
-			setStoredValue(valueToStore);
+				try {
+					window.localStorage.setItem(key, JSON.stringify(valueToStore));
+				} catch (e) {}
 
-			window.localStorage.setItem(key, JSON.stringify(valueToStore));
+				window.dispatchEvent(new Event("localStorageChange"));
 
-			window.dispatchEvent(new Event("localStorageChange"));
+				return valueToStore;
+			});
 		} catch (error) {}
-	};
+	}, [key]);
 
 	useEffect(() => {
 		const handleStorageChange = () => {

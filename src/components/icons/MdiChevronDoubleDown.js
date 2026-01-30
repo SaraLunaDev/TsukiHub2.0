@@ -7,7 +7,7 @@ export function MdiChevronDoubleDown(props) {
       viewBox="0 0 24 24"
       {...props}
     >
-      {/* Icon from Material Design Icons by Pictogrammers - https://github.com/Templarian/MaterialDesign/blob/master/LICENSE */}
+      {}
       <path
         fill="currentColor"
         d="M16.59 5.59L18 7l-6 6l-6-6l1.41-1.41L12 10.17zm0 6L18 13l-6 6l-6-6l1.41-1.41L12 16.17z"

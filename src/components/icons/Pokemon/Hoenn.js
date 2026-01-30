@@ -7,7 +7,7 @@ export function Hoenn(props) {
       viewBox="0 0 14 14"
       {...props}
     >
-      {/* Icon from Streamline by Streamline - https://creativecommons.org/licenses/by/4.0/ */}
+      {}
       <path
         fill="none"
         stroke="currentColor"

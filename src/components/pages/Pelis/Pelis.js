@@ -23,6 +23,17 @@ function Pelis() {
 	const { data, loading, error } = useGoogleSheet(
 		config?.pelisSheetUrl || "",
 	);
+	const { data: usersData } = useGoogleSheet(
+		config?.userdataSheetUrl || "",
+		"userData",
+	);
+	const getUserById = (id) => {
+		if (!usersData || !id) return null;
+		const found = usersData.find(
+			(u) => String(u.id).trim() === String(id).trim(),
+		);
+		return found;
+	};
 	const [showFilter, setShowFilter] = useState(false);
 
 	const [isGrid, setIsGrid] = useLocalStorage("pelis_isGrid", false);
@@ -381,7 +392,7 @@ function Pelis() {
 										}
 									})
 									.map((row, idx) => (
-										<ItemImagenList key={idx} {...row} />
+										<ItemImagenList key={idx} {...row} userSheet={getUserById(row.Usuario)} />
 									))}
 							</div>
 						) : (
@@ -465,7 +476,7 @@ function Pelis() {
 										}
 									})
 									.map((row, idx) => (
-										<ItemCaratula key={idx} {...row} />
+										<ItemCaratula key={idx} {...row} userSheet={getUserById(row.Usuario)} />
 									))}
 							</div>
 						)

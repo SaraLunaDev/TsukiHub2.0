@@ -283,8 +283,7 @@ function Inicio() {
 				img.removeEventListener("error", checkAllLoaded);
 			});
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [showEmotesTable, userData, searchFilters.emotes, emotesRowLines]);
+	}, [showEmotesTable, userData, searchFilters.emotes, emotesRowLines, maxEmotesPerRow]);
 
 	if (loading && (!rawData || rawData.length === 0)) {
 		return (

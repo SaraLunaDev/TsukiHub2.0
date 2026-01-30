@@ -51,7 +51,7 @@ function Recomendar() {
     ? "Recomendar Juego"
     : "Recomendar Pelicula o Serie";
 
-  // Forzar grid por defecto si no hay valor guardado
+  
   const [isGrid, setIsGrid] = useLocalStorage(
     isJuegos ? "recomendar_juegos_isGrid" : "recomendar_pelis_isGrid",
     true

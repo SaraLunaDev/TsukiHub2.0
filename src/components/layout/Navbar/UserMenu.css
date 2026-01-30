@@ -1,15 +1,8 @@
-/* ============================================
-// CONTENEDOR DEL MENU
-// ============================================
-*/
+
 .user-menu {
 	position: relative;
 }
 
-/* ============================================
-// BOTON DEL MENU
-// ============================================
-*/
 .user-menu-button {
 	width: 32px;
 	height: 32px;
@@ -47,10 +40,6 @@
 	font-size: 14px;
 }
 
-/* ============================================
-// DROPDOWN - MOVIL
-// ============================================
-*/
 .user-menu-dropdown {
 	position: fixed;
 	bottom: 70px;
@@ -69,10 +58,6 @@ body:not(.dark-mode) .user-menu-dropdown {
 	border-top-color: rgba(102, 102, 102, 0.25);
 }
 
-/* ============================================
-// HEADER DEL DROPDOWN
-// ============================================
-*/
 .user-menu-header {
 	display: flex;
 	align-items: center;
@@ -95,16 +80,11 @@ body:not(.dark-mode) .user-menu-dropdown {
 	color: var(--text);
 }
 
-/* ============================================
-// OPCIONES DEL MENU
-// ============================================
-*/
 .user-menu-options {
 	padding: 0;
 	padding-bottom: 8px;
 }
 
-/* Boton de perfil especial */
 .user-menu-profile-button {
 	width: 100%;
 	display: flex;
@@ -124,7 +104,6 @@ body:not(.dark-mode) .user-menu-profile-button {
 	border-bottom-color: rgba(102, 102, 102, 0.5);
 }
 
-/* Barra divisoria para el tema en movil */
 .user-menu-option-divider {
 	padding-top: 18px !important;
 	margin-top: 8px !important;
@@ -224,24 +203,18 @@ body:not(.dark-mode) .user-menu-option-divider {
 	font-weight: 500;
 }
 
-/* Opcion solo visible en movil */
 .user-menu-option-mobile {
 	display: flex;
 }
 
-/* Ocultar boton de tema en PC (esta fuera del menu) */
 @media (min-width: 769px) {
 	.user-menu-option-theme {
 		display: none;
 	}
 }
 
-/* ============================================
-// PC
-// ============================================
-*/
 @media (min-width: 769px) {
-	/* Dropdown en PC - desde arriba */
+	
 	.user-menu-dropdown {
 		position: absolute;
 		top: calc(100% + 16px);
@@ -261,7 +234,7 @@ body:not(.dark-mode) .user-menu-option-divider {
 		border-right: 1px solid rgba(160, 168, 178, 0.25);
 	}
 
-	/* Boton de perfil en PC */
+	
 	.user-menu-profile-button {
 		padding: 10px 12px;
 	}
@@ -279,13 +252,13 @@ body:not(.dark-mode) .user-menu-option-divider {
 		font-size: 11px;
 	}
 
-	/* Boton mas pequeno en PC */
+	
 	.user-menu-button {
 		width: 32px;
 		height: 32px;
 	}
 
-	/* Header del dropdown */
+	
 	.user-menu-header {
 		padding: 12px;
 	}
@@ -299,7 +272,7 @@ body:not(.dark-mode) .user-menu-option-divider {
 		font-size: 14px;
 	}
 
-	/* Opciones en PC */
+	
 	.user-menu-option {
 		padding: 10px 12px;
 		font-size: 14px;
@@ -310,7 +283,7 @@ body:not(.dark-mode) .user-menu-option-divider {
 		min-width: 24px;
 	}
 
-	/* Ocultar opcion de inicio en PC */
+	
 	.user-menu-option-mobile {
 		display: none;
 	}

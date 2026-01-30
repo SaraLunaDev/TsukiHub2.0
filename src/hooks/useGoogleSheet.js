@@ -22,7 +22,7 @@ export function useGoogleSheet(sheetUrl, tabName = "default") {
       const rows = csvText.split("\n").filter((row) => row.trim());
       if (rows.length < 2) throw new Error("Datos insuficientes");
 
-      // Nuevo parse que maneja comillas y comas dentro de los campos
+      
       function parseCSVRow(row) {
         const result = [];
         let current = "";
@@ -86,8 +86,8 @@ export function useGoogleSheet(sheetUrl, tabName = "default") {
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sheetUrl]);
+    
+  }, [fetchData]);
 
   return { data, loading, error, refetch };
 }

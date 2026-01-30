@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import useLocalStorage from "./useLocalStorage";
 import { STORAGE_KEYS, API_URLS } from "../constants/config";
 import { getRolesFromToken } from "../utils/jwt-client";
@@ -29,7 +29,7 @@ export function useAuth() {
 
   const { isAdmin, isMod } = getRoles();
 
-  const updateRoles = async () => {
+  const updateRoles = useCallback(async () => {
     if (!twitchUser || !twitchToken || isUpdating) return;
 
     if (rolesToken) {
@@ -53,7 +53,7 @@ export function useAuth() {
     } finally {
       setIsUpdating(false);
     }
-  };
+  }, [twitchUser, twitchToken, rolesToken, isUpdating, setRolesToken]);
 
   const logout = () => {
     setTwitchUser(null);
@@ -65,8 +65,8 @@ export function useAuth() {
     if (isAuthenticated) {
       updateRoles();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [twitchUser?.login, twitchToken]);
+    
+  }, [isAuthenticated, updateRoles]);
 
   return {
     user: twitchUser,

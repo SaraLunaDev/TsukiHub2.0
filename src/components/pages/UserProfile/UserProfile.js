@@ -1,7 +1,4 @@
-// ============================================
-// COMPONENTE: UserProfile
-// ============================================
-// Pagina de perfil de usuario con sus estadisticas personales
+
 
 import React from "react";
 import { useParams } from "react-router-dom";

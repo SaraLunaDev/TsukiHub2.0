@@ -7,7 +7,7 @@ export function GenshinImpact(props) {
       viewBox="0 0 24 24"
       {...props}
     >
-      {/* Icon from Material Design Icons by Pictogrammers - https://github.com/Templarian/MaterialDesign/blob/master/LICENSE */}
+      {}
       <path fill="currentColor" d="M12 1L9 9l-8 3l8 3l3 8l3-8l8-3l-8-3z" />
     </svg>
   );

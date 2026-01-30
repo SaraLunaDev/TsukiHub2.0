@@ -1,7 +1,4 @@
-/* ============================================
-// ESTILOS DEL LAYOUT
-// ============================================
-*/
+
 
 .layout {
 	min-height: 100vh;
@@ -9,16 +6,11 @@
 	flex-direction: column;
 }
 
-/* ============================================
-// CONTENIDO PRINCIPAL
-// ============================================
-*/
 .layout-content {
 	flex: 1;
 	padding-bottom: 75px;
 }
 
-/* PC */
 @media (min-width: 820px) {
 	.layout-content {
 		padding-top: 64px;

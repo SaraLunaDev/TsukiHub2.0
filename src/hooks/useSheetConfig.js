@@ -8,7 +8,7 @@ try {
     initialConfig = JSON.parse(stored);
   }
 } catch (e) {
-  // Ignorar errores
+  
 }
 
 export function useSheetConfig() {

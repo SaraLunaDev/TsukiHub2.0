@@ -7,7 +7,7 @@ export function StreamlineFlexGamblingRemix(props) {
       viewBox="0 0 14 14"
       {...props}
     >
-      {/* Icon from Flex free icons by Streamline - https://creativecommons.org/licenses/by/4.0/ */}
+      {}
       <path
         fill="currentColor"
         fillRule="evenodd"

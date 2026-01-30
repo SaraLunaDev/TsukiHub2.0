@@ -1,14 +1,3 @@
-/* ============================================
-// ESTILOS DE LA PAGINA TTS
-// ============================================
-*/
-
-/* ============================================
-   ASSET BUTTONS (voices & sounds)
-   - Visual style inspired by the provided snippet
-   - Uses app color variables from src/App.css (eg. --button, --text, --text-2)
-   ============================================ */
-
 .tts-assets-list {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -103,19 +92,15 @@
 	flex: 1 1 auto;
 }
 
-/* Position for star (replace ID on hover), and responsive behavior */
 .asset-item {
 	position: relative;
-	/* ensure children absolute positioning is relative to this item */
 }
 
-/* Ensure the button content stays above the star when needed */
 .tts-button-top {
 	position: relative;
 	z-index: 1;
 }
 
-/* Favorite toggle (inline, sits at row end) - hidden by default, visible on hover and always visible for favorites */
 .fav-toggle {
 	background: transparent;
 	border: none;
@@ -134,17 +119,15 @@
 		color 0.12s ease,
 		visibility 0.12s;
 	cursor: pointer;
-	margin-left: auto; /* push to the right inside the flex row */
+	margin-left: auto;
 }
 
-/* Star SVG sizing inside the fav button */
 .fav-toggle .tts-asset-star {
 	width: 1em;
 	height: 1em;
 	display: block;
 }
 
-/* Show star on hover; keep ID visible. Favorite items show star always */
 .asset-item:hover .fav-toggle {
 	opacity: 1;
 	visibility: visible;
@@ -154,7 +137,6 @@
 	visibility: visible;
 }
 
-/* Favorite color (when it's actually favorited) - use type colors */
 .voces-section .fav-toggle.fav {
 	color: var(--color-voice);
 }
@@ -169,7 +151,6 @@
 	border-bottom: 1px solid var(--divider);
 }
 
-/* Small screens: keep grid responsive, but hide the hover-star (use long-press instead) */
 @media (max-width: 728px) {
 	.tts-assets-list {
 		grid-template-columns: repeat(2, 1fr);
@@ -178,11 +159,10 @@
 		max-width: 8ch;
 	}
 	.fav-toggle {
-		display: none; /* star hidden on touch devices (long-press behavior in JS) */
+		display: none;
 	}
 }
 
-/* Left-column layout for TTS page */
 .tts-wrapper {
 	position: relative;
 	display: flex;
@@ -240,8 +220,7 @@
 	font-family: inherit;
 	line-height: 1.385;
 	font-size: 13px;
-	padding: 12px;
-	z-index: 1;
+	padding: 12px 12px 23px 12px;
 	font-weight: 800;
 }
 
@@ -265,8 +244,6 @@
 	font-size: 13px;
 	overflow: hidden;
 	padding: 6px 6px 10px 6px;
-	margin: 0;
-	z-index: 2;
 	font-weight: 800;
 }
 
@@ -300,35 +277,176 @@
 .text-validator .progress-bar {
 	position: absolute;
 	left: 6px;
-	right: 6px;
+	right: 70px;
 	bottom: 6px;
-	height: 6px;
-	background: rgba(255, 255, 255, 0.06);
+	height: 8px;
 	border-radius: 999px;
 	overflow: hidden;
-	z-index: 4;
+	z-index: 8;
+	pointer-events: none;
+	background: rgba(255, 255, 255, 0.12);
+}
+
+.text-validator .copy-btn {
+	position: absolute;
+	right: 6px;
+	bottom: 6px;
+	height: auto;
+	min-width: 56px;
+	padding: 4px 4px;
+	border-radius: 4px;
+	border: none;
+	background: var(--color-mid);
+	color: var(--text);
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	line-height: 1;
+	z-index: 6;
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
 }
 
 .text-validator .progress-fill {
 	height: 100%;
+	min-height: 10px;
 	width: 0%;
 	background: var(--color-voice);
+	box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.4);
 	transition:
 		width 120ms linear,
 		background 120ms linear;
 	border-radius: 999px;
 }
 
-.text-validator .progress-fill.limit {
-	background: var(--error);
-}
-
-.text-validator .token-voice {
-	color: var(--color-voice);
-}
-
 .text-validator .token-sound {
 	color: var(--color-sound);
+}
+
+.tts-global-volume {
+	display: flex;
+	gap: 12px;
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--divider);
+	align-items: center;
+	justify-content: flex-end;
+}
+
+.tts-volume-row {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.sonidos-section .tts-volume-row input[type="range"] {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 120px;
+	height: 6px;
+	background: var(--dark-2);
+	border-radius: 999px;
+	outline: none;
+	padding: 0;
+	margin: 0;
+}
+
+.sonidos-section .tts-volume-row input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 0;
+	height: 0;
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	pointer-events: none;
+}
+
+.sonidos-section .tts-volume-row input[type="range"]::-moz-range-thumb {
+	width: 0;
+	height: 0;
+	background: transparent;
+	border: none;
+}
+
+.sonidos-section .tts-volume-row input[type="range"]::-moz-range-track {
+	background: var(--dark-2);
+	border: none;
+}
+
+.sonidos-section .tts-volume-row input[type="range"]::-moz-range-progress {
+	background: var(--text-2);
+}
+
+.sonidos-section .tts-volume-row input[type="range"]::-ms-fill-lower {
+	background: var(--text-2);
+	border-radius: 999px;
+}
+
+.sonidos-section .tts-volume-row input[type="range"]::-ms-fill-upper {
+	background: var(--dark-2);
+	border-radius: 999px;
+}
+
+.voces-section .tts-volume-row input[type="range"] {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 120px;
+	height: 6px;
+	background: var(--dark-2);
+	border-radius: 999px;
+	outline: none;
+	padding: 0;
+	margin: 0;
+}
+
+.voces-section .tts-volume-row input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 0;
+	height: 0;
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	pointer-events: none;
+}
+
+.voces-section .tts-volume-row input[type="range"]::-moz-range-thumb {
+	width: 0;
+	height: 0;
+	background: transparent;
+	border: none;
+}
+
+.voces-section .tts-volume-row input[type="range"]::-moz-range-track {
+	background: var(--dark-2);
+	border: none;
+}
+
+.voces-section .tts-volume-row input[type="range"]::-moz-range-progress {
+	background: var(--text-2);
+}
+
+.voces-section .tts-volume-row input[type="range"]::-ms-fill-lower {
+	background: var(--text-2);
+	border-radius: 999px;
+}
+
+.voces-section .tts-volume-row input[type="range"]::-ms-fill-upper {
+	background: var(--dark-2);
+	border-radius: 999px;
+}
+
+.tts-volume-label {
+	font-size: 12px;
+	color: var(--text-2);
+}
+
+.tts-volume-value {
+	font-size: 12px;
+	color: var(--text-2);
+	min-width: 36px;
+	text-align: right;
 }
 
 .tts-container {
@@ -348,12 +466,12 @@
 		flex: 0 0 auto;
 		width: 100%;
 		max-width: 100%;
-		order: -1; /* Ensure it appears first */
+		order: -1;
 	}
 	.tts-container {
 		width: 100%;
 		margin-left: 0;
-		order: 1; /* Ensure it appears second */
+		order: 1;
 	}
 	.tts-container .top-section {
 		padding: 4px;

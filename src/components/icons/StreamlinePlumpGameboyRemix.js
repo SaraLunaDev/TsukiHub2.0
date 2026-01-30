@@ -7,7 +7,7 @@ export function StreamlinePlumpGameboyRemix(props) {
       viewBox="0 0 48 48"
       {...props}
     >
-      {/* Icon from Plump free icons by Streamline - https://creativecommons.org/licenses/by/4.0/ */}
+      {}
       <path
         fill="currentColor"
         fillRule="evenodd"

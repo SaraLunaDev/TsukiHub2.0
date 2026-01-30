@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { spring } from "svelte/motion";
 import "./HoverCard.css";
 import HoverCardBack from "./HoverCardBack";
@@ -8,8 +8,6 @@ const springInteractSettings = { stiffness: 0.066, damping: 0.25 };
 const springPopoverSettings = { stiffness: 0.033, damping: 0.45 };
 const snapSettings = { stiffness: 0.01, damping: 0.06 };
 const DEBUG_HOVER_CARD = false;
-
-// Todo pillado de aqui https://github.com/simeydotme/pokemon-cards-css
 
 function clamp(v, a, b) {
 	return Math.max(a, Math.min(b, v));
@@ -27,9 +25,7 @@ const TIER_OVERLAY_POS = {
 	},
 };
 
-const BANNER_TIER_IMAGE_ADJUST = {
-	/* Por ahora no lo voy a usar */
-};
+const BANNER_TIER_IMAGE_ADJUST = {};
 
 export default function HoverCard({
 	src,
@@ -56,6 +52,20 @@ export default function HoverCard({
 
 	const [imagesReady, setImagesReady] = useState(false);
 	const loadIdRef = useRef(0);
+
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		try {
+			const params = new URLSearchParams(window.location.search || "");
+			const enabled =
+				params.get("hoverdebug") === "1" ||
+				localStorage.getItem("hovercard_debug") === "1" ||
+				!!window.__HOVERCARD_DEBUG__;
+			if (enabled && !window.__HOVERCARD_DEBUG__) {
+				window.__HOVERCARD_DEBUG__ = true;
+			}
+		} catch (err) {}
+	}, []);
 
 	const [backVisible, setBackVisible] = useState(true);
 	const [backFading, setBackFading] = useState(false);
@@ -227,39 +237,63 @@ export default function HoverCard({
 		}
 
 		if (!incoming.src) {
+			if (interactingRef.current || pointerDownRef.current) {
+				pendingLockRef.current = incoming;
+				return;
+			}
 			setDisplayData(incoming);
 			setImagesReady(false);
 			return;
 		}
 
-		setImagesReady(false);
-
-		setBackVisible(true);
-
-		if (backFadeDelayRef.current) {
-			clearTimeout(backFadeDelayRef.current);
-			backFadeDelayRef.current = null;
+		const isInteractingNow =
+			interactingRef.current || pointerDownRef.current;
+		if (!isInteractingNow) {
+			setImagesReady(false);
 		}
-		if (backFadeTimeoutRef.current) {
-			clearTimeout(backFadeTimeoutRef.current);
-			backFadeTimeoutRef.current = null;
-		}
-
+		const skipBackOverlay =
+			interactingRef.current || pointerDownRef.current;
 		const backEl = el && el.querySelector(".card__back-overlay");
-		if (backEl) {
-			backEl.style.transition = "none";
-		}
-		setBackFading(false);
-		backShownAtRef.current = Date.now();
-		if (backEl) {
-			if (backNoTransitionTimeoutRef.current) {
-				clearTimeout(backNoTransitionTimeoutRef.current);
-				backNoTransitionTimeoutRef.current = null;
+		if (!skipBackOverlay) {
+			setBackVisible(true);
+
+			if (backFadeDelayRef.current) {
+				clearTimeout(backFadeDelayRef.current);
+				backFadeDelayRef.current = null;
 			}
-			backNoTransitionTimeoutRef.current = setTimeout(() => {
-				if (backEl) backEl.style.transition = "";
-				backNoTransitionTimeoutRef.current = null;
-			}, 40);
+			if (backFadeTimeoutRef.current) {
+				clearTimeout(backFadeTimeoutRef.current);
+				backFadeTimeoutRef.current = null;
+			}
+
+			if (backEl) {
+				backEl.style.transition = "none";
+			}
+			setBackFading(false);
+			backShownAtRef.current = Date.now();
+			if (backEl) {
+				if (backNoTransitionTimeoutRef.current) {
+					clearTimeout(backNoTransitionTimeoutRef.current);
+					backNoTransitionTimeoutRef.current = null;
+				}
+				backNoTransitionTimeoutRef.current = setTimeout(() => {
+					if (backEl) backEl.style.transition = "";
+					backNoTransitionTimeoutRef.current = null;
+				}, 40);
+			}
+		} else {
+			if (backEl) {
+				backEl.style.transition = "none";
+				setBackFading(false);
+				if (backNoTransitionTimeoutRef.current) {
+					clearTimeout(backNoTransitionTimeoutRef.current);
+					backNoTransitionTimeoutRef.current = null;
+				}
+				backNoTransitionTimeoutRef.current = setTimeout(() => {
+					if (backEl) backEl.style.transition = "";
+					backNoTransitionTimeoutRef.current = null;
+				}, 40);
+			}
 		}
 		const id = ++loadIdRef.current;
 
@@ -332,7 +366,7 @@ export default function HoverCard({
 					`url('/img/glitter.png')`,
 				);
 				el.style.setProperty("--illusion-size", "cover");
-				el.style.setProperty("--illusion-opacity", "0.03");
+				el.style.setProperty("--illusion-opacity", "0.18");
 			} else if (kind === "illusion") {
 				el.style.setProperty(
 					"--tier-illusion",
@@ -489,7 +523,8 @@ export default function HoverCard({
 						`url('/img/glitter.png')`,
 					);
 					el.style.setProperty("--illusion-size", "cover");
-					el.style.setProperty("--illusion-opacity", "0.03");
+
+					el.style.setProperty("--illusion-opacity", "0.18");
 				} else if (dTier === 4) {
 					el.style.removeProperty("--foil");
 					el.style.removeProperty("--imgsize");
@@ -718,6 +753,18 @@ export default function HoverCard({
 		};
 	}, []);
 
+	const displayTier = displayData ? displayData.tier : undefined;
+
+	const ensureIllusion = useCallback(() => {
+		const el = cardRef.current;
+		if (!el) return;
+		if (displayTier === 5) {
+			el.style.setProperty("--tier-illusion", `url('/img/glitter.png')`);
+			el.style.setProperty("--illusion-size", "cover");
+			el.style.setProperty("--illusion-opacity", "0.18");
+		}
+	}, [displayTier]);
+
 	const onPointerEnter = (e) => {
 		if (e && e.preventDefault) e.preventDefault();
 		const el = cardRef.current;
@@ -737,6 +784,13 @@ export default function HoverCard({
 		if (glareSpringRef.current) {
 			glareSpringRef.current.set({ x: 50, y: 50, o: 1 });
 		}
+
+		ensureIllusion();
+
+		if (typeof window !== "undefined" && window.__HOVERCARD_DEBUG__) {
+			window.__HOVERCARD_UPDATE_STATUS__ &&
+				window.__HOVERCARD_UPDATE_STATUS__();
+		}
 	};
 
 	const onPointerMove = (e) => {
@@ -754,6 +808,8 @@ export default function HoverCard({
 		interactingRef.current = true;
 		const clientX = e.touches ? e.touches[0].clientX : e.clientX;
 		const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+		lastPointerRef.current.x = clientX;
+		lastPointerRef.current.y = clientY;
 		const rect = rectEl.getBoundingClientRect();
 		const absolute = { x: clientX - rect.left, y: clientY - rect.top };
 		const percent = {
@@ -768,25 +824,6 @@ export default function HoverCard({
 		const debugEnabled =
 			(typeof window !== "undefined" && window.__HOVERCARD_DEBUG__) ||
 			DEBUG_HOVER_CARD;
-		if (debugEnabled) {
-			const rectInfo = {
-				width: rect.width,
-				height: rect.height,
-				top: rect.top,
-				left: rect.left,
-			};
-			console.log("[HoverCard debug]", {
-				rectElTag: rectEl && rectEl.tagName,
-				rect: rectInfo,
-				percent,
-				center,
-				rotateTargetX,
-				rotateTargetY,
-				clientX,
-				clientY,
-				eventType: e && e.type,
-			});
-		}
 
 		if (debugEnabled) {
 			const elDebug = cardRef.current;
@@ -844,18 +881,51 @@ export default function HoverCard({
 				y: adjust(percent.y, 0, 100, 33, 67),
 			});
 		}
+
+		if (typeof window !== "undefined" && window.__HOVERCARD_DEBUG__) {
+			window.__HOVERCARD_UPDATE_STATUS__ &&
+				window.__HOVERCARD_UPDATE_STATUS__();
+		}
 	};
 
-	const onPointerEnd = (immediate = false) => {
+	const onPointerEnd = (immediate = false, reason = "unknown") => {
+		if (typeof window !== "undefined" && window.__HOVERCARD_DEBUG__) {
+			window.__HOVERCARD_UPDATE_STATUS__ &&
+				window.__HOVERCARD_UPDATE_STATUS__();
+		}
+
 		if (leaveTimeoutRef.current) {
 			clearTimeout(leaveTimeoutRef.current);
 			leaveTimeoutRef.current = null;
 		}
 
+		if (immediate && pointerDownRef.current) {
+			return;
+		}
+
+		const el = cardRef.current;
+		if (el && typeof el.matches === "function" && el.matches(":hover")) {
+			return;
+		}
+
+		if (typeof document !== "undefined" && lastPointerRef.current) {
+			try {
+				const p = lastPointerRef.current;
+				if (typeof document.elementFromPoint === "function") {
+					const at = document.elementFromPoint(p.x, p.y);
+					if (at && el.contains(at)) {
+						return;
+					}
+				}
+			} catch (err) {}
+		}
+
 		const doReset = () => {
 			interactingRef.current = false;
 			const el = cardRef.current;
-			if (el) el.classList.remove("is-hovered");
+			if (el) {
+				el.classList.remove("is-hovered");
+			}
 
 			if (rotateSpringRef.current) {
 				rotateSpringRef.current.stiffness = snapSettings.stiffness;
@@ -879,6 +949,12 @@ export default function HoverCard({
 			const overlay = el && el.querySelector(".hover-debug-overlay");
 			if (overlay && overlay.parentNode)
 				overlay.parentNode.removeChild(overlay);
+
+			if (pendingLockRef.current) {
+				setDisplayData(pendingLockRef.current);
+				setImagesReady(false);
+				pendingLockRef.current = null;
+			}
 		};
 
 		if (immediate) {
@@ -892,6 +968,14 @@ export default function HoverCard({
 		}, RESET_DELAY);
 	};
 
+	const handlePointerLeave = (e) => {
+		if (typeof window !== "undefined" && window.__HOVERCARD_DEBUG__) {
+			window.__HOVERCARD_UPDATE_STATUS__ &&
+				window.__HOVERCARD_UPDATE_STATUS__();
+		}
+		pointerEndRef.current && pointerEndRef.current(true, "pointerleave");
+	};
+
 	const onFocus = () => {
 		const el = cardRef.current;
 		if (!el) return;
@@ -900,11 +984,36 @@ export default function HoverCard({
 		if (glareSpringRef.current) glareSpringRef.current.set({ o: 0.6 });
 	};
 
-	const onBlur = () => onPointerEnd(true);
+	const onBlur = (e) => {
+		const el = cardRef.current;
+		if (!el) return onPointerEnd(true);
+
+		const related =
+			e &&
+			(e.relatedTarget || (e.nativeEvent && e.nativeEvent.relatedTarget));
+		if (related) {
+			if (el.contains(related)) {
+				return;
+			}
+			onPointerEnd(true, "blur-related");
+			return;
+		}
+
+		setTimeout(() => {
+			const active = document.activeElement;
+			if (active && el.contains(active)) {
+				return;
+			}
+			onPointerEnd(true, "blur-delayed");
+		}, 0);
+	};
 
 	const pointerEnterRef = useRef(onPointerEnter);
 	const pointerMoveRef = useRef(onPointerMove);
 	const pointerEndRef = useRef(onPointerEnd);
+	const pointerDownRef = useRef(false);
+	const lastPointerRef = useRef({ x: 0, y: 0 });
+	const pendingLockRef = useRef(null);
 
 	useEffect(() => {
 		pointerEnterRef.current = onPointerEnter;
@@ -915,6 +1024,43 @@ export default function HoverCard({
 	useEffect(() => {
 		const el = rotatorRef.current || cardRef.current;
 		if (!el) return;
+
+		const ensureDebugOverlay = () => {
+			if (typeof window === "undefined" || !window.__HOVERCARD_DEBUG__)
+				return null;
+			let s = el.querySelector(".hover-debug-status");
+			if (!s) {
+				s = document.createElement("div");
+				s.className = "hover-debug-status";
+				s.style.position = "absolute";
+				s.style.left = "6px";
+				s.style.bottom = "6px";
+				s.style.background = "rgba(0,0,0,0.6)";
+				s.style.color = "white";
+				s.style.font = "11px/1 monospace";
+				s.style.padding = "4px 6px";
+				s.style.borderRadius = "4px";
+				s.style.zIndex = 10005;
+				s.style.pointerEvents = "none";
+				el.appendChild(s);
+			}
+			return s;
+		};
+
+		const updateDebugStatus = () => {
+			if (typeof window === "undefined" || !window.__HOVERCARD_DEBUG__)
+				return;
+			const s = ensureDebugOverlay();
+			if (!s) return;
+			const parts = [];
+			parts.push(`hover:${el.matches(":hover")}`);
+			parts.push(`pointerDown:${pointerDownRef.current}`);
+			parts.push(`focused:${document.activeElement === el}`);
+			parts.push(`isHoveredClass:${el.classList.contains("is-hovered")}`);
+			s.textContent = parts.join(" | ");
+		};
+
+		window.__HOVERCARD_UPDATE_STATUS__ = updateDebugStatus;
 
 		const handleTouchStart = (e) => {
 			if (e && e.preventDefault) e.preventDefault();
@@ -934,13 +1080,29 @@ export default function HoverCard({
 		el.addEventListener("touchend", handleTouchEnd, { passive: false });
 		el.addEventListener("touchcancel", handleTouchEnd, { passive: false });
 
+		const handlePointerDown = (e) => {
+			pointerDownRef.current = true;
+		};
+		const handlePointerUp = (e) => {
+			pointerDownRef.current = false;
+			ensureIllusion();
+			pointerEndRef.current && pointerEndRef.current(false, "pointerup");
+		};
+
+		el.addEventListener("pointerdown", handlePointerDown);
+		el.addEventListener("pointerup", handlePointerUp);
+		el.addEventListener("pointerleave", handlePointerLeave);
+
 		return () => {
 			el.removeEventListener("touchstart", handleTouchStart);
 			el.removeEventListener("touchmove", handleTouchMove);
 			el.removeEventListener("touchend", handleTouchEnd);
 			el.removeEventListener("touchcancel", handleTouchEnd);
+			el.removeEventListener("pointerdown", handlePointerDown);
+			el.removeEventListener("pointerup", handlePointerUp);
+			el.removeEventListener("pointerleave", handlePointerLeave);
 		};
-	}, []);
+	}, [ensureIllusion]);
 
 	return (
 		<div
@@ -975,7 +1137,6 @@ export default function HoverCard({
 					onPointerMove={onPointerMove}
 					onPointerLeave={() => onPointerEnd(true)}
 				>
-					{/* Front: solo cuando las imagenes estan listas */}
 					{imagesReady && displayData.src ? (
 						<div className="card__front">
 							<img src={displayData.src} alt={displayData.alt} />
@@ -993,8 +1154,6 @@ export default function HoverCard({
 						</>
 					) : null}
 
-					{/* Dorso: siempre visible al click y durante al menos 200ms. Si la imagen necesita
-              cargarse, mantener el dorso hasta que termine; una vez lista, iniciar fade-out de 1s para mostrar la carta. */}
 					{backVisible ? (
 						<HoverCardBack
 							src="/static/resources/gacha/back.webp"

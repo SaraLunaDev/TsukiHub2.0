@@ -7,7 +7,7 @@ export function SolarMicrophoneBold(props) {
       viewBox="0 0 24 24"
       {...props}
     >
-      {/* Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ */}
+      {}
       <path
         fill="currentColor"
         d="M12 2a5.75 5.75 0 0 0-5.75 5.75v3a5.75 5.75 0 0 0 11.452.75H13a.75.75 0 0 1 0-1.5h4.75V8.5H13A.75.75 0 0 1 13 7h4.701A5.75 5.75 0 0 0 12 2"

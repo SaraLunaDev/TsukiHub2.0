@@ -54,6 +54,9 @@ web_modules/
 # Optional npm cache directory
 .npm
 
+# Github Instructions
+.github/instructions/
+
 # Optional eslint cache
 .eslintcache
 

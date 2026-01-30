@@ -1,8 +1,8 @@
-/* Quitar margen inferior solo a la searchbar móvil encima del header */
+
 .user-search-mobile-only .user-search-container {
   margin-bottom: 0 !important;
 }
-/* Buscador de usuario solo móvil, encima del header */
+
 .user-search-mobile-only {
   display: none;
 }
@@ -201,13 +201,13 @@
     flex: 0 0 auto;
     width: 100%;
     max-width: 100%;
-    order: -1; /* Ensure it appears first */
+    order: -1; 
   }
 
   .pokedex-container {
     width: 100%;
     margin-left: 0;
-    order: 1; /* Ensure it appears second */
+    order: 1; 
   }
 
   .pokemon-grid {

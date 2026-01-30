@@ -1,6 +1,4 @@
-// ============================================
-// COMPONENTE LAYOUT
-// ============================================
+
 
 import Navbar from "./Navbar/Navbar";
 import "./Layout.css";

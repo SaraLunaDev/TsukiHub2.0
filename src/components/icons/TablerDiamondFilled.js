@@ -7,7 +7,7 @@ export function TablerDiamondFilled(props) {
       viewBox="-5 -5 34 34"
       {...props}
     >
-      {/* Icon from Remix Icon by Remix Design - https://github.com/Remix-Design/RemixIcon/blob/master/License */}
+      {}
       <path
         fill="currentColor"
         stroke="var(--dark)"

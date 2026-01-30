@@ -74,14 +74,71 @@ const sortById = (arr = []) =>
 		});
 
 export default function TTS() {
-	const [voices, setVoices] = useState([]);
-	const [sounds, setSounds] = useState([]);
-	const [favVoices, setFavVoices] = useState([]);
-	const [favSounds, setFavSounds] = useState([]);
+	const readStoredAssets = () => {
+		try {
+			const stored = JSON.parse(
+				localStorage.getItem("tts:static:assets") || "null",
+			);
+			if (stored) {
+				const map = (arr = [], type) =>
+					sortById((arr || []).map((x) => normalizeFavItem(type, x)));
+				return {
+					voices: map(stored.voices, "voice"),
+					sounds: map(stored.sounds, "sound"),
+				};
+			}
+		} catch (e) {}
+		return { voices: [], sounds: [] };
+	};
+
+	const readStoredFavorites = () => {
+		try {
+			const fv = JSON.parse(
+				localStorage.getItem("tts:favorites:voices") || "[]",
+			);
+			const fs = JSON.parse(
+				localStorage.getItem("tts:favorites:sounds") || "[]",
+			);
+			return {
+				favVoices: sortById(
+					(fv || []).map((i) => normalizeFavItem("voice", i)),
+				),
+				favSounds: sortById(
+					(fs || []).map((i) => normalizeFavItem("sound", i)),
+				),
+			};
+		} catch (e) {
+			return { favVoices: [], favSounds: [] };
+		}
+	};
+
+	const readStoredVolume = (key, def = 0.5) => {
+		try {
+			const v = parseFloat(localStorage.getItem(key));
+			if (!Number.isNaN(v)) return v;
+		} catch (e) {}
+		return def;
+	};
+
+	const [voices, setVoices] = useState(() => readStoredAssets().voices);
+	const [sounds, setSounds] = useState(() => readStoredAssets().sounds);
+	const [favVoices, setFavVoices] = useState(
+		() => readStoredFavorites().favVoices,
+	);
+	const [favSounds, setFavSounds] = useState(
+		() => readStoredFavorites().favSounds,
+	);
 	const audioRef = useRef(null);
+	const validatorRef = useRef(null);
 	const [playingId, setPlayingId] = useState(null);
 	const [voiceSearch, setVoiceSearch] = useState("");
 	const [soundSearch, setSoundSearch] = useState("");
+	const [voiceVolume, setVoiceVolume] = useState(() =>
+		readStoredVolume("tts:volume:voice", 0.5),
+	);
+	const [soundVolume, setSoundVolume] = useState(() =>
+		readStoredVolume("tts:volume:sound", 0.5),
+	);
 
 	const touchTimerRef = useRef(null);
 	const longPressTriggeredRef = useRef(false);
@@ -113,46 +170,69 @@ export default function TTS() {
 
 	useEffect(() => {
 		let mounted = true;
+		const mapAndSort = (arr = [], type) =>
+			(arr || [])
+				.map((x) => normalizeFavItem(type, x))
+				.sort((a, b) => {
+					const urlA = getIdFromUrl(a?.url);
+					const urlB = getIdFromUrl(b?.url);
+					const idA =
+						typeof a?.id !== "undefined" && a.id !== null
+							? a.id
+							: Number.isFinite(urlA)
+								? urlA
+								: getIdFromName(a.name);
+					const idB =
+						typeof b?.id !== "undefined" && b.id !== null
+							? b.id
+							: Number.isFinite(urlB)
+								? urlB
+								: getIdFromName(b.name);
+					const valA =
+						idA === Infinity ? Number.MAX_SAFE_INTEGER : idA;
+					const valB =
+						idB === Infinity ? Number.MAX_SAFE_INTEGER : idB;
+					return valA - valB;
+				});
+
+		let loadedFromStorage = false;
+		try {
+			const stored = JSON.parse(
+				localStorage.getItem("tts:static:assets") || "null",
+			);
+			if (stored) {
+				loadedFromStorage = true;
+				if (stored.voices)
+					setVoices(mapAndSort(stored.voices, "voice"));
+				if (stored.sounds)
+					setSounds(mapAndSort(stored.sounds, "sound"));
+			}
+		} catch (e) {}
+
 		fetch("/api/get-static-assets")
 			.then((r) => r.json())
 			.then((data) => {
 				if (!mounted) return;
-				const mapAndSort = (arr = [], type) =>
-					(arr || [])
-						.map((x) => normalizeFavItem(type, x))
-						.sort((a, b) => {
-							const urlA = getIdFromUrl(a?.url);
-							const urlB = getIdFromUrl(b?.url);
-							const idA =
-								typeof a?.id !== "undefined" && a.id !== null
-									? a.id
-									: Number.isFinite(urlA)
-										? urlA
-										: getIdFromName(a.name);
-							const idB =
-								typeof b?.id !== "undefined" && b.id !== null
-									? b.id
-									: Number.isFinite(urlB)
-										? urlB
-										: getIdFromName(b.name);
-							const valA =
-								idA === Infinity
-									? Number.MAX_SAFE_INTEGER
-									: idA;
-							const valB =
-								idB === Infinity
-									? Number.MAX_SAFE_INTEGER
-									: idB;
-							return valA - valB;
-						});
 				if (data.voices) setVoices(mapAndSort(data.voices, "voice"));
 				if (data.sounds) setSounds(mapAndSort(data.sounds, "sound"));
+				try {
+					localStorage.setItem(
+						"tts:static:assets",
+						JSON.stringify({
+							voices: data.voices || [],
+							sounds: data.sounds || [],
+						}),
+					);
+				} catch (e) {}
 			})
 			.catch(() => {
 				if (!mounted) return;
-				setVoices([]);
-				setSounds([]);
+				if (!loadedFromStorage) {
+					setVoices([]);
+					setSounds([]);
+				}
 			});
+
 		return () => {
 			mounted = false;
 			if (audioRef.current) {
@@ -163,137 +243,72 @@ export default function TTS() {
 	}, []);
 
 	useEffect(() => {
-		const token = localStorage.getItem("twitchToken");
-		if (!token) {
-			try {
-				const fv = JSON.parse(
-					localStorage.getItem("tts:favorites:voices") || "[]",
-				);
-				const fs = JSON.parse(
-					localStorage.getItem("tts:favorites:sounds") || "[]",
-				);
-				setFavVoices(
-					sortById(
-						(fv || []).map((i) => normalizeFavItem("voice", i)),
-					),
-				);
-				setFavSounds(
-					sortById(
-						(fs || []).map((i) => normalizeFavItem("sound", i)),
-					),
-				);
-			} catch (e) {
-				setFavVoices([]);
-				setFavSounds([]);
-			}
-			return;
+		try {
+			const fv = JSON.parse(
+				localStorage.getItem("tts:favorites:voices") || "[]",
+			);
+			const fs = JSON.parse(
+				localStorage.getItem("tts:favorites:sounds") || "[]",
+			);
+			setFavVoices(
+				sortById((fv || []).map((i) => normalizeFavItem("voice", i))),
+			);
+			setFavSounds(
+				sortById((fs || []).map((i) => normalizeFavItem("sound", i))),
+			);
+		} catch (e) {
+			setFavVoices([]);
+			setFavSounds([]);
 		}
-
-		fetch("/api/user-pref", {
-			headers: { Authorization: `Bearer ${token}` },
-		})
-			.then((r) => r.json())
-			.then((data) => {
-				const pref = data?.pref || {};
-				const tts = pref?.TTS || {};
-				const v = (tts.voiceFav || [])
-					.map((i) => normalizeFavItem("voice", i))
-					.filter(Boolean);
-				const s = (tts.soundFav || [])
-					.map((i) => normalizeFavItem("sound", i))
-					.filter(Boolean);
-				if (v.length || s.length) {
-					setFavVoices(sortById(v));
-					setFavSounds(sortById(s));
-				} else {
-					try {
-						const fv = JSON.parse(
-							localStorage.getItem("tts:favorites:voices") ||
-								"[]",
-						);
-						const fs = JSON.parse(
-							localStorage.getItem("tts:favorites:sounds") ||
-								"[]",
-						);
-						setFavVoices(
-							sortById(
-								(fv || []).map((i) =>
-									normalizeFavItem("voice", i),
-								),
-							),
-						);
-						setFavSounds(
-							sortById(
-								(fs || []).map((i) =>
-									normalizeFavItem("sound", i),
-								),
-							),
-						);
-					} catch (e) {}
-				}
-			})
-			.catch(() => {
-				try {
-					const fv = JSON.parse(
-						localStorage.getItem("tts:favorites:voices") || "[]",
-					);
-					const fs = JSON.parse(
-						localStorage.getItem("tts:favorites:sounds") || "[]",
-					);
-					setFavVoices(
-						sortById(
-							(fv || []).map((i) => normalizeFavItem("voice", i)),
-						),
-					);
-					setFavSounds(
-						sortById(
-							(fs || []).map((i) => normalizeFavItem("sound", i)),
-						),
-					);
-				} catch (e) {}
-			});
 	}, []);
 
-	const persistToServer = async (voicesArr, soundsArr) => {
-		const token =
-			localStorage.getItem("twitchToken") ||
-			localStorage.getItem("rolesToken");
-		if (!token) {
-			try {
-				localStorage.setItem(
-					"tts:favorites:voices",
-					JSON.stringify(voicesArr),
-				);
-				localStorage.setItem(
-					"tts:favorites:sounds",
-					JSON.stringify(soundsArr),
-				);
-			} catch (err) {}
-			return;
-		}
+	useEffect(() => {
 		try {
-			await fetch("/api/user-pref", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify({
-					pref: { TTS: { voiceFav: voicesArr, soundFav: soundsArr } },
-				}),
-			});
-		} catch (err) {
-			try {
-				localStorage.setItem(
-					"tts:favorites:voices",
-					JSON.stringify(voicesArr),
-				);
-				localStorage.setItem(
-					"tts:favorites:sounds",
-					JSON.stringify(soundsArr),
-				);
-			} catch (e) {}
-		}
+			localStorage.setItem("tts:volume:voice", String(voiceVolume));
+		} catch (e) {}
+	}, [voiceVolume]);
+
+	useEffect(() => {
+		try {
+			localStorage.setItem("tts:volume:sound", String(soundVolume));
+		} catch (e) {}
+	}, [soundVolume]);
+
+	useEffect(() => {
+		try {
+			if (
+				audioRef.current &&
+				playingId &&
+				String(playingId).startsWith("voice-")
+			) {
+				audioRef.current.volume = voiceVolume;
+			}
+		} catch (e) {}
+	}, [voiceVolume, playingId]);
+
+	useEffect(() => {
+		try {
+			if (
+				audioRef.current &&
+				playingId &&
+				String(playingId).startsWith("sound-")
+			) {
+				audioRef.current.volume = soundVolume;
+			}
+		} catch (e) {}
+	}, [soundVolume, playingId]);
+
+	const persistToServer = (voicesArr, soundsArr) => {
+		try {
+			localStorage.setItem(
+				"tts:favorites:voices",
+				JSON.stringify(voicesArr),
+			);
+			localStorage.setItem(
+				"tts:favorites:sounds",
+				JSON.stringify(soundsArr),
+			);
+		} catch (e) {}
 	};
 
 	const isFavorite = (type, nameOrItem) => {
@@ -376,7 +391,7 @@ export default function TTS() {
 		});
 	};
 
-	const playAsset = (asset, type, assetId) => {
+	const _playAsset = (asset, type, assetId) => {
 		if (longPressTriggeredRef.current) {
 			longPressTriggeredRef.current = false;
 			return;
@@ -401,6 +416,7 @@ export default function TTS() {
 		}
 		try {
 			const a = new Audio(asset.url);
+			a.volume = type === "voice" ? voiceVolume : soundVolume;
 			audioRef.current = a;
 			setPlayingId(id);
 			a.play().catch(() => {
@@ -423,6 +439,14 @@ export default function TTS() {
 		}
 	};
 
+	const playAsset = (asset, type, assetId) => {
+		const id = `${type}-${assetId}`;
+		const willStop = playingId === id;
+		_playAsset(asset, type, assetId);
+		if (!willStop && validatorRef.current)
+			validatorRef.current.insertToken(type, assetId);
+	};
+
 	const handleTouchStart = (asset, type) => {
 		longPressTriggeredRef.current = false;
 		if (touchTimerRef.current) clearTimeout(touchTimerRef.current);
@@ -440,6 +464,10 @@ export default function TTS() {
 		setTimeout(() => (longPressTriggeredRef.current = false), 50);
 	};
 
+	const handleClickAsset = (asset, type, assetId) => {
+		playAsset(asset, type, assetId);
+	};
+
 	return (
 		<div className="main-container">
 			<div className="tts-wrapper">
@@ -452,7 +480,7 @@ export default function TTS() {
 					</div>
 
 					<div className="inset-section text-validator-section">
-						<TextValidator />
+						<TextValidator ref={validatorRef} />
 					</div>
 					<div className="inset-section">
 						<TutorialPanel />
@@ -465,6 +493,28 @@ export default function TTS() {
 							<div className="top-section-h2-down">
 								<span>
 									<b>{voices.length}</b> voces
+								</span>
+								<span>
+									<div className="tts-volume-row">
+										<input
+											type="range"
+											min="0"
+											max="100"
+											value={Math.round(
+												voiceVolume * 100,
+											)}
+											onChange={(e) =>
+												setVoiceVolume(
+													Number(e.target.value) /
+														100,
+												)
+											}
+											aria-label="Volumen voces"
+											style={{
+												background: `linear-gradient(90deg, var(--text-2) ${Math.round(voiceVolume * 100)}%, var(--dark-2) ${Math.round(voiceVolume * 100)}%)`,
+											}}
+										/>
+									</div>
 								</span>
 							</div>
 						</div>
@@ -526,7 +576,7 @@ export default function TTS() {
 															longPressTriggeredRef.current = false;
 															return;
 														}
-														playAsset(
+														handleClickAsset(
 															f,
 															"voice",
 															fid,
@@ -545,7 +595,7 @@ export default function TTS() {
 																longPressTriggeredRef.current = false;
 																return;
 															}
-															playAsset(
+															handleClickAsset(
 																f,
 																"voice",
 																fid,
@@ -760,6 +810,28 @@ export default function TTS() {
 							<div className="top-section-h2-down">
 								<span>
 									<b>{sounds.length}</b> sonidos
+								</span>
+								<span>
+									<div className="tts-volume-row">
+										<input
+											type="range"
+											min="0"
+											max="100"
+											value={Math.round(
+												soundVolume * 100,
+											)}
+											onChange={(e) =>
+												setSoundVolume(
+													Number(e.target.value) /
+														100,
+												)
+											}
+											aria-label="Volumen sonidos"
+											style={{
+												background: `linear-gradient(90deg, var(--text-2) ${Math.round(soundVolume * 100)}%, var(--dark-2) ${Math.round(soundVolume * 100)}%)`,
+											}}
+										/>
+									</div>
 								</span>
 							</div>
 						</div>

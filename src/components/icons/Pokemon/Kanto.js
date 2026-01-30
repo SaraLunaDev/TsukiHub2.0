@@ -7,7 +7,7 @@ export function Kanto(props) {
       viewBox="0 0 24 24"
       {...props}
     >
-      {/* Icon from Huge Icons by Hugeicons - undefined */}
+      {}
       <g
         fill="none"
         stroke="currentColor"

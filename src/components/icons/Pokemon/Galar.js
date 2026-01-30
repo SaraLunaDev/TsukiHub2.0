@@ -7,7 +7,7 @@ export function Galar(props) {
       viewBox="0 0 48 48"
       {...props}
     >
-      {/* Icon from IconPark Outline by ByteDance - https://github.com/bytedance/IconPark/blob/master/LICENSE */}
+      {}
       <path
         fill="none"
         stroke="currentColor"

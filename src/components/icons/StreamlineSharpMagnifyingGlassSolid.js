@@ -7,7 +7,7 @@ export function StreamlineSharpMagnifyingGlassSolid(props) {
       viewBox="0 0 24 24"
       {...props}
     >
-      {/* Icon from Sharp free icons by Streamline - https://creativecommons.org/licenses/by/4.0/ */}
+      {}
       <path
         fill="currentColor"
         fillRule="evenodd"

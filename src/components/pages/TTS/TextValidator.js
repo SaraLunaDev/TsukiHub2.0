@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+	useEffect,
+	useRef,
+	useState,
+	useImperativeHandle,
+	forwardRef,
+} from "react";
 
 const escapeHtml = (s) =>
 	s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -15,10 +21,42 @@ const getHighlightedHtml = (input) => {
 	return out;
 };
 
-export default function TextValidator({ maxChars = 500 }) {
+export default forwardRef(function TextValidator({ maxChars = 500 }, ref) {
 	const [text, setText] = useState("");
+	const [copied, setCopied] = useState(false);
 	const textareaRef = useRef(null);
 	const highlightRef = useRef(null);
+
+	useImperativeHandle(ref, () => ({
+		insertToken(type, id) {
+			const ta = textareaRef.current;
+			if (!ta) return;
+			const token = type === "voice" ? `(${id}:)` : `(${id})`;
+			const start =
+				typeof ta.selectionStart === "number" ? ta.selectionStart : 0;
+			const end =
+				typeof ta.selectionEnd === "number" ? ta.selectionEnd : 0;
+			const before = ta.value.slice(0, start);
+			const after = ta.value.slice(end);
+			const allowed = Math.max(
+				0,
+				maxChars - (before.length + after.length),
+			);
+			const toInsert = token.slice(0, allowed);
+			const newValue = (before + toInsert + after).slice(0, maxChars);
+			ta.value = newValue;
+			const caretPos = Math.min(
+				before.length + toInsert.length,
+				newValue.length,
+			);
+			ta.selectionStart = ta.selectionEnd = caretPos;
+			setText(newValue);
+			if (highlightRef.current)
+				highlightRef.current.innerHTML = getHighlightedHtml(newValue);
+			autoResize(ta);
+			ta.focus();
+		},
+	}));
 
 	useEffect(() => {
 		if (highlightRef.current) {
@@ -30,14 +68,14 @@ export default function TextValidator({ maxChars = 500 }) {
 		if (textareaRef.current) {
 			const ta = textareaRef.current;
 			ta.style.height = "auto";
-			ta.style.height = `${Math.max(ta.scrollHeight, 100)}px`;
+			ta.style.height = `${Math.max(ta.scrollHeight + 14, 100)}px`;
 		}
 	}, []);
 
 	const autoResize = (ta) => {
 		if (!ta) return;
 		ta.style.height = "auto";
-		ta.style.height = `${Math.max(ta.scrollHeight, 100)}px`;
+		ta.style.height = `${Math.max(ta.scrollHeight + 14, 100)}px`;
 	};
 
 	const handleInput = (e) => {
@@ -107,6 +145,22 @@ export default function TextValidator({ maxChars = 500 }) {
 		}
 	};
 
+	const handleCopy = async () => {
+		const toCopy = (text || "").replace(/\r?\n/g, " ").trim();
+		try {
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				await navigator.clipboard.writeText(toCopy);
+			} else {
+				const ta = textareaRef.current;
+				if (!ta) return;
+				ta.select();
+				document.execCommand("copy");
+			}
+			setCopied(true);
+			setTimeout(() => setCopied(false), 1400);
+		} catch (e) {}
+	};
+
 	return (
 		<div
 			className="text-validator"
@@ -140,6 +194,15 @@ export default function TextValidator({ maxChars = 500 }) {
 					}}
 				/>
 			</div>
+			<button
+				type="button"
+				className={`copy-btn ${copied ? "copied" : ""}`}
+				onClick={handleCopy}
+				aria-label="Copiar sin saltos de línea"
+				title="Copiar sin saltos de línea"
+			>
+				Copiar
+			</button>
 		</div>
 	);
-}
+});

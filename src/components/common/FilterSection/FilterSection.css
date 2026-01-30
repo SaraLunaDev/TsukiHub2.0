@@ -15,7 +15,7 @@
   font-size: 13px;
   min-width: 300px;
   outline: none;
-  /* mas de lo mismo */
+  
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="%23999" fill-rule="evenodd" d="M3.25 11a7.75 7.75 0 1 1 15.5 0a7.75 7.75 0 0 1-15.5 0M11 .75C5.34.75.75 5.34.75 11S5.34 21.25 11 21.25c2.38 0 4.57-.811 6.31-2.172l3.806 3.806l1.768-1.768l-3.806-3.806A10.2 10.2 0 0 0 21.25 11C21.25 5.34 16.661.75 11 .75" clip-rule="evenodd"/></svg>');
   background-repeat: no-repeat;
   background-position: 10px center;
@@ -83,7 +83,7 @@
   padding-right: 28px;
   outline: none;
   appearance: none;
-  /* ni zorra de como usar el icono que tengo ya asi que copio el path. jej */
+  
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23aaa" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></svg>');
   background-repeat: no-repeat;
   background-position: right 6px center;

@@ -26,7 +26,7 @@
 .carousel-arrow-right {
   right: 0;
 }
-/* ...existing code... */
+
 .carousel-dots {
   display: flex;
   gap: 8px;

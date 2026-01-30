@@ -1,22 +1,18 @@
 @media (max-width: 600px) {
-  .hide-mobile {
-    display: none !important;
-  }
+	.hide-mobile {
+		display: none !important;
+	}
 }
-/* ============================================
-// ESTILOS DE LA PAGINA JUEGOS
-// ============================================ 
-*/
 
 .juegos-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 20px;
-  padding: 8px;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+	gap: 20px;
+	padding: 8px;
 }
 
 @media (max-width: 600px) {
-  .juegos-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  }
+	.juegos-grid {
+		grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+	}
 }
