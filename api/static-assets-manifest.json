@@ -49,6 +49,13 @@
       "api": "elevenlabs",
       "fullName": "Loquendo"
     },
+	{
+      "id": 17,
+      "name": "Irene",
+      "file": "17_Irene.mp3",
+      "api": "elevenlabs",
+      "fullName": "Irene"
+    },
     {
       "id": 1,
       "name": "Aerista",
