@@ -31,7 +31,9 @@ export default forwardRef(function TextValidator({ maxChars = 500 }, ref) {
 		insertToken(type, id) {
 			const ta = textareaRef.current;
 			if (!ta) return;
-			const token = type === "voice" ? `(${id}:)` : `(${id})`;
+			const idStr =
+				String(id || "").replace(/^0+(?=\d)/, "") || String(id);
+			const token = type === "voice" ? `(${idStr}:)` : `(${idStr})`;
 			const start =
 				typeof ta.selectionStart === "number" ? ta.selectionStart : 0;
 			const end =

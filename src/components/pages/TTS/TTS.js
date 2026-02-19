@@ -154,14 +154,14 @@ export default function TTS() {
 		const idNum = getIdFromName(name);
 		if (idNum === Infinity) {
 			if (typeof idCandidate === "number") {
-				const fileIdPadded = String(idCandidate).padStart(2, "0");
+				const fileIdPadded = String(idCandidate);
 				if (fileIdPadded.includes(q)) return true;
 				if (String(idCandidate).includes(q)) return true;
 			} else {
 				if (name.toLowerCase().includes(q)) return true;
 			}
 		} else {
-			const padded = String(idNum).padStart(2, "0");
+			const padded = String(idNum);
 			if (padded.includes(q)) return true;
 			if (String(idNum).includes(q)) return true;
 		}
@@ -548,10 +548,7 @@ export default function TTS() {
 										const fid =
 											fidNumber === Infinity
 												? f.name
-												: String(fidNumber).padStart(
-														2,
-														"0",
-													);
+												: String(fidNumber);
 										const id = `voice-${fid}`;
 										return (
 											<div
@@ -700,14 +697,8 @@ export default function TTS() {
 													: getIdFromName(v.name);
 										const fileId =
 											idNum === Infinity
-												? String(idx + 1).padStart(
-														2,
-														"0",
-													)
-												: String(idNum).padStart(
-														2,
-														"0",
-													);
+												? String(idx + 1)
+												: String(idNum);
 										const id = `voice-${fileId}`;
 										const fav = isFavorite("voice", v.name);
 										return (
@@ -866,9 +857,7 @@ export default function TTS() {
 											const fid =
 												fidNumber === Infinity
 													? f.name
-													: String(
-															fidNumber,
-														).padStart(2, "0");
+													: String(fidNumber);
 											const id = `sound-${fid}`;
 											return (
 												<div
@@ -1023,14 +1012,8 @@ export default function TTS() {
 														: getIdFromName(s.name);
 											const fileId =
 												idNum === Infinity
-													? String(idx + 1).padStart(
-															2,
-															"0",
-														)
-													: String(idNum).padStart(
-															2,
-															"0",
-														);
+													? String(idx + 1)
+													: String(idNum);
 											const id = `sound-${fileId}`;
 											const fav = isFavorite(
 												"sound",
