@@ -1,5 +1,5 @@
-import { requireAuth } from "./auth-middleware.js";
-import { createToken, isAdmin, isMod } from "./utils/jwt-utils.js";
+import { requireAuth } from "../lib/auth-middleware.js";
+import { createToken, isAdmin, isMod } from "../lib/utils/jwt-utils.js";
 
 export default async function handler(req, res) {
 	if (req.method !== "GET") {

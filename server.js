@@ -28,34 +28,34 @@ app.use(express.urlencoded({ extended: true }));
 const apiDir = path.join(__dirname, "api");
 
 if (fs.existsSync(apiDir)) {
-  const files = fs.readdirSync(apiDir);
-  
-  for (const file of files) {
-    if (file.endsWith(".js")) {
-      const route = "/api/" + file.replace(".js", "");
-      const modulePath = path.join(apiDir, file);
+	const files = fs.readdirSync(apiDir);
 
-      app.all(route, async (req, res) => {
-        try {
-          const handler = await import("file://" + modulePath);
-          
-          if (typeof handler === "function") {
-            await handler(req, res);
-          } else if (typeof handler.default === "function") {
-            await handler.default(req, res);
-          } else {
-            res.status(500).json({
-              error: "Handler invalido en " + file,
-            });
-          }
-        } catch (err) {
-          res.status(500).json({
-            error: err.message || "Error interno del servidor",
-          });
-        }
-      });
-    }
-  }
+	for (const file of files) {
+		if (file.endsWith(".js")) {
+			const route = "/api/" + file.replace(".js", "");
+			const modulePath = path.join(apiDir, file);
+
+			app.all(route, async (req, res) => {
+				try {
+					const handler = await import("file://" + modulePath);
+
+					if (typeof handler === "function") {
+						await handler(req, res);
+					} else if (typeof handler.default === "function") {
+						await handler.default(req, res);
+					} else {
+						res.status(500).json({
+							error: "Handler invalido en " + file,
+						});
+					}
+				} catch (err) {
+					res.status(500).json({
+						error: err.message || "Error interno del servidor",
+					});
+				}
+			});
+		}
+	}
 } else {
 }
 
@@ -63,8 +63,8 @@ if (fs.existsSync(apiDir)) {
 // ARCHIVOS ESTATICOS
 // ============================================
 const staticDir = fs.existsSync(path.join(__dirname, "build"))
-  ? "build"
-  : "public";
+	? "build"
+	: "public";
 
 app.use(express.static(path.join(__dirname, staticDir)));
 
@@ -72,20 +72,20 @@ app.use(express.static(path.join(__dirname, staticDir)));
 // FALLBACK PARA REACT ROUTER
 // ============================================
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, staticDir, "index.html"));
+	res.sendFile(path.join(__dirname, staticDir, "index.html"));
 });
 
 // ============================================
 // INICIAR SERVIDOR
 // ============================================
 app.listen(PORT, () => {
-  console.log("");
-  console.log("===========================================");
-  console.log("🚀 SERVIDOR DE DESARROLLO INICIADO");
-  console.log("===========================================");
-  console.log(`📡 URL: http://localhost:${PORT}`);
-  console.log(`📁 Directorio estatico: ${staticDir}/`);
-  console.log(`🔌 APIs disponibles en: /api/*`);
-  console.log("===========================================");
-  console.log("");
+	console.log("");
+	console.log("===========================================");
+	console.log("🚀 SERVIDOR DE DESARROLLO INICIADO");
+	console.log("===========================================");
+	console.log(`📡 URL: http://localhost:${PORT}`);
+	console.log(`📁 Directorio estatico: ${staticDir}/`);
+	console.log(`🔌 APIs disponibles en: /api/*`);
+	console.log("===========================================");
+	console.log("");
 });

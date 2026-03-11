@@ -10,6 +10,8 @@ import Gacha from "./components/pages/Gacha/Gacha";
 import GameBoy from "./components/pages/GameBoy/GameBoy";
 import TTS from "./components/pages/TTS/TTS";
 import UserProfile from "./components/pages/UserProfile/UserProfile";
+import UpdateMissingIds from "./components/pages/UpdateMissingIds/UpdateMissingIds";
+import EditarItem from "./components/pages/EditarItem/EditarItem";
 import "./App.css";
 
 function App() {
@@ -25,10 +27,12 @@ function App() {
 					{}
 					<Route path="/juegos" element={<Juegos />} />
 					<Route path="/juegos/recomendar" element={<Recomendar />} />
+					<Route path="/juegos/editar/:id" element={<EditarItem />} />
 
 					{}
 					<Route path="/pelis" element={<Pelis />} />
 					<Route path="/pelis/recomendar" element={<Recomendar />} />
+					<Route path="/pelis/editar/:id" element={<EditarItem />} />
 
 					{}
 					<Route path="/pokedex" element={<Pokedex />} />
@@ -46,6 +50,12 @@ function App() {
 
 					{}
 					<Route path="/user/:username" element={<UserProfile />} />
+
+					{}
+					<Route
+						path="/admin/update-ids"
+						element={<UpdateMissingIds />}
+					/>
 				</Routes>
 			</Layout>
 		</Router>

@@ -1,5 +1,5 @@
-import { getValues, appendValues, updateValues } from "./sheets-client.js";
-import { requireAuth } from "./auth-middleware.js";
+import { getValues, appendValues, updateValues } from "../lib/sheets-client.js";
+import { requireAuth } from "../lib/auth-middleware.js";
 
 /**
  * API: GET /api/user-pref
