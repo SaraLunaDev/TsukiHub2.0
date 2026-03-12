@@ -392,7 +392,11 @@ function Pelis() {
 										}
 									})
 									.map((row, idx) => (
-										<ItemImagenList key={idx} {...row} userSheet={getUserById(row.Usuario)} />
+										<ItemImagenList
+											key={idx}
+											{...row}
+											userSheet={getUserById(row.Usuario)}
+										/>
 									))}
 							</div>
 						) : (
@@ -476,7 +480,11 @@ function Pelis() {
 										}
 									})
 									.map((row, idx) => (
-										<ItemCaratula key={idx} {...row} userSheet={getUserById(row.Usuario)} />
+										<ItemCaratula
+											key={idx}
+											{...row}
+											userSheet={getUserById(row.Usuario)}
+										/>
 									))}
 							</div>
 						)

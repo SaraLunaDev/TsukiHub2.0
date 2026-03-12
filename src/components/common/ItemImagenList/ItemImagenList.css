@@ -298,7 +298,7 @@
 }
 
 .item-list-delete-btn-right {
-	background: rgba(220, 38, 38, 0.9);
+	background: rgb(146, 58, 58);
 	color: white;
 	border: none;
 	border-radius: 50%;
@@ -315,9 +315,36 @@
 }
 
 .item-list-delete-btn-right:hover {
-	background: rgba(220, 38, 38, 1);
+	background: rgb(146, 58, 58);
 	transform: scale(1.1);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.item-list-edit-btn-right {
+	background: rgb(34, 139, 34);
+	color: white;
+	border: none;
+	border-radius: 50%;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	z-index: 15;
+	font-size: 14px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	flex-shrink: 0;
+}
+
+.item-list-edit-btn-right:hover {
+	background: rgb(34, 139, 34);
+	transform: scale(1.1);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.item-list-edit-btn-right:active {
+	transform: scale(0.95);
 }
 
 .item-list-delete-btn-right:active {

@@ -8,6 +8,8 @@ export const API_URLS = {
 	GET_SHEETS_CONFIG: "/api/get-sheets-config",
 	VERIFY_USER: "/api/verify-user",
 	DELETE_RECOMMENDATION: "/api/delete-recommendation",
+	GET_VOTES: "/api/get-votes",
+	MODIFY_VOTE: "/api/modify-vote",
 };
 
 const CONFIG_VERSION = "4.0.0";

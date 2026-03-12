@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import "./Recomendar.css";
-import ItemCaratula from "../../common/ItemCaratula/ItemCaratula";
+import ItemCaratula, {
+	fetchVotes,
+} from "../../common/ItemCaratula/ItemCaratula";
 import ItemImagenList from "../../common/ItemImagenList/ItemImagenList";
 import { MaterialSymbolsListsRounded } from "../../icons/MaterialSymbolsListsRounded";
 import { TablerLayoutGridFilled } from "../../icons/TablerLayoutGridFilled";
@@ -24,23 +26,91 @@ function Recomendar() {
 	const SHEET_URL = isJuegos
 		? config?.juegosSheetUrl || ""
 		: config?.pelisSheetUrl || "";
-	const { data, loading, error, refetch } = useGoogleSheet(SHEET_URL);
+	const { data, loading, error } = useGoogleSheet(SHEET_URL);
 	const { data: usersData } = useGoogleSheet(
 		config?.userdataSheetUrl || "",
 		"userData",
 	);
+
+	const parseDateValue = (val) => {
+		if (!val) return 0;
+
+		if (typeof val === "string") {
+			const parts = val.split("/");
+			if (parts.length === 3) {
+				const [d, m, y] = parts;
+				const iso = `${y.padStart(4, "0")}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+				const time = Date.parse(iso);
+				return isNaN(time) ? 0 : time;
+			}
+
+			const parsed = Date.parse(val);
+			return isNaN(parsed) ? 0 : parsed;
+		}
+
+		if (typeof val === "number") {
+			return val;
+		}
+		return 0;
+	};
+
+	const [voteCounts, setVoteCounts] = useState(new Map());
+
+	useEffect(() => {
+		if (!data) return;
+		const tipo = isJuegos ? "Juegos" : "Pelis";
+		const localMap = new Map();
+		data.forEach((row) => {
+			if ((row["Estado"] || "").toLowerCase() !== "recomendacion") return;
+			const id = String(getRowId(row));
+			const localKey = `votes_cache_${tipo}_${id}`;
+			try {
+				const val = window.localStorage.getItem(localKey);
+				if (val !== null) {
+					localMap.set(id, JSON.parse(val));
+				}
+			} catch {}
+		});
+		if (localMap.size > 0) {
+			setVoteCounts(localMap);
+		}
+	}, [data, isJuegos]);
+
+	const handleVoteChange = (id, newCount) => {
+		setVoteCounts((prev) => {
+			const m = new Map(prev);
+			m.set(id, newCount);
+			return m;
+		});
+	};
+
+	useEffect(() => {
+		if (!data) return;
+
+		const tipo = isJuegos ? "Juegos" : "Pelis";
+		fetchVotes(tipo).then(({ counts }) => {
+			if (counts) setVoteCounts(counts);
+		});
+	}, [data, isJuegos]);
+
 	const filteredData = useMemo(() => {
 		if (!data) return [];
-		return data.filter(
+		const items = data.filter(
 			(row) => (row["Estado"] || "").toLowerCase() === "recomendacion",
 		);
-	}, [data]);
 
-	const handleRecommendationDeleted = () => {
-		if (refetch) {
-			refetch();
-		}
-	};
+		items.sort((a, b) => {
+			const idA = String(getRowId(a));
+			const idB = String(getRowId(b));
+			const votesA = voteCounts.get(idA) || 0;
+			const votesB = voteCounts.get(idB) || 0;
+			if (votesB !== votesA) return votesB - votesA;
+			const da = parseDateValue(a.Fecha || a.recommendedDate);
+			const db = parseDateValue(b.Fecha || b.recommendedDate);
+			return da - db;
+		});
+		return items;
+	}, [data, voteCounts]);
 
 	const getUserById = (id) => {
 		if (!usersData || !id) {
@@ -452,7 +522,6 @@ function Recomendar() {
 												data.error || "Error al enviar",
 											);
 										setEnviado(true);
-										refetch(); // Actualizar la lista automáticamente
 										setComentario("");
 										setSelectedResult(null);
 										setSelectedRecommendPlatform("");
@@ -598,9 +667,7 @@ function Recomendar() {
 										key={idx}
 										{...row}
 										userSheet={getUserById(row.Usuario)}
-										onRecommendationDeleted={
-											handleRecommendationDeleted
-										}
+										onVote={handleVoteChange}
 									/>
 								))}
 							</div>
@@ -617,9 +684,6 @@ function Recomendar() {
 										key={idx}
 										{...row}
 										userSheet={getUserById(row.Usuario)}
-										onRecommendationDeleted={
-											handleRecommendationDeleted
-										}
 									/>
 								))}
 							</div>

@@ -44,8 +44,6 @@ export default async function handler(req, res) {
 		return res.status(500).json({ error: "Google credentials missing" });
 	}
 
-	// Using sheets-client.js (appendValues) for lightweight Sheets REST calls
-
 	let sheetName;
 	const isPelis =
 		item.tipo &&
@@ -84,13 +82,19 @@ export default async function handler(req, res) {
 			});
 		}
 
+		const now = new Date();
+		const dd = String(now.getDate()).padStart(2, "0");
+		const mm = String(now.getMonth() + 1).padStart(2, "0");
+		const yyyy = now.getFullYear();
+		const recommendedDate = `${dd}/${mm}/${yyyy}`;
+
 		await appendValues(sheetId, range, [
 			[
 				item.id || "",
 				cleanTextForCSV(item.nombre || item.title || ""),
 				"Recomendacion",
 				item.tipo || tipo || "",
-				"",
+				recommendedDate,
 				item.url || "",
 				item.caratula || "",
 				item.imagen || "",

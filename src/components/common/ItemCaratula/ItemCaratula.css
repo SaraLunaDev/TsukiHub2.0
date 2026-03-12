@@ -22,21 +22,25 @@
 
 .item-delete-btn {
 	position: absolute;
-	top: -8px;
-	right: -8px;
+	bottom: 42px;
+	right: -4px;
 	background: rgb(146, 58, 58);
 	color: white;
 	border: none;
 	border-radius: 50%;
-	width: 24px;
-	height: 24px;
+	width: 20px;
+	height: 20px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
 	z-index: 15;
-	font-size: 14px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	font-size: 12px;
+	border: 1px solid var(--border);
+}
+
+.item-caratula:not(.item-caratula-recomendacion) .item-delete-btn {
+	bottom: 48px;
 }
 
 .item-delete-btn:hover {
@@ -57,21 +61,25 @@
 
 .item-edit-btn {
 	position: absolute;
-	top: 20px;
-	right: -8px;
+	bottom: 64px;
+	right: -4px;
 	background: rgb(34, 139, 34);
 	color: white;
 	border: none;
 	border-radius: 50%;
-	width: 24px;
-	height: 24px;
+	width: 20px;
+	height: 20px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
 	z-index: 15;
 	font-size: 14px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	border: 1px solid var(--border);
+}
+
+.item-caratula:not(.item-caratula-recomendacion) .item-edit-btn {
+	bottom: 70px;
 }
 
 .item-edit-btn:hover {
@@ -343,6 +351,58 @@
 		max-height: calc(1.4em * 6);
 	}
 }
+
+.item-votos-superpuesta {
+	position: absolute;
+	top: 0px;
+	right: 0;
+	display: flex;
+	align-items: center;
+	font-size: 13px;
+	color: var(--text);
+	background: var(--item);
+	padding: 8px 10px 4px 10px;
+	border-radius: 0 6px 0 0;
+	z-index: 4;
+	border-top: 1px solid var(--border);
+	border-right: 1px solid var(--border);
+	cursor: default;
+}
+.item-votos-superpuesta.user-logged {
+	cursor: pointer;
+}
+
+.item-votos-superpuesta .vote-btn {
+	background: none;
+	border: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: inherit;
+	color: var(--text);
+}
+
+.item-votos-superpuesta .vote-count {
+	margin-left: 4px;
+}
+
+.item-votos-superpuesta.user-logged:hover .vote-btn,
+.item-votos-superpuesta.user-logged:hover .vote-count {
+	transform: translateY(-2px);
+}
+
+.item-votos-superpuesta.voted {
+	color: var(--color-mid);
+}
+.item-votos-superpuesta.voted .vote-btn {
+	color: var(--color-mid);
+}
+.item-votos-superpuesta.voted .vote-count {
+	color: var(--color-mid);
+}
+
 .item-comentario-overlay svg {
 	font-size: 13px !important;
 	min-width: 13px;

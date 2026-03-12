@@ -69,6 +69,15 @@ export default function EditarItem() {
 		setItemData((prev) => ({ ...prev, [field]: value }));
 	};
 
+	const setTodayFecha = () => {
+		const now = new Date();
+		const dd = String(now.getDate()).padStart(2, "0");
+		const mm = String(now.getMonth() + 1).padStart(2, "0");
+		const yyyy = now.getFullYear();
+		const formatted = `${dd}/${mm}/${yyyy}`;
+		handleInputChange("Fecha", formatted);
+	};
+
 	const handleSave = async (e) => {
 		e.preventDefault();
 		setSaving(true);
@@ -118,9 +127,11 @@ export default function EditarItem() {
 
 	return (
 		<div className="main-container">
-			<div className="top-section">
-				<h2>Editar Item #{id}</h2>
-				<div className="top-section-h2-down">
+			<div className="top-section editar-header">
+				<div className="header-title-ellipsis">
+					<span className="header-title-text">
+						{itemData.Nombre || `Item #${id}`} ({id})
+					</span>
 					<button
 						type="button"
 						onClick={() => navigate(-1)}
@@ -135,236 +146,306 @@ export default function EditarItem() {
 
 			<div className="inset-section">
 				<form onSubmit={handleSave} className="edit-form">
-					<div className="form-grid">
-						<div className="form-group">
-							<label>ID</label>
-							<input
-								type="text"
-								value={itemData.ID || ""}
-								onChange={(e) =>
-									handleInputChange("ID", e.target.value)
-								}
-								disabled
-							/>
+					<div className="edit-layout">
+						<div className="form-grid">
+							<div className="form-fields-grid">
+								<div className="form-group">
+									<label>Nombre</label>
+									<input
+										type="text"
+										value={itemData.Nombre || ""}
+										onChange={(e) =>
+											handleInputChange(
+												"Nombre",
+												e.target.value,
+											)
+										}
+									/>
+								</div>
+								<div className="form-group">
+									<label>Estado</label>
+									<select
+										value={itemData.Estado || ""}
+										onChange={(e) =>
+											handleInputChange(
+												"Estado",
+												e.target.value,
+											)
+										}
+									>
+										<option value="">Seleccionar...</option>
+										<option value="Ahora">Ahora</option>
+										<option value="Planeado">
+											Planeado
+										</option>
+										<option value="Pasado">Pasado</option>
+										<option value="Dropeado">
+											Dropeado
+										</option>
+										<option value="Recomendacion">
+											Recomendación
+										</option>
+										<option value="Pausado">Pausado</option>
+									</select>
+								</div>
+								<div className="form-group">
+									<label>Tipo</label>
+									<input
+										type="text"
+										value={itemData.Tipo || ""}
+										onChange={(e) =>
+											handleInputChange(
+												"Tipo",
+												e.target.value,
+											)
+										}
+									/>
+								</div>
+								<div className="form-group">
+									<label>Nota</label>
+									<div className="slider-container">
+										<input
+											type="range"
+											min="0"
+											max="10"
+											step="0.25"
+											value={itemData.Nota || 0}
+											onChange={(e) =>
+												handleInputChange(
+													"Nota",
+													e.target.value,
+												)
+											}
+										/>
+										<span className="slider-value">
+											{itemData.Nota || 0}
+										</span>
+									</div>
+								</div>
+								<div className="form-group">
+									<label>URL</label>
+									<input
+										type="url"
+										value={
+											itemData.Link || itemData.URL || ""
+										}
+										onChange={(e) =>
+											handleInputChange(
+												"Link",
+												e.target.value,
+											)
+										}
+									/>
+								</div>
+								<div className="form-group">
+									<label>Duración</label>
+									<input
+										type="text"
+										value={itemData.Duracion || ""}
+										onChange={(e) =>
+											handleInputChange(
+												"Duracion",
+												e.target.value,
+											)
+										}
+									/>
+								</div>
+								<div className="form-group fecha-group">
+									<label>Fecha</label>
+									<div className="fecha-input-wrapper">
+										<input
+											type="text"
+											value={itemData.Fecha || ""}
+											onChange={(e) =>
+												handleInputChange(
+													"Fecha",
+													e.target.value,
+												)
+											}
+										/>
+										<button
+											type="button"
+											onClick={setTodayFecha}
+										>
+											Hoy
+										</button>
+									</div>
+								</div>
+								<div className="form-group">
+									<label>Fecha Salida</label>
+									<input
+										type="text"
+										value={itemData.Fecha_Salida || ""}
+										onChange={(e) =>
+											handleInputChange(
+												"Fecha_Salida",
+												e.target.value,
+											)
+										}
+									/>
+								</div>
+								<div className="form-group">
+									<label>Trailer</label>
+									<input
+										type="url"
+										value={itemData.Trailer || ""}
+										onChange={(e) =>
+											handleInputChange(
+												"Trailer",
+												e.target.value,
+											)
+										}
+									/>
+								</div>
+								<div className="form-group">
+									<label>Nota Global</label>
+									<div className="slider-container">
+										<input
+											type="range"
+											min="0"
+											max="10"
+											step="0.001"
+											value={itemData.Nota_Global || 0}
+											onChange={(e) =>
+												handleInputChange(
+													"Nota_Global",
+													e.target.value,
+												)
+											}
+										/>
+										<span className="slider-value">
+											{itemData.Nota_Global || 0}
+										</span>
+									</div>
+								</div>
+								<div className="form-group">
+									<label>Creador</label>
+									<input
+										type="text"
+										value={itemData.Creador || ""}
+										onChange={(e) =>
+											handleInputChange(
+												"Creador",
+												e.target.value,
+											)
+										}
+									/>
+								</div>
+								<div className="form-group">
+									<label>Usuario</label>
+									<input
+										type="text"
+										value={itemData.Usuario || ""}
+										onChange={(e) =>
+											handleInputChange(
+												"Usuario",
+												e.target.value,
+											)
+										}
+									/>
+								</div>
+							</div>
+							<div className="form-group form-group-full">
+								<label>Géneros</label>
+								<input
+									type="text"
+									value={itemData.Generos || ""}
+									onChange={(e) =>
+										handleInputChange(
+											"Generos",
+											e.target.value,
+										)
+									}
+									placeholder="Separados por comas"
+								/>
+							</div>
+							<div className="form-group form-group-full resumen-field">
+								<label>Resumen</label>
+								<textarea
+									value={itemData.Resumen || ""}
+									onChange={(e) =>
+										handleInputChange(
+											"Resumen",
+											e.target.value,
+										)
+									}
+								/>
+							</div>
+							<div className="form-group form-group-full comentario-field">
+								<label>Comentario</label>
+								<textarea
+									value={itemData.Comentario || ""}
+									onChange={(e) =>
+										handleInputChange(
+											"Comentario",
+											e.target.value,
+										)
+									}
+									rows={2}
+								/>
+							</div>{" "}
 						</div>
+						<div className="images-sidebar">
+							<div className="form-group">
+								<label>Carátula</label>
+								{itemData.Caratula && (
+									<div className="image-preview">
+										<img
+											src={itemData.Caratula}
+											alt="Previsualización carátula"
+											onError={(e) => {
+												e.target.style.display = "none";
+											}}
+											onLoad={(e) => {
+												e.target.style.display =
+													"block";
+											}}
+										/>
+									</div>
+								)}
+								<input
+									type="url"
+									value={itemData.Caratula || ""}
+									onChange={(e) =>
+										handleInputChange(
+											"Caratula",
+											e.target.value,
+										)
+									}
+									placeholder="URL de la carátula"
+								/>
+							</div>
 
-						<div className="form-group">
-							<label>Nombre</label>
-							<input
-								type="text"
-								value={itemData.Nombre || ""}
-								onChange={(e) =>
-									handleInputChange("Nombre", e.target.value)
-								}
-							/>
-						</div>
-
-						<div className="form-group">
-							<label>Estado</label>
-							<select
-								value={itemData.Estado || ""}
-								onChange={(e) =>
-									handleInputChange("Estado", e.target.value)
-								}
-							>
-								<option value="">Seleccionar...</option>
-								<option value="Ahora">Ahora</option>
-								<option value="Planeado">Planeado</option>
-								<option value="Pasado">Pasado</option>
-								<option value="Dropeado">Dropeado</option>
-								<option value="Recomendacion">
-									Recomendación
-								</option>
-								<option value="Pausado">Pausado</option>
-							</select>
-						</div>
-
-						<div className="form-group">
-							<label>Tipo</label>
-							<input
-								type="text"
-								value={itemData.Tipo || ""}
-								onChange={(e) =>
-									handleInputChange("Tipo", e.target.value)
-								}
-							/>
-						</div>
-
-						<div className="form-group">
-							<label>Nota</label>
-							<input
-								type="number"
-								min="0"
-								max="10"
-								step="0.1"
-								value={itemData.Nota || ""}
-								onChange={(e) =>
-									handleInputChange("Nota", e.target.value)
-								}
-							/>
-						</div>
-
-						<div className="form-group">
-							<label>URL</label>
-							<input
-								type="url"
-								value={itemData.Link || itemData.URL || ""}
-								onChange={(e) =>
-									handleInputChange("Link", e.target.value)
-								}
-							/>
-						</div>
-
-						<div className="form-group">
-							<label>Carátula</label>
-							<input
-								type="url"
-								value={itemData.Caratula || ""}
-								onChange={(e) =>
-									handleInputChange(
-										"Caratula",
-										e.target.value,
-									)
-								}
-							/>
-						</div>
-
-						<div className="form-group">
-							<label>Imagen</label>
-							<input
-								type="url"
-								value={itemData.Imagen || ""}
-								onChange={(e) =>
-									handleInputChange("Imagen", e.target.value)
-								}
-							/>
-						</div>
-
-						<div className="form-group">
-							<label>Duración</label>
-							<input
-								type="text"
-								value={itemData.Duracion || ""}
-								onChange={(e) =>
-									handleInputChange(
-										"Duracion",
-										e.target.value,
-									)
-								}
-							/>
-						</div>
-
-						<div className="form-group">
-							<label>Fecha</label>
-							<input
-								type="text"
-								value={itemData.Fecha || ""}
-								onChange={(e) =>
-									handleInputChange("Fecha", e.target.value)
-								}
-							/>
-						</div>
-
-						<div className="form-group">
-							<label>Fecha Salida</label>
-							<input
-								type="text"
-								value={itemData.Fecha_Salida || ""}
-								onChange={(e) =>
-									handleInputChange(
-										"Fecha_Salida",
-										e.target.value,
-									)
-								}
-							/>
-						</div>
-
-						<div className="form-group">
-							<label>Trailer</label>
-							<input
-								type="url"
-								value={itemData.Trailer || ""}
-								onChange={(e) =>
-									handleInputChange("Trailer", e.target.value)
-								}
-							/>
-						</div>
-
-						<div className="form-group">
-							<label>Nota Global</label>
-							<input
-								type="number"
-								min="0"
-								max="10"
-								step="0.1"
-								value={itemData.Nota_Global || ""}
-								onChange={(e) =>
-									handleInputChange(
-										"Nota_Global",
-										e.target.value,
-									)
-								}
-							/>
-						</div>
-
-						<div className="form-group">
-							<label>Creador</label>
-							<input
-								type="text"
-								value={itemData.Creador || ""}
-								onChange={(e) =>
-									handleInputChange("Creador", e.target.value)
-								}
-							/>
-						</div>
-
-						<div className="form-group">
-							<label>Usuario</label>
-							<input
-								type="text"
-								value={itemData.Usuario || ""}
-								onChange={(e) =>
-									handleInputChange("Usuario", e.target.value)
-								}
-							/>
-						</div>
-
-						<div className="form-group form-group-full">
-							<label>Géneros</label>
-							<input
-								type="text"
-								value={itemData.Generos || ""}
-								onChange={(e) =>
-									handleInputChange("Generos", e.target.value)
-								}
-								placeholder="Separados por comas"
-							/>
-						</div>
-
-						<div className="form-group form-group-full">
-							<label>Resumen</label>
-							<textarea
-								value={itemData.Resumen || ""}
-								onChange={(e) =>
-									handleInputChange("Resumen", e.target.value)
-								}
-								rows={3}
-							/>
-						</div>
-
-						<div className="form-group form-group-full">
-							<label>Comentario</label>
-							<textarea
-								value={itemData.Comentario || ""}
-								onChange={(e) =>
-									handleInputChange(
-										"Comentario",
-										e.target.value,
-									)
-								}
-								rows={2}
-							/>
-						</div>
+							<div className="form-group">
+								<label>Imagen</label>
+								{itemData.Imagen && (
+									<div className="image-preview">
+										<img
+											src={itemData.Imagen}
+											alt="Previsualización imagen"
+											onError={(e) => {
+												e.target.style.display = "none";
+											}}
+											onLoad={(e) => {
+												e.target.style.display =
+													"block";
+											}}
+										/>
+									</div>
+								)}
+								<input
+									type="url"
+									value={itemData.Imagen || ""}
+									onChange={(e) =>
+										handleInputChange(
+											"Imagen",
+											e.target.value,
+										)
+									}
+									placeholder="URL de la imagen"
+								/>
+							</div>
+						</div>{" "}
 					</div>
 
 					<div className="form-actions">

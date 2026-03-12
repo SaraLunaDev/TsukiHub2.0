@@ -10,7 +10,6 @@ import Gacha from "./components/pages/Gacha/Gacha";
 import GameBoy from "./components/pages/GameBoy/GameBoy";
 import TTS from "./components/pages/TTS/TTS";
 import UserProfile from "./components/pages/UserProfile/UserProfile";
-import UpdateMissingIds from "./components/pages/UpdateMissingIds/UpdateMissingIds";
 import EditarItem from "./components/pages/EditarItem/EditarItem";
 import "./App.css";
 
@@ -52,10 +51,6 @@ function App() {
 					<Route path="/user/:username" element={<UserProfile />} />
 
 					{}
-					<Route
-						path="/admin/update-ids"
-						element={<UpdateMissingIds />}
-					/>
 				</Routes>
 			</Layout>
 		</Router>

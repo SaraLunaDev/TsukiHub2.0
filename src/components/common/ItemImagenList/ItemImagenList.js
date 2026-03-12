@@ -5,6 +5,7 @@ import { MdiChevronUp } from "../../icons/MdiChevronUp";
 import "./ItemImagenList.css";
 import { MaterialSymbolsLightKidStar } from "../../icons/MaterialSymbolsLightKidStar";
 import { MaterialSymbolsClose } from "../../icons/MaterialSymbolsClose";
+import { MaterialSymbolsEdit } from "../../icons/MaterialSymbolsEdit";
 import { API_URLS, STORAGE_KEYS } from "../../../constants/config";
 import useLocalStorage from "../../../hooks/useLocalStorage";
 import { useAuth } from "../../../hooks/useAuth";
@@ -43,6 +44,17 @@ export default function ItemImagenList({
 		Estado === "Recomendacion" &&
 		user &&
 		(isAdmin || String(Usuario).trim() === String(user.id).trim());
+
+	const canEdit = user && isAdmin && itemId;
+
+	const handleEdit = (e) => {
+		e.stopPropagation();
+		const isJuegos = window.location.pathname.includes("/juegos");
+		const editPath = isJuegos ? "/juegos/editar/" : "/pelis/editar/";
+
+		const encodedFecha = encodeURIComponent(Fecha_Salida || "");
+		window.location.href = `${editPath}${itemId}?fecha=${encodedFecha}`;
+	};
 
 	const handleDelete = async (e) => {
 		e.stopPropagation();
@@ -140,6 +152,15 @@ export default function ItemImagenList({
 								<h2 className="item-imagen-list-nombre">
 									{nombrePrincipal}
 								</h2>
+							)}
+							{canEdit && (
+								<button
+									className="item-list-edit-btn-right"
+									onClick={handleEdit}
+									aria-label="Editar item"
+								>
+									<MaterialSymbolsEdit />
+								</button>
 							)}
 							{canDelete && (
 								<button

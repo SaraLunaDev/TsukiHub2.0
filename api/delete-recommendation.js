@@ -38,39 +38,51 @@ export default async function handler(req, res) {
 	}
 
 	try {
-		const existing = await getValues(sheetId, `${sheetName}!A:Q`);
-		const rows = Array.isArray(existing?.values) ? existing.values : [];
+		const sheets = ["Juegos New", "Pelis New"];
+		let foundSheet = null;
+		let headers = null;
+		let itemRowIndex = -1;
+		let currentRow = null;
 
-		let rowToDelete = -1;
-		for (let i = 1; i < rows.length; i++) {
-			const row = rows[i];
-			const rowId = String(row?.[0] || "").trim();
-			const rowUsuario = String(row?.[16] || "").trim();
-			const rowEstado = String(row?.[2] || "").trim();
+		for (const sheetName of sheets) {
+			try {
+				const sheetData = await getValues(sheetId, `${sheetName}!A:Q`);
+				if (!sheetData || !sheetData.values) continue;
 
-			if (
-				String(itemId).trim() === rowId &&
-				rowEstado.toLowerCase() === "recomendacion" &&
-				(isAdmin || rowUsuario === String(authenticatedUserId).trim())
-			) {
-				rowToDelete = i + 1;
-				break;
+				headers = sheetData.values[0];
+				const rows = sheetData.values.slice(1);
+
+				itemRowIndex = rows.findIndex((row) => {
+					const rowId = String(row?.[0] || "").trim();
+					const rowUsuario = String(row?.[16] || "").trim();
+					const rowEstado = String(row?.[2] || "").trim();
+					return (
+						String(itemId).trim() === rowId &&
+						rowEstado.toLowerCase() === "recomendacion" &&
+						(isAdmin ||
+							rowUsuario === String(authenticatedUserId).trim())
+					);
+				});
+
+				if (itemRowIndex !== -1) {
+					currentRow = rows[itemRowIndex];
+					foundSheet = sheetName;
+					break;
+				}
+			} catch (error) {
+				console.log(`Error checking ${sheetName}:`, error.message);
+				continue;
 			}
 		}
 
-		if (rowToDelete === -1) {
+		if (!foundSheet || itemRowIndex === -1) {
 			return res.status(404).json({
 				error: "Recomendación no encontrada o no tienes permisos para eliminarla",
 			});
 		}
 
-		const rowIndex0Based = rowToDelete - 1;
-		await deleteRows(
-			sheetId,
-			sheetName,
-			rowIndex0Based,
-			rowIndex0Based + 1,
-		);
+		const rowIndexReal = itemRowIndex + 2;
+		await deleteRows(sheetId, foundSheet, [rowIndexReal], rowIndexReal + 1);
 
 		res.json({ success: true });
 	} catch (e) {

@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect, useCallback } from "react";
 
 function useLocalStorage(key, initialValue) {
@@ -12,39 +10,57 @@ function useLocalStorage(key, initialValue) {
 		}
 	});
 
-	const setValue = useCallback((value) => {
-		try {
-			setStoredValue((prevStoredValue) => {
-				const valueToStore =
-					value instanceof Function ? value(prevStoredValue) : value;
+	const setValue = useCallback(
+		(value) => {
+			try {
+				setStoredValue((prevStoredValue) => {
+					const valueToStore =
+						value instanceof Function
+							? value(prevStoredValue)
+							: value;
 
-				const isSame =
-					typeof valueToStore === "object"
-						? JSON.stringify(valueToStore) ===
-							JSON.stringify(prevStoredValue)
-						: valueToStore === prevStoredValue;
+					const isSame =
+						typeof valueToStore === "object"
+							? JSON.stringify(valueToStore) ===
+								JSON.stringify(prevStoredValue)
+							: valueToStore === prevStoredValue;
 
-				if (isSame) {
-					return prevStoredValue;
-				}
+					if (isSame) {
+						return prevStoredValue;
+					}
 
-				try {
-					window.localStorage.setItem(key, JSON.stringify(valueToStore));
-				} catch (e) {}
+					try {
+						window.localStorage.setItem(
+							key,
+							JSON.stringify(valueToStore),
+						);
+					} catch (e) {}
 
-				window.dispatchEvent(new Event("localStorageChange"));
+					setTimeout(() => {
+						window.dispatchEvent(new Event("localStorageChange"));
+					}, 0);
 
-				return valueToStore;
-			});
-		} catch (error) {}
-	}, [key]);
+					return valueToStore;
+				});
+			} catch (error) {}
+		},
+		[key],
+	);
 
 	useEffect(() => {
 		const handleStorageChange = () => {
 			try {
 				const item = window.localStorage.getItem(key);
 				if (item) {
-					setStoredValue(JSON.parse(item));
+					const parsed = JSON.parse(item);
+					setStoredValue((prev) => {
+						const same =
+							typeof parsed === "object"
+								? JSON.stringify(parsed) ===
+									JSON.stringify(prev)
+								: parsed === prev;
+						return same ? prev : parsed;
+					});
 				}
 			} catch (error) {}
 		};
