@@ -20,7 +20,7 @@ import GenreFilter from "../../common/FilterSection/GenreFilter";
 
 function Juegos() {
 	const { config } = useSheetConfig();
-	const { data, loading, error } = useGoogleSheet(
+	const { data, loading, error, refetch } = useGoogleSheet(
 		config?.juegosSheetUrl || "",
 	);
 	const { data: usersData } = useGoogleSheet(
@@ -166,6 +166,7 @@ function Juegos() {
 										<ItemCaratula
 											key={"jugando-" + idx}
 											{...row}
+											onRecommendationDeleted={refetch}
 										/>
 									)}
 								/>

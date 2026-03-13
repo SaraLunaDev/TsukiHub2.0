@@ -393,6 +393,24 @@
 	transform: translateY(-2px);
 }
 
+.item-votos-superpuesta.own-recommendation {
+	cursor: default;
+}
+
+.item-votos-superpuesta.own-recommendation:hover .vote-btn,
+.item-votos-superpuesta.own-recommendation:hover .vote-count {
+	transform: none;
+}
+
+.item-votos-superpuesta.voting {
+	cursor: default;
+	pointer-events: none;
+}
+
+.item-votos-superpuesta.voting .vote-btn {
+	cursor: not-allowed;
+}
+
 .item-votos-superpuesta.voted {
 	color: var(--color-mid);
 }

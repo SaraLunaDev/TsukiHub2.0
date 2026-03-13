@@ -95,6 +95,10 @@ export default function HoverCard({
 				if (leaveTimeoutRef.current === _leaveId)
 					leaveTimeoutRef.current = null;
 			}
+			if (transitionTimeoutRef.current) {
+				clearTimeout(transitionTimeoutRef.current);
+				transitionTimeoutRef.current = null;
+			}
 		};
 	}, [lockToBack]);
 
@@ -633,6 +637,7 @@ export default function HoverCard({
 	const unsubBackgroundRef = useRef(null);
 	const unsubScaleRef = useRef(null);
 	const springsInitializedRef = useRef(false);
+	const transitionTimeoutRef = useRef(null);
 
 	function initSprings() {
 		if (springsInitializedRef.current) return;
@@ -773,6 +778,11 @@ export default function HoverCard({
 			clearTimeout(leaveTimeoutRef.current);
 			leaveTimeoutRef.current = null;
 		}
+		if (transitionTimeoutRef.current) {
+			clearTimeout(transitionTimeoutRef.current);
+			transitionTimeoutRef.current = null;
+		}
+		el.setAttribute("data-no-transition", "");
 		el.classList.add("is-hovered");
 		if (!springsInitializedRef.current) initSprings();
 
@@ -904,11 +914,20 @@ export default function HoverCard({
 		}
 
 		const el = cardRef.current;
-		if (el && typeof el.matches === "function" && el.matches(":hover")) {
+		if (
+			!immediate &&
+			el &&
+			typeof el.matches === "function" &&
+			el.matches(":hover")
+		) {
 			return;
 		}
 
-		if (typeof document !== "undefined" && lastPointerRef.current) {
+		if (
+			!immediate &&
+			typeof document !== "undefined" &&
+			lastPointerRef.current
+		) {
 			try {
 				const p = lastPointerRef.current;
 				if (typeof document.elementFromPoint === "function") {
@@ -954,6 +973,18 @@ export default function HoverCard({
 				setDisplayData(pendingLockRef.current);
 				setImagesReady(false);
 				pendingLockRef.current = null;
+			}
+
+			if (el) {
+				if (transitionTimeoutRef.current) {
+					clearTimeout(transitionTimeoutRef.current);
+					transitionTimeoutRef.current = null;
+				}
+				transitionTimeoutRef.current = setTimeout(() => {
+					const el2 = cardRef.current;
+					if (el2) el2.removeAttribute("data-no-transition");
+					transitionTimeoutRef.current = null;
+				}, 400);
 			}
 		};
 

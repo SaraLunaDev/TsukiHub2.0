@@ -1,5 +1,6 @@
 import { appendValues, getValues } from "../lib/sheets-client.js";
 import { requireAuth } from "../lib/auth-middleware.js";
+import { isAdmin } from "../lib/utils/jwt-utils.js";
 
 // Limpia texto para CSV
 const cleanTextForCSV = (text) => {
@@ -32,7 +33,8 @@ export default async function handler(req, res) {
 		return res.status(authResult.status).json({ error: authResult.error });
 	}
 
-	const authenticatedUserId = authResult.userId;
+	const { username, userId: authenticatedUserId } = authResult;
+	const allowDuplicate = isAdmin(username);
 
 	const { item, comment, tipo } = req.body;
 	if (!item) return res.status(400).json({ error: "Missing data" });
@@ -75,7 +77,7 @@ export default async function handler(req, res) {
 			return incomingMediaType === rowMediaType;
 		});
 
-		if (duplicate) {
+		if (duplicate && !allowDuplicate) {
 			return res.status(409).json({
 				error: "Esa recomendación ya existe...",
 				duplicate: true,

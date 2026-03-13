@@ -9,6 +9,7 @@ import { MaterialSymbolsEdit } from "../../icons/MaterialSymbolsEdit";
 import { API_URLS, STORAGE_KEYS } from "../../../constants/config";
 import useLocalStorage from "../../../hooks/useLocalStorage";
 import { useAuth } from "../../../hooks/useAuth";
+import { useSheetConfig } from "../../../hooks/useSheetConfig";
 
 export default function ItemImagenList({
 	Imagen,
@@ -38,6 +39,28 @@ export default function ItemImagenList({
 	const [user] = useLocalStorage(STORAGE_KEYS.TWITCH_USER, null);
 	const [token] = useLocalStorage(STORAGE_KEYS.TWITCH_TOKEN, null);
 	const { isAdmin } = useAuth();
+	const { config } = useSheetConfig();
+
+	const removeRecommendationFromLocalCache = (id) => {
+		try {
+			const sheetUrl = window.location.pathname.includes("/juegos")
+				? config?.juegosSheetUrl
+				: config?.pelisSheetUrl;
+			if (!sheetUrl) return;
+			const cacheKey = `gsheet_cache_${sheetUrl}_default`;
+			const stored = window.localStorage.getItem(cacheKey);
+			if (!stored) return;
+			const parsed = JSON.parse(stored);
+			if (!Array.isArray(parsed)) return;
+			const filtered = parsed.filter((row) => {
+				const rowId = String(
+					row?.ID ?? row?.Id ?? row?.id ?? "",
+				).trim();
+				return rowId !== String(id).trim();
+			});
+			window.localStorage.setItem(cacheKey, JSON.stringify(filtered));
+		} catch {}
+	};
 
 	const itemId = ID || Id || id;
 	const canDelete =
@@ -91,8 +114,9 @@ export default function ItemImagenList({
 				);
 			}
 
+			removeRecommendationFromLocalCache(itemId);
 			if (onRecommendationDeleted) {
-				onRecommendationDeleted();
+				onRecommendationDeleted(itemId);
 			}
 		} catch (error) {
 			console.error("Error deleting recommendation:", error);

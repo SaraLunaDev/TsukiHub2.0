@@ -9,39 +9,189 @@ import { MaterialSymbolsEdit } from "../../icons/MaterialSymbolsEdit";
 import { API_URLS, STORAGE_KEYS } from "../../../constants/config";
 import useLocalStorage from "../../../hooks/useLocalStorage";
 import { useAuth } from "../../../hooks/useAuth";
+import { useSheetConfig } from "../../../hooks/useSheetConfig";
 import { Fa7SolidThumbsUp } from "../../icons/Fa7SolidThumbsUp";
 
 const countsCache = new Map();
-
-const userVotesCache = new Map();
-
 const fetchPromises = new Map();
 
-export async function fetchVotes(tipo, userId) {
+function votesCacheKey(tipo) {
+	return `gsheet_cache_votes_${tipo}`;
+}
+
+function getVoteField(vote, ...fieldNames) {
+	if (!vote || typeof vote !== "object") return "";
+
+	for (const name of fieldNames) {
+		if (vote[name] !== undefined && vote[name] !== null) {
+			return String(vote[name]).trim();
+		}
+	}
+
+	const target = String(fieldNames[0] || "")
+		.trim()
+		.toLowerCase();
+	for (const key of Object.keys(vote)) {
+		if (String(key).trim().toLowerCase() === target) {
+			return String(vote[key]).trim();
+		}
+	}
+
+	return "";
+}
+
+function getVoteId(vote) {
+	return getVoteField(vote, "ID", "Id", "id", "identifier");
+}
+
+function getVoteUserId(vote) {
+	return getVoteField(
+		vote,
+		"Usuario",
+		"usuario",
+		"userId",
+		"user",
+		"userid",
+		"user_id",
+	);
+}
+
+function buildCountsFromVotes(votes) {
+	const counts = new Map();
+	for (const vote of votes) {
+		const id = getVoteId(vote);
+		if (!id) continue;
+		counts.set(id, (counts.get(id) || 0) + 1);
+	}
+	return counts;
+}
+
+function updateVoteCache(tipo, userId, itemId, nombre, action) {
+	const id = String(itemId);
+	const userIdStr = userId ? String(userId) : "";
+	const votes = voteListsCache.get(tipo) || [];
+
+	if (action === "add") {
+		votes.push({
+			Tipo: tipo,
+			ID: id,
+			Nombre: nombre || "",
+			Usuario: userIdStr,
+		});
+	} else {
+		const index = votes.findIndex(
+			(v) => getVoteId(v) === id && getVoteUserId(v) === userIdStr,
+		);
+		if (index !== -1) {
+			votes.splice(index, 1);
+		}
+	}
+
+	voteListsCache.set(tipo, votes);
+	try {
+		window.localStorage.setItem(votesCacheKey(tipo), JSON.stringify(votes));
+	} catch {}
+
+	const counts = buildCountsFromVotes(votes);
+	countsCache.set(tipo, counts);
+	return counts.get(id) || 0;
+}
+
+const voteListsCache = new Map();
+
+export async function fetchVotes(
+	tipo,
+	userId,
+	{ skipCache } = { skipCache: false },
+) {
+	try {
+		const baseKey = votesCacheKey(tipo);
+		for (let i = localStorage.length - 1; i >= 0; i--) {
+			const key = localStorage.key(i);
+			if (key?.startsWith(`${baseKey}_user_`)) {
+				localStorage.removeItem(key);
+			}
+		}
+	} catch {}
+
+	const cachedCounts = countsCache.get(tipo);
+	const cachedVotes = voteListsCache.get(tipo);
+
+	const computeUserSet = (votes) => {
+		if (!userId) return null;
+		const set = new Set();
+		for (const vote of votes || []) {
+			if (getVoteUserId(vote) === String(userId)) {
+				const id = getVoteId(vote);
+				if (id) set.add(id);
+			}
+		}
+		return set;
+	};
+
+	if (cachedCounts && (!userId || cachedVotes) && !skipCache) {
+		void fetchVotes(tipo, userId, { skipCache: true });
+		return { counts: cachedCounts, userSet: computeUserSet(cachedVotes) };
+	}
+
+	try {
+		const stored = window.localStorage.getItem(votesCacheKey(tipo));
+		if (stored && !skipCache) {
+			const parsed = JSON.parse(stored);
+			let votes = [];
+			if (Array.isArray(parsed)) {
+				votes = parsed;
+			} else if (parsed && typeof parsed === "object") {
+				votes = Object.entries(parsed).flatMap(([id, count]) =>
+					Array.from({ length: Number(count) || 0 }, () => ({
+						Tipo: tipo,
+						ID: id,
+					})),
+				);
+			}
+
+			const counts = buildCountsFromVotes(votes);
+			countsCache.set(tipo, counts);
+			voteListsCache.set(tipo, votes);
+
+			if (!userId) {
+				return { counts, userSet: null };
+			}
+			const userSet = computeUserSet(votes);
+
+			void fetchVotes(tipo, userId, { skipCache: true });
+			return { counts, userSet };
+		}
+	} catch (e) {}
+
 	const key = userId ? `${tipo}:${userId}` : tipo;
 	if (fetchPromises.has(key)) {
 		return fetchPromises.get(key);
 	}
-	const promise = (async () => {
-		const url = `${API_URLS.GET_VOTES}?tipo=${encodeURIComponent(tipo)}${
-			userId ? `&userId=${encodeURIComponent(userId)}` : ""
-		}`;
+
+	const makeRequest = async () => {
+		const url = `${API_URLS.GET_VOTES}?tipo=${encodeURIComponent(
+			tipo,
+		)}&raw=true${userId ? `&userId=${encodeURIComponent(userId)}` : ""}`;
 		const resp = await fetch(url);
 		const data = await resp.json();
 
-		if (data.counts) {
-			const map = new Map(Object.entries(data.counts));
-			countsCache.set(tipo, map);
-		}
+		const votes = Array.isArray(data.votes) ? data.votes : [];
+		const counts = buildCountsFromVotes(votes);
+		countsCache.set(tipo, counts);
+		voteListsCache.set(tipo, votes);
+		try {
+			window.localStorage.setItem(
+				votesCacheKey(tipo),
+				JSON.stringify(votes),
+			);
+		} catch {}
 
-		let userSet = null;
-		if (userId && data.userVotedIds) {
-			userSet = new Set(data.userVotedIds);
-			userVotesCache.set(`${tipo}:${userId}`, userSet);
-		}
+		const userSet = computeUserSet(votes);
+		return { counts, userSet };
+	};
 
-		return { counts: countsCache.get(tipo), userSet };
-	})();
+	const promise = makeRequest();
 	fetchPromises.set(key, promise);
 	promise.finally(() => fetchPromises.delete(key));
 	return promise;
@@ -74,31 +224,39 @@ export default function ItemCaratula({
 	const [user] = useLocalStorage(STORAGE_KEYS.TWITCH_USER, null);
 	const [token] = useLocalStorage(STORAGE_KEYS.TWITCH_TOKEN, null);
 	const { isAdmin } = useAuth();
+	const { config } = useSheetConfig();
+	const isJuegos = window.location.pathname.includes("/juegos");
 	const [hover, setHover] = useState(false);
 	const [deleting, setDeleting] = useState(false);
-	const localVotesKey = `votes_cache_${tipo}_${itemId}`;
-	const [localVotes, setLocalVotes] = useLocalStorage(localVotesKey, null);
 	const [votes, setVotes] = useState(0);
 	const [voting, setVoting] = useState(false);
-	const localHasVotedKey = `hasvoted_cache_${tipo}_${itemId}_${user?.id ?? "anon"}`;
-	const [localHasVoted, setLocalHasVoted] = useLocalStorage(
-		localHasVotedKey,
-		false,
-	);
 	const [hasVoted, setHasVoted] = useState(false);
 
-	useEffect(() => {
-		if (localVotes !== null) {
-			setVotes(localVotes);
-		}
-		setHasVoted(localHasVoted);
-	}, [localVotes, localHasVoted]);
+	const removeRecommendationFromLocalCache = (itemId) => {
+		try {
+			const sheetUrl = isJuegos
+				? config?.juegosSheetUrl
+				: config?.pelisSheetUrl;
+			if (!sheetUrl) return;
+			const cacheKey = `gsheet_cache_${sheetUrl}_default`;
+			const stored = window.localStorage.getItem(cacheKey);
+			if (!stored) return;
+			const parsed = JSON.parse(stored);
+			if (!Array.isArray(parsed)) return;
+			const filtered = parsed.filter((row) => {
+				const id = String(row?.ID ?? row?.Id ?? row?.id ?? "").trim();
+				return id !== String(itemId).trim();
+			});
+			window.localStorage.setItem(cacheKey, JSON.stringify(filtered));
+		} catch {}
+	};
 
-	const canDelete =
+	const isOwnRecommendation =
 		user &&
-		(isAdmin ||
-			(Estado === "Recomendacion" &&
-				String(Usuario).trim() === String(user.id).trim()));
+		Estado === "Recomendacion" &&
+		String(Usuario).trim() === String(user.id).trim();
+
+	const canDelete = user && (isAdmin || isOwnRecommendation);
 
 	useEffect(() => {
 		if (!itemId || Estado !== "Recomendacion") return;
@@ -110,62 +268,40 @@ export default function ItemCaratula({
 				const { counts, userSet } = await fetchVotes(tipo, user?.id);
 				if (!cancelled) {
 					const newVotes = counts?.get(idKey) || 0;
-
-					if (localVotes === null || newVotes !== localVotes) {
-						setVotes(newVotes);
-						setLocalVotes(newVotes);
-					}
+					setVotes(newVotes);
 					if (userSet) {
 						setHasVoted(userSet.has(idKey));
-						setLocalHasVoted(userSet.has(idKey));
 					}
 				}
+
+				try {
+					const { counts: updatedCounts, userSet: updatedUserSet } =
+						await fetchVotes(tipo, user?.id, { skipCache: true });
+					if (!cancelled) {
+						const updatedVotes = updatedCounts?.get(idKey) || 0;
+						setVotes(updatedVotes);
+						if (updatedUserSet) {
+							setHasVoted(updatedUserSet.has(idKey));
+						}
+					}
+				} catch {}
 			} catch (err) {
 				console.error("Error loading votes", err);
 			}
 		};
 
-		const userKey = user && `${tipo}:${user.id}`;
-		if (countsCache.has(tipo)) {
-			const map = countsCache.get(tipo);
-			const cachedVotes = map.get(idKey) || 0;
-
-			if (localVotes === null || cachedVotes !== localVotes) {
-				setVotes(cachedVotes);
-				setLocalVotes(cachedVotes);
-			}
-			if (userKey && userVotesCache.has(userKey)) {
-				const voted = userVotesCache.get(userKey).has(idKey);
-				setHasVoted(voted);
-				setLocalHasVoted(voted);
-			}
-
-			if (user && !userVotesCache.has(userKey)) {
-				loadAllVotes();
-			} else {
-			}
-		} else {
-			loadAllVotes();
-		}
+		loadAllVotes();
 
 		return () => {
 			cancelled = true;
 		};
-	}, [
-		itemId,
-		tipo,
-		user,
-		Estado,
-		setLocalVotes,
-		setLocalHasVoted,
-		localVotes,
-	]);
+	}, [itemId, tipo, user?.id, Estado]);
 
 	const handleVote = async (e) => {
 		if (e && e.stopPropagation) {
 			e.stopPropagation();
 		}
-		if (!user || voting) return;
+		if (!user || voting || isOwnRecommendation) return;
 		setVoting(true);
 		try {
 			const action = hasVoted ? "remove" : "add";
@@ -184,39 +320,71 @@ export default function ItemCaratula({
 			});
 			const data = await resp.json();
 			if (resp.ok && data.success) {
-				let newVal;
-				if (action === "add") {
-					newVal = votes + 1;
-					setHasVoted(true);
-					setLocalHasVoted(true);
-				} else {
-					newVal = Math.max(votes - 1, 0);
-					setHasVoted(false);
-					setLocalHasVoted(false);
-				}
-
+				const newVal = updateVoteCache(
+					tipo,
+					user?.id,
+					itemId,
+					Nombre,
+					action,
+				);
 				setVotes(newVal);
-				setLocalVotes(newVal);
-
-				const map = countsCache.get(tipo) || new Map();
-				map.set(String(itemId), newVal);
-				countsCache.set(tipo, map);
-
-				if (user && user.id) {
-					const ukey = `${tipo}:${user.id}`;
-					const set = userVotesCache.get(ukey) || new Set();
-					if (action === "add") {
-						set.add(String(itemId));
-					} else {
-						set.delete(String(itemId));
-					}
-					userVotesCache.set(ukey, set);
-				}
+				setHasVoted(action === "add");
 
 				if (onVote) {
 					onVote(String(itemId), newVal);
 				}
 			} else {
+				if (
+					resp.status === 409 &&
+					data.error === "User already voted"
+				) {
+					try {
+						const { counts, userSet } = await fetchVotes(
+							tipo,
+							user?.id,
+						);
+						const idKey = String(itemId);
+						setVotes(counts?.get(idKey) || 0);
+						const nowHasVoted = Boolean(userSet?.has(idKey));
+						setHasVoted(nowHasVoted);
+
+						if (nowHasVoted) {
+							const resp2 = await fetch(API_URLS.MODIFY_VOTE, {
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json",
+									...(token
+										? { Authorization: `Bearer ${token}` }
+										: {}),
+								},
+								body: JSON.stringify({
+									tipo,
+									id: itemId,
+									nombre: Nombre,
+									action: "remove",
+								}),
+							});
+							const data2 = await resp2.json();
+							if (resp2.ok && data2.success) {
+								const newVal = updateVoteCache(
+									tipo,
+									user?.id,
+									itemId,
+									Nombre,
+									"remove",
+								);
+								setVotes(newVal);
+								setHasVoted(false);
+								if (onVote) onVote(String(itemId), newVal);
+							}
+						}
+					} catch {}
+				} else if (
+					resp.status === 404 &&
+					data.error === "Vote not found"
+				) {
+					setHasVoted(false);
+				}
 				console.error("Failed to modify vote", data.error);
 			}
 		} catch (err) {
@@ -261,8 +429,9 @@ export default function ItemCaratula({
 				);
 			}
 
+			removeRecommendationFromLocalCache(itemId);
 			if (onRecommendationDeleted) {
-				onRecommendationDeleted();
+				onRecommendationDeleted(itemId);
 			}
 		} catch (error) {
 			console.error("Error deleting recommendation:", error);
@@ -295,16 +464,28 @@ export default function ItemCaratula({
 			{}
 			{Estado === "Recomendacion" && (
 				<div
-					className={`item-votos-superpuesta${hasVoted ? " voted" : ""}${user ? " user-logged" : ""}`}
+					className={`item-votos-superpuesta${hasVoted ? " voted" : ""}${user ? " user-logged" : ""}${isOwnRecommendation ? " own-recommendation" : ""}${voting ? " voting" : ""}`}
 					onClick={handleVote}
 					role="button"
-					aria-label="Votar"
-					tabIndex={user && !voting && !hasVoted ? 0 : -1}
+					aria-label={
+						isOwnRecommendation
+							? "No puedes votar tu propia recomendación"
+							: "Votar"
+					}
+					tabIndex={
+						user && !voting && !hasVoted && !isOwnRecommendation
+							? 0
+							: -1
+					}
 				>
 					<button
 						className="vote-btn"
-						disabled={!user || voting}
-						aria-label="Votar"
+						disabled={!user || voting || isOwnRecommendation}
+						aria-label={
+							isOwnRecommendation
+								? "No puedes votar tu propia recomendación"
+								: "Votar"
+						}
 					>
 						<Fa7SolidThumbsUp
 							style={{ fontSize: 14 }}

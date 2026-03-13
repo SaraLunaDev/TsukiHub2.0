@@ -20,7 +20,7 @@ import GenreFilter from "../../common/FilterSection/GenreFilter";
 
 function Pelis() {
 	const { config } = useSheetConfig();
-	const { data, loading, error } = useGoogleSheet(
+	const { data, loading, error, refetch } = useGoogleSheet(
 		config?.pelisSheetUrl || "",
 	);
 	const { data: usersData } = useGoogleSheet(
@@ -396,6 +396,7 @@ function Pelis() {
 											key={idx}
 											{...row}
 											userSheet={getUserById(row.Usuario)}
+											onRecommendationDeleted={refetch}
 										/>
 									))}
 							</div>
@@ -484,6 +485,7 @@ function Pelis() {
 											key={idx}
 											{...row}
 											userSheet={getUserById(row.Usuario)}
+											onRecommendationDeleted={refetch}
 										/>
 									))}
 							</div>

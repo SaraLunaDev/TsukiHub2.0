@@ -22,7 +22,7 @@ import "./Inicio.css";
 const EXCLUDED_USERS = ["TsukiSoft", "TsukiwiChan"];
 
 function Inicio() {
-	const { user: isMod } = useAuth();
+	const { isMod } = useAuth();
 	const { config } = useSheetConfig();
 	const [emotesRowLines, setEmotesRowLines] = useState({});
 	const [expandedAchievements, setExpandedAchievements] = useState([]);
@@ -283,7 +283,13 @@ function Inicio() {
 				img.removeEventListener("error", checkAllLoaded);
 			});
 		};
-	}, [showEmotesTable, userData, searchFilters.emotes, emotesRowLines, maxEmotesPerRow]);
+	}, [
+		showEmotesTable,
+		userData,
+		searchFilters.emotes,
+		emotesRowLines,
+		maxEmotesPerRow,
+	]);
 
 	if (loading && (!rawData || rawData.length === 0)) {
 		return (

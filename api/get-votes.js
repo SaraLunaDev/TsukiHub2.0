@@ -5,24 +5,68 @@ export default async function handler(req, res) {
 		return res.status(405).json({ error: "Method not allowed" });
 	}
 
-	const { tipo, id, userId } = req.query;
+	const { tipo, id, userId, raw } = req.query;
 	if (!tipo) {
 		return res
 			.status(400)
 			.json({ error: "`tipo` query parameter is required" });
 	}
 
-	const sheetId = process.env.GOOGLE_SHEET_ID;
-	if (!sheetId) {
-		return res.status(500).json({ error: "Google Sheet ID missing" });
+	const wantRaw = String(raw).toLowerCase() === "true";
+
+	function parseCSVRow(row) {
+		const result = [];
+		let current = "";
+		let inQuotes = false;
+		for (let i = 0; i < row.length; i++) {
+			const char = row[i];
+			if (char === '"') {
+				if (inQuotes && row[i + 1] === '"') {
+					current += '"';
+					i++;
+				} else {
+					inQuotes = !inQuotes;
+				}
+			} else if (char === "," && !inQuotes) {
+				result.push(current);
+				current = "";
+			} else {
+				current += char;
+			}
+		}
+		result.push(current);
+		return result;
 	}
 
-	try {
+	let rows = [];
+	const votosUrl = process.env.VOTOS_SHEET_URL;
+	if (votosUrl) {
+		try {
+			const resp = await fetch(votosUrl);
+			if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+			const csvText = await resp.text();
+			const lines = csvText.split("\n").filter((r) => r.trim());
+			rows = lines.map(parseCSVRow);
+		} catch (csvErr) {
+			console.error("Error fetching votes CSV", csvErr);
+			rows = [];
+		}
+	}
+
+	if (rows.length === 0) {
+		const sheetId = process.env.GOOGLE_SHEET_ID;
+		if (!sheetId) {
+			return res.status(500).json({ error: "Google Sheet ID missing" });
+		}
+
 		const sheetData = await getValues(sheetId, `Votos!A:D`);
-		const rows = Array.isArray(sheetData?.values) ? sheetData.values : [];
+		rows = Array.isArray(sheetData?.values) ? sheetData.values : [];
+	}
 
-		const dataRows = rows.slice(1);
+	const headers = (rows[0] || []).map((h) => String(h).trim());
+	const dataRows = rows.slice(1);
 
+	try {
 		const normalizedTipo = String(tipo).toLowerCase();
 		const includeUser = userId != null && userId !== "";
 		let userVotedIds = includeUser ? new Set() : null;
@@ -46,6 +90,7 @@ export default async function handler(req, res) {
 			return res.status(200).json({ success: true, count, hasVoted });
 		} else {
 			const counts = {};
+			const votes = wantRaw ? [] : null;
 			dataRows.forEach((row) => {
 				const rowTipo = String(row[0] || "").toLowerCase();
 				if (rowTipo !== normalizedTipo) return;
@@ -59,8 +104,16 @@ export default async function handler(req, res) {
 						userVotedIds.add(rowId);
 					}
 				}
+				if (wantRaw) {
+					const obj = {};
+					headers.forEach((h, i) => {
+						obj[h] = row[i] || "";
+					});
+					votes.push(obj);
+				}
 			});
 			const result = { success: true, counts };
+			if (wantRaw) result.votes = votes;
 			if (includeUser) result.userVotedIds = Array.from(userVotedIds);
 			return res.status(200).json(result);
 		}

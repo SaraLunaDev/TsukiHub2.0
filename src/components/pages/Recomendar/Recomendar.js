@@ -10,6 +10,7 @@ import ItemImagenSmall from "../../common/ItemImagenSmall/ItemImagenSmall";
 import SearchBar from "../../common/SearchBar/SearchBar";
 import { useGoogleSheet } from "../../../hooks/useGoogleSheet";
 import { useSheetConfig } from "../../../hooks/useSheetConfig";
+import { useAuth } from "../../../hooks/useAuth";
 import useLocalStorage from "../../../hooks/useLocalStorage";
 import { useLocation } from "react-router-dom";
 import { API_URLS } from "../../../constants/config";
@@ -26,10 +27,136 @@ function Recomendar() {
 	const SHEET_URL = isJuegos
 		? config?.juegosSheetUrl || ""
 		: config?.pelisSheetUrl || "";
+
+	const CACHE_KEY = React.useMemo(
+		() => `gsheet_cache_${SHEET_URL}_default`,
+		[SHEET_URL],
+	);
+
 	const { data, loading, error } = useGoogleSheet(SHEET_URL);
 	const { data: usersData } = useGoogleSheet(
 		config?.userdataSheetUrl || "",
 		"userData",
+	);
+
+	const [localCacheData, setLocalCacheData] = useState([]);
+	const [removedIds, setRemovedIds] = useState(() => new Set());
+
+	useEffect(() => {
+		if (!CACHE_KEY) return;
+		try {
+			const stored = window.localStorage.getItem(CACHE_KEY);
+			if (stored) {
+				setLocalCacheData(JSON.parse(stored));
+			} else {
+				setLocalCacheData([]);
+			}
+		} catch {
+			setLocalCacheData([]);
+		}
+	}, [CACHE_KEY]);
+
+	useEffect(() => {
+		setRemovedIds(new Set());
+	}, [CACHE_KEY]);
+
+	const formatDateDDMMYYYY = React.useCallback((date = new Date()) => {
+		const d = date.getDate().toString().padStart(2, "0");
+		const m = (date.getMonth() + 1).toString().padStart(2, "0");
+		const y = date.getFullYear();
+		return `${d}/${m}/${y}`;
+	}, []);
+
+	const addRecommendationToLocalCache = React.useCallback(
+		(recommendation) => {
+			if (!CACHE_KEY) return;
+			try {
+				const stored = window.localStorage.getItem(CACHE_KEY);
+				const existing = stored ? JSON.parse(stored) : [];
+				const updated = Array.isArray(existing)
+					? [...existing, recommendation]
+					: [recommendation];
+				window.localStorage.setItem(CACHE_KEY, JSON.stringify(updated));
+				setLocalCacheData(updated);
+			} catch {}
+		},
+		[CACHE_KEY],
+	);
+	const removeRecommendationFromLocalCache = (id) => {
+		if (!CACHE_KEY) return;
+		const normalizedId = String(id).trim();
+		try {
+			const stored = window.localStorage.getItem(CACHE_KEY);
+			if (!stored) return;
+			const parsed = JSON.parse(stored);
+			if (!Array.isArray(parsed)) return;
+			const filtered = parsed.filter((row) => {
+				const rowId = String(getRowId(row)).trim();
+				return rowId !== normalizedId;
+			});
+			window.localStorage.setItem(CACHE_KEY, JSON.stringify(filtered));
+			setLocalCacheData(filtered);
+			setRemovedIds((prev) => {
+				const next = new Set(prev);
+				next.add(normalizedId);
+				return next;
+			});
+		} catch {}
+	};
+
+	const { isAdmin } = useAuth();
+	const [user] = useLocalStorage("twitchUser", null);
+	const [token] = useLocalStorage("twitchToken", null);
+
+	const buildRecommendationForCache = React.useCallback(
+		(selectedResult, tipoValue, comentario) => {
+			const now = new Date();
+			return {
+				ID:
+					selectedResult.id ||
+					selectedResult.ID ||
+					selectedResult.Id ||
+					"",
+				Nombre:
+					selectedResult.nombre ||
+					selectedResult.title ||
+					selectedResult.name ||
+					"",
+				Estado: "Recomendacion",
+				Tipo: tipoValue || "",
+				Fecha: formatDateDDMMYYYY(now),
+				URL: "",
+				Caratula:
+					selectedResult.caratula || selectedResult.Caratula || "",
+				Imagen: selectedResult.imagen || selectedResult.Imagen || "",
+				Duracion:
+					selectedResult.duracion || selectedResult.Duracion || "",
+				Nota: "",
+				Trailer: selectedResult.trailer || selectedResult.Trailer || "",
+				Generos: Array.isArray(selectedResult.generos)
+					? selectedResult.generos.join(", ")
+					: selectedResult.generos || "",
+				Resumen: selectedResult.resumen || selectedResult.Resumen || "",
+				Fecha_Salida:
+					selectedResult.fecha ||
+					selectedResult.Fecha_Salida ||
+					selectedResult.FechaSalida ||
+					"",
+				Nota_Global:
+					selectedResult.nota_global ||
+					selectedResult.Nota_Global ||
+					"",
+				Creador: selectedResult.creador || selectedResult.Creador || "",
+				Usuario:
+					user?.id ||
+					user?.user_id ||
+					user?.userId ||
+					user?.id_str ||
+					"",
+				Comentario: comentario || "",
+			};
+		},
+		[formatDateDDMMYYYY, user],
 	);
 
 	const parseDateValue = (val) => {
@@ -56,24 +183,55 @@ function Recomendar() {
 
 	const [voteCounts, setVoteCounts] = useState(new Map());
 
+	const mapsAreEqual = React.useCallback((a, b) => {
+		if (a === b) return true;
+		if (!a || !b) return false;
+		if (a.size !== b.size) return false;
+		for (const [key, value] of a) {
+			if (b.get(key) !== value) return false;
+		}
+		return true;
+	}, []);
+
+	const setVoteCountsIfChanged = React.useCallback(
+		(next) => {
+			setVoteCounts((prev) => {
+				if (mapsAreEqual(prev, next)) return prev;
+				return next;
+			});
+		},
+		[mapsAreEqual],
+	);
+
 	useEffect(() => {
 		if (!data) return;
 		const tipo = isJuegos ? "Juegos" : "Pelis";
-		const localMap = new Map();
-		data.forEach((row) => {
-			if ((row["Estado"] || "").toLowerCase() !== "recomendacion") return;
-			const id = String(getRowId(row));
-			const localKey = `votes_cache_${tipo}_${id}`;
-			try {
-				const val = window.localStorage.getItem(localKey);
-				if (val !== null) {
-					localMap.set(id, JSON.parse(val));
+		const cacheKey = `gsheet_cache_votes_${tipo}`;
+		try {
+			const stored = window.localStorage.getItem(cacheKey);
+			if (stored) {
+				const parsed = JSON.parse(stored);
+				let votes = [];
+				if (Array.isArray(parsed)) {
+					votes = parsed;
+				} else if (parsed && typeof parsed === "object") {
+					votes = Object.entries(parsed).flatMap(([id, count]) =>
+						Array.from({ length: Number(count) || 0 }, () => ({
+							ID: id,
+						})),
+					);
 				}
-			} catch {}
-		});
-		if (localMap.size > 0) {
-			setVoteCounts(localMap);
-		}
+				const map = new Map();
+				for (const vote of votes) {
+					const id = String(
+						vote?.ID ?? vote?.Id ?? vote?.id ?? "",
+					).trim();
+					if (!id) continue;
+					map.set(id, (map.get(id) || 0) + 1);
+				}
+				setVoteCounts(map);
+			}
+		} catch {}
 	}, [data, isJuegos]);
 
 	const handleVoteChange = (id, newCount) => {
@@ -88,16 +246,49 @@ function Recomendar() {
 		if (!data) return;
 
 		const tipo = isJuegos ? "Juegos" : "Pelis";
-		fetchVotes(tipo).then(({ counts }) => {
-			if (counts) setVoteCounts(counts);
-		});
-	}, [data, isJuegos]);
+		let cancelled = false;
+
+		const loadVotes = async () => {
+			try {
+				const { counts } = await fetchVotes(tipo);
+				if (!cancelled && counts) setVoteCountsIfChanged(counts);
+
+				const { counts: updatedCounts } = await fetchVotes(tipo, null, {
+					skipCache: true,
+				});
+				if (!cancelled && updatedCounts)
+					setVoteCountsIfChanged(updatedCounts);
+			} catch {}
+		};
+
+		loadVotes();
+		return () => {
+			cancelled = true;
+		};
+	}, [data, isJuegos, setVoteCountsIfChanged]);
 
 	const filteredData = useMemo(() => {
-		if (!data) return [];
-		const items = data.filter(
-			(row) => (row["Estado"] || "").toLowerCase() === "recomendacion",
-		);
+		if (!data && (!localCacheData || localCacheData.length === 0))
+			return [];
+
+		// Prefer the most recent local cache entries when there are duplicates.
+		const merged = [...(data || []), ...(localCacheData || [])];
+		const uniqueById = new Map();
+		for (const row of merged) {
+			const id = String(getRowId(row)).trim();
+			if (!id) continue;
+			// Always overwrite so local cache entries (later in the list) win.
+			uniqueById.set(id, row);
+		}
+		const items = Array.from(uniqueById.values())
+			.filter(
+				(row) =>
+					(row["Estado"] || "").toLowerCase() === "recomendacion",
+			)
+			.filter((row) => {
+				const id = String(getRowId(row)).trim();
+				return !removedIds.has(id);
+			});
 
 		items.sort((a, b) => {
 			const idA = String(getRowId(a));
@@ -110,7 +301,7 @@ function Recomendar() {
 			return da - db;
 		});
 		return items;
-	}, [data, voteCounts]);
+	}, [data, voteCounts, localCacheData, removedIds]);
 
 	const getUserById = (id) => {
 		if (!usersData || !id) {
@@ -168,11 +359,9 @@ function Recomendar() {
 	const [, setEnviado] = useState(false);
 	const [errorEnvio, setErrorEnvio] = useState("");
 
-	const [user] = useLocalStorage("twitchUser", null);
-	const [token] = useLocalStorage("twitchToken", null);
-
 	const [searchLoading, setSearchLoading] = useState(false);
 	const [searchError, setSearchError] = useState("");
+	const latestRecommendationRef = React.useRef(null);
 
 	React.useEffect(() => {
 		if (!search || search.length < 2) {
@@ -283,6 +472,26 @@ function Recomendar() {
 		}, 400);
 		return () => clearTimeout(timeout);
 	}, [search, isJuegos]);
+
+	useEffect(() => {
+		if (
+			successMsg === "¡Recomendacion enviada! Muchas gracias" &&
+			latestRecommendationRef.current
+		) {
+			addRecommendationToLocalCache(
+				buildRecommendationForCache(
+					latestRecommendationRef.current.selectedResult,
+					latestRecommendationRef.current.tipoValue,
+					latestRecommendationRef.current.comentario,
+				),
+			);
+			latestRecommendationRef.current = null;
+		}
+	}, [
+		successMsg,
+		addRecommendationToLocalCache,
+		buildRecommendationForCache,
+	]);
 
 	return (
 		<main className="main-container">
@@ -457,12 +666,7 @@ function Recomendar() {
 								className="recomendar-form"
 								onSubmit={async (e) => {
 									e.preventDefault();
-									if (existingMatch) {
-										setErrorEnvio(
-											"Este item ya existe en la base de datos",
-										);
-										return;
-									}
+
 									setEnviando(true);
 									setErrorEnvio("");
 									setEnviado(false);
@@ -521,6 +725,11 @@ function Recomendar() {
 											throw new Error(
 												data.error || "Error al enviar",
 											);
+										latestRecommendationRef.current = {
+											selectedResult,
+											tipoValue,
+											comentario,
+										};
 										setEnviado(true);
 										setComentario("");
 										setSelectedResult(null);
@@ -537,7 +746,7 @@ function Recomendar() {
 									}
 								}}
 							>
-								{existingMatch ? (
+								{existingMatch && !isAdmin ? (
 									<>
 										<div className="recomendar-duplicate-message">
 											{isJuegos
@@ -555,6 +764,13 @@ function Recomendar() {
 									</>
 								) : (
 									<>
+										{existingMatch && isAdmin && (
+											<div className="recomendar-duplicate-message">
+												{isJuegos
+													? "Este juego ya ha sido recomendado o jugado..."
+													: "Esta pelicula o serie ya ha sido recomendada o vista..."}
+											</div>
+										)}
 										<div className="char-counter">
 											{100 - comentario.length} caracteres
 											restantes
@@ -668,6 +884,9 @@ function Recomendar() {
 										{...row}
 										userSheet={getUserById(row.Usuario)}
 										onVote={handleVoteChange}
+										onRecommendationDeleted={
+											removeRecommendationFromLocalCache
+										}
 									/>
 								))}
 							</div>
@@ -684,6 +903,9 @@ function Recomendar() {
 										key={idx}
 										{...row}
 										userSheet={getUserById(row.Usuario)}
+										onRecommendationDeleted={
+											removeRecommendationFromLocalCache
+										}
 									/>
 								))}
 							</div>
