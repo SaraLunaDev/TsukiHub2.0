@@ -17,6 +17,7 @@ export default function ItemImagenList({
 	Resumen,
 	Trailer,
 	Generos,
+	Fecha,
 	Fecha_Salida,
 	Tipo,
 	Creador,
@@ -43,9 +44,7 @@ export default function ItemImagenList({
 
 	const removeRecommendationFromLocalCache = (id) => {
 		try {
-			const sheetUrl = window.location.pathname.includes("/juegos")
-				? config?.juegosSheetUrl
-				: config?.pelisSheetUrl;
+			const sheetUrl = config?.itemsSheetUrl;
 			if (!sheetUrl) return;
 			const cacheKey = `gsheet_cache_${sheetUrl}_default`;
 			const stored = window.localStorage.getItem(cacheKey);
@@ -75,8 +74,9 @@ export default function ItemImagenList({
 		const isJuegos = window.location.pathname.includes("/juegos");
 		const editPath = isJuegos ? "/juegos/editar/" : "/pelis/editar/";
 
-		const encodedFecha = encodeURIComponent(Fecha_Salida || "");
-		window.location.href = `${editPath}${itemId}?fecha=${encodedFecha}`;
+		const encodedFecha = encodeURIComponent(Fecha || "");
+		const encodedUsuario = encodeURIComponent(Usuario || "");
+		window.location.href = `${editPath}${itemId}?fecha=${encodedFecha}&usuario=${encodedUsuario}`;
 	};
 
 	const handleDelete = async (e) => {

@@ -6,7 +6,7 @@ import { MaterialSymbolsLightKidStar } from "../../icons/MaterialSymbolsLightKid
 import { MaterialSymbolsAlarm } from "../../icons/MaterialSymbolsAlarm";
 import { MaterialSymbolsClose } from "../../icons/MaterialSymbolsClose";
 import { MaterialSymbolsEdit } from "../../icons/MaterialSymbolsEdit";
-import { API_URLS, STORAGE_KEYS } from "../../../constants/config";
+import { API_URLS, STORAGE_KEYS, getConfig } from "../../../constants/config";
 import useLocalStorage from "../../../hooks/useLocalStorage";
 import { useAuth } from "../../../hooks/useAuth";
 import { useSheetConfig } from "../../../hooks/useSheetConfig";
@@ -14,6 +14,43 @@ import { Fa7SolidThumbsUp } from "../../icons/Fa7SolidThumbsUp";
 
 const countsCache = new Map();
 const fetchPromises = new Map();
+
+function parseCSVRow(row) {
+	const result = [];
+	let current = "";
+	let inQuotes = false;
+	for (let i = 0; i < row.length; i++) {
+		const char = row[i];
+		if (char === '"') {
+			if (inQuotes && row[i + 1] === '"') {
+				current += '"';
+				i++;
+			} else {
+				inQuotes = !inQuotes;
+			}
+		} else if (char === "," && !inQuotes) {
+			result.push(current);
+			current = "";
+		} else {
+			current += char;
+		}
+	}
+	result.push(current);
+	return result;
+}
+
+function parseCSV(csvText) {
+	const rows = csvText.split("\n").filter((r) => r.trim());
+	if (rows.length < 2) return [];
+	const headers = parseCSVRow(rows[0]).map((h) => h.trim());
+	return rows.slice(1).map((row) => {
+		const cols = parseCSVRow(row);
+		return headers.reduce((obj, h, i) => {
+			obj[h] = (cols[i] ?? "").trim();
+			return obj;
+		}, {});
+	});
+}
 
 function votesCacheKey(tipo) {
 	return `gsheet_cache_votes_${tipo}`;
@@ -41,12 +78,13 @@ function getVoteField(vote, ...fieldNames) {
 }
 
 function getVoteId(vote) {
-	return getVoteField(vote, "ID", "Id", "id", "identifier");
+	return getVoteField(vote, "item_id", "ID", "Id", "id", "identifier");
 }
 
 function getVoteUserId(vote) {
 	return getVoteField(
 		vote,
+		"usuario_id",
 		"Usuario",
 		"usuario",
 		"userId",
@@ -130,39 +168,8 @@ export async function fetchVotes(
 	};
 
 	if (cachedCounts && (!userId || cachedVotes) && !skipCache) {
-		void fetchVotes(tipo, userId, { skipCache: true });
 		return { counts: cachedCounts, userSet: computeUserSet(cachedVotes) };
 	}
-
-	try {
-		const stored = window.localStorage.getItem(votesCacheKey(tipo));
-		if (stored && !skipCache) {
-			const parsed = JSON.parse(stored);
-			let votes = [];
-			if (Array.isArray(parsed)) {
-				votes = parsed;
-			} else if (parsed && typeof parsed === "object") {
-				votes = Object.entries(parsed).flatMap(([id, count]) =>
-					Array.from({ length: Number(count) || 0 }, () => ({
-						Tipo: tipo,
-						ID: id,
-					})),
-				);
-			}
-
-			const counts = buildCountsFromVotes(votes);
-			countsCache.set(tipo, counts);
-			voteListsCache.set(tipo, votes);
-
-			if (!userId) {
-				return { counts, userSet: null };
-			}
-			const userSet = computeUserSet(votes);
-
-			void fetchVotes(tipo, userId, { skipCache: true });
-			return { counts, userSet };
-		}
-	} catch (e) {}
 
 	const key = userId ? `${tipo}:${userId}` : tipo;
 	if (fetchPromises.has(key)) {
@@ -170,13 +177,19 @@ export async function fetchVotes(
 	}
 
 	const makeRequest = async () => {
-		const url = `${API_URLS.GET_VOTES}?tipo=${encodeURIComponent(
-			tipo,
-		)}&raw=true${userId ? `&userId=${encodeURIComponent(userId)}` : ""}`;
-		const resp = await fetch(url);
-		const data = await resp.json();
-
-		const votes = Array.isArray(data.votes) ? data.votes : [];
+		const cfg = await getConfig();
+		const votosUrl = cfg?.votosSheetUrl;
+		if (!votosUrl) throw new Error("votosSheetUrl not configured");
+		const resp = await fetch(votosUrl);
+		if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+		const csvText = await resp.text();
+		const allVotes = parseCSV(csvText);
+		const normalizedTipo = String(tipo).toLowerCase();
+		const votes = allVotes.filter(
+			(v) =>
+				String(v.tipo || "").toLowerCase() === normalizedTipo &&
+				String(v.activo || "").toUpperCase() === "TRUE",
+		);
 		const counts = buildCountsFromVotes(votes);
 		countsCache.set(tipo, counts);
 		voteListsCache.set(tipo, votes);
@@ -186,7 +199,6 @@ export async function fetchVotes(
 				JSON.stringify(votes),
 			);
 		} catch {}
-
 		const userSet = computeUserSet(votes);
 		return { counts, userSet };
 	};
@@ -214,29 +226,28 @@ export default function ItemCaratula({
 	id,
 	onRecommendationDeleted,
 	onVote,
+	voteCount = 0,
+	hasVotedInitial = false,
 }) {
 	const itemId = ID || Id || id;
 
 	const tipo = window.location.pathname.includes("/juegos")
-		? "Juegos"
-		: "Pelis";
+		? "Juego"
+		: "Pelicula";
 
 	const [user] = useLocalStorage(STORAGE_KEYS.TWITCH_USER, null);
 	const [token] = useLocalStorage(STORAGE_KEYS.TWITCH_TOKEN, null);
 	const { isAdmin } = useAuth();
 	const { config } = useSheetConfig();
-	const isJuegos = window.location.pathname.includes("/juegos");
 	const [hover, setHover] = useState(false);
 	const [deleting, setDeleting] = useState(false);
-	const [votes, setVotes] = useState(0);
+	const [votes, setVotes] = useState(voteCount || 0);
 	const [voting, setVoting] = useState(false);
-	const [hasVoted, setHasVoted] = useState(false);
+	const [hasVoted, setHasVoted] = useState(hasVotedInitial || false);
 
 	const removeRecommendationFromLocalCache = (itemId) => {
 		try {
-			const sheetUrl = isJuegos
-				? config?.juegosSheetUrl
-				: config?.pelisSheetUrl;
+			const sheetUrl = config?.itemsSheetUrl;
 			if (!sheetUrl) return;
 			const cacheKey = `gsheet_cache_${sheetUrl}_default`;
 			const stored = window.localStorage.getItem(cacheKey);
@@ -259,43 +270,12 @@ export default function ItemCaratula({
 	const canDelete = user && (isAdmin || isOwnRecommendation);
 
 	useEffect(() => {
-		if (!itemId || Estado !== "Recomendacion") return;
+		setVotes(voteCount || 0);
+	}, [voteCount]);
 
-		const idKey = String(itemId);
-		let cancelled = false;
-		const loadAllVotes = async () => {
-			try {
-				const { counts, userSet } = await fetchVotes(tipo, user?.id);
-				if (!cancelled) {
-					const newVotes = counts?.get(idKey) || 0;
-					setVotes(newVotes);
-					if (userSet) {
-						setHasVoted(userSet.has(idKey));
-					}
-				}
-
-				try {
-					const { counts: updatedCounts, userSet: updatedUserSet } =
-						await fetchVotes(tipo, user?.id, { skipCache: true });
-					if (!cancelled) {
-						const updatedVotes = updatedCounts?.get(idKey) || 0;
-						setVotes(updatedVotes);
-						if (updatedUserSet) {
-							setHasVoted(updatedUserSet.has(idKey));
-						}
-					}
-				} catch {}
-			} catch (err) {
-				console.error("Error loading votes", err);
-			}
-		};
-
-		loadAllVotes();
-
-		return () => {
-			cancelled = true;
-		};
-	}, [itemId, tipo, user?.id, Estado]);
+	useEffect(() => {
+		setHasVoted(hasVotedInitial || false);
+	}, [hasVotedInitial]);
 
 	const handleVote = async (e) => {
 		if (e && e.stopPropagation) {
@@ -331,7 +311,7 @@ export default function ItemCaratula({
 				setHasVoted(action === "add");
 
 				if (onVote) {
-					onVote(String(itemId), newVal);
+					onVote(String(itemId), newVal, action === "add");
 				}
 			} else {
 				if (
@@ -375,7 +355,8 @@ export default function ItemCaratula({
 								);
 								setVotes(newVal);
 								setHasVoted(false);
-								if (onVote) onVote(String(itemId), newVal);
+								if (onVote)
+									onVote(String(itemId), newVal, false);
 							}
 						}
 					} catch {}
@@ -447,7 +428,8 @@ export default function ItemCaratula({
 		const editPath = isJuegos ? "/juegos/editar/" : "/pelis/editar/";
 
 		const encodedFecha = encodeURIComponent(Fecha || "");
-		window.location.href = `${editPath}${itemId}?fecha=${encodedFecha}`;
+		const encodedUsuario = encodeURIComponent(Usuario || "");
+		window.location.href = `${editPath}${itemId}?fecha=${encodedFecha}&usuario=${encodedUsuario}`;
 	};
 
 	const caratulaClass =
@@ -540,6 +522,13 @@ export default function ItemCaratula({
 				</div>
 			)}
 			<div className="item-img-wrapper">
+				{(Estado === "Pausado" || Estado === "Dropeado") && (
+					<div
+						className={`item-estado-badge item-estado-badge--${Estado.toLowerCase()}`}
+					>
+						{Estado}
+					</div>
+				)}
 				{Duracion && (
 					<div className="item-duracion-superpuesta">
 						<MaterialSymbolsAlarm
@@ -600,18 +589,13 @@ export default function ItemCaratula({
 						</div>
 					)}
 				</div>
-				{(Duracion ||
-					Nota ||
-					(Estado === "Recomendacion" && Comentario)) && (
-					<div
-						className={
-							Estado === "Recomendacion"
-								? "item-img-overlay-recomendacion"
-								: "item-img-overlay-normal"
-						}
-					/>
-				)}
-				{}
+				<div
+					className={
+						Estado === "Recomendacion"
+							? "item-img-overlay-recomendacion"
+							: "item-img-overlay-normal"
+					}
+				/>
 				{Fecha && Estado !== "Recomendacion" && (
 					<div className="item-fecha-superpuesta">{Fecha}</div>
 				)}

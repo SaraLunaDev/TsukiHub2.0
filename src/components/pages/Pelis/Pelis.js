@@ -20,19 +20,70 @@ import GenreFilter from "../../common/FilterSection/GenreFilter";
 
 function Pelis() {
 	const { config } = useSheetConfig();
-	const { data, loading, error, refetch } = useGoogleSheet(
-		config?.pelisSheetUrl || "",
+	const {
+		data: rawData,
+		loading,
+		error,
+		refetch,
+	} = useGoogleSheet(config?.itemsSheetUrl || "");
+	const { data: comentariosData } = useGoogleSheet(
+		config?.comentariosSheetUrl || "",
+		"comentarios",
 	);
 	const { data: usersData } = useGoogleSheet(
-		config?.userdataSheetUrl || "",
+		config?.usuariosSheetUrl || "",
 		"userData",
+	);
+	const data = React.useMemo(() => {
+		if (!rawData) return null;
+		return rawData.filter(
+			(row) =>
+				(row.tipo || "").toLowerCase() === "pelicula" &&
+				!row.eliminado_en,
+		);
+	}, [rawData]);
+	const normalizeItemRow = React.useCallback(
+		(row) => {
+			if (!row) return row;
+			const comment = comentariosData?.find(
+				(c) =>
+					String(c.item_id || "").trim() ===
+						String(row.id || "").trim() &&
+					String(c.usuario_id || "").trim() ===
+						String(row.usuario_id || "").trim(),
+			);
+			return {
+				...row,
+				ID: row.id,
+				Nombre: row.nombre,
+				Estado: row.estado,
+				Tipo: row.plataforma,
+				Fecha: row.fecha,
+				Duracion: row.duracion,
+				Nota: row.nota,
+				Link: row.youtube_url,
+				URL: row.youtube_url,
+				Caratula: row.caratula,
+				Imagen: row.imagen,
+				Trailer: row.trailer,
+				Generos: row.generos,
+				Resumen: row.resumen,
+				Fecha_Salida: row.fecha_salida,
+				Nota_Global: row.nota_global,
+				Creador: row.creador,
+				Usuario: row.usuario_id,
+				Comentario: comment ? comment.comentario : row.comentario || "",
+			};
+		},
+		[comentariosData],
 	);
 	const getUserById = (id) => {
 		if (!usersData || !id) return null;
 		const found = usersData.find(
 			(u) => String(u.id).trim() === String(id).trim(),
 		);
-		return found;
+		if (!found) return null;
+		return { ...found, pfp: found.imagen_perfil || "" };
 	};
 	const [showFilter, setShowFilter] = useState(false);
 
@@ -45,11 +96,13 @@ function Pelis() {
 	const genreOptions = React.useMemo(() => {
 		if (!data) return [];
 		const set = new Set();
-		data.filter(
-			(row) => (row["Estado"] || "").toLowerCase() === "pasado",
+		data.filter((row) =>
+			["pasado", "pausado", "dropeado"].includes(
+				(row["estado"] || "").toLowerCase(),
+			),
 		).forEach((row) => {
-			if (row["Generos"]) {
-				row["Generos"].split(",").forEach((g) => set.add(g.trim()));
+			if (row["generos"]) {
+				row["generos"].split(",").forEach((g) => set.add(g.trim()));
 			}
 		});
 		return Array.from(set).sort();
@@ -61,10 +114,12 @@ function Pelis() {
 	const typeOptions = React.useMemo(() => {
 		if (!data) return [];
 		const set = new Set();
-		data.filter(
-			(row) => (row["Estado"] || "").toLowerCase() === "pasado",
+		data.filter((row) =>
+			["pasado", "pausado", "dropeado"].includes(
+				(row["estado"] || "").toLowerCase(),
+			),
 		).forEach((row) => {
-			if (row["Tipo"]) set.add(cleanType(row["Tipo"]));
+			if (row["plataforma"]) set.add(cleanType(row["plataforma"]));
 		});
 		return Array.from(set).sort();
 	}, [data]);
@@ -72,11 +127,13 @@ function Pelis() {
 	const years = React.useMemo(() => {
 		if (!data) return [];
 		const set = new Set();
-		data.filter(
-			(row) => (row["Estado"] || "").toLowerCase() === "pasado",
+		data.filter((row) =>
+			["pasado", "pausado", "dropeado"].includes(
+				(row["estado"] || "").toLowerCase(),
+			),
 		).forEach((row) => {
-			if (row["Fecha"]) {
-				const parts = row["Fecha"].split("/");
+			if (row["fecha"]) {
+				const parts = row["fecha"].split("/");
 				if (parts.length === 3) set.add(parts[2]);
 			}
 		});
@@ -85,19 +142,21 @@ function Pelis() {
 
 	const filteredVistas = data
 		? data
-				.filter(
-					(row) => (row["Estado"] || "").toLowerCase() === "pasado",
+				.filter((row) =>
+					["pasado", "pausado", "dropeado"].includes(
+						(row["estado"] || "").toLowerCase(),
+					),
 				)
 				.filter(
 					(row) =>
 						(!selectedYear ||
-							(row["Fecha"] &&
-								row["Fecha"].endsWith("/" + selectedYear))) &&
+							(row["fecha"] &&
+								row["fecha"].endsWith("/" + selectedYear))) &&
 						(!selectedType ||
-							cleanType(row["Tipo"]) === selectedType) &&
+							cleanType(row["plataforma"]) === selectedType) &&
 						(!selectedGenre ||
-							(row["Generos"] &&
-								row["Generos"]
+							(row["generos"] &&
+								row["generos"]
 									.split(",")
 									.map((g) => g.trim())
 									.includes(selectedGenre))) &&
@@ -118,11 +177,11 @@ function Pelis() {
 			{data &&
 				(data.some(
 					(row) =>
-						(row["Estado"] || "").trim().toLowerCase() === "ahora",
+						(row["estado"] || "").trim().toLowerCase() === "ahora",
 				) ||
 					data.some(
 						(row) =>
-							(row["Estado"] || "").trim().toLowerCase() ===
+							(row["estado"] || "").trim().toLowerCase() ===
 							"planeo",
 					)) && (
 					<div style={{ display: "flex", gap: 24 }}>
@@ -135,7 +194,7 @@ function Pelis() {
 											{
 												data.filter(
 													(row) =>
-														(row["Estado"] || "")
+														(row["estado"] || "")
 															.trim()
 															.toLowerCase() ===
 														"ahora",
@@ -145,7 +204,7 @@ function Pelis() {
 										entrada
 										{data.filter(
 											(row) =>
-												(row["Estado"] || "")
+												(row["estado"] || "")
 													.trim()
 													.toLowerCase() === "ahora",
 										).length === 1
@@ -158,14 +217,14 @@ function Pelis() {
 								<Carousel
 									items={data.filter(
 										(row) =>
-											(row["Estado"] || "")
+											(row["estado"] || "")
 												.trim()
 												.toLowerCase() === "ahora",
 									)}
 									renderItem={(row, idx) => (
 										<ItemCaratula
 											key={"proximamente-" + idx}
-											{...row}
+											{...normalizeItemRow(row)}
 										/>
 									)}
 								/>
@@ -180,7 +239,7 @@ function Pelis() {
 											{
 												data.filter(
 													(row) =>
-														(row["Estado"] || "")
+														(row["estado"] || "")
 															.trim()
 															.toLowerCase() ===
 														"planeo",
@@ -190,7 +249,7 @@ function Pelis() {
 										entrada
 										{data.filter(
 											(row) =>
-												(row["Estado"] || "")
+												(row["estado"] || "")
 													.trim()
 													.toLowerCase() === "planeo",
 										).length === 1
@@ -201,12 +260,14 @@ function Pelis() {
 							</div>
 							<div className="inset-section">
 								<CarruselImagen
-									items={data.filter(
-										(row) =>
-											(row["Estado"] || "")
-												.trim()
-												.toLowerCase() === "planeo",
-									)}
+									items={data
+										.filter(
+											(row) =>
+												(row["estado"] || "")
+													.trim()
+													.toLowerCase() === "planeo",
+										)
+										.map(normalizeItemRow)}
 								/>
 							</div>
 						</div>
@@ -344,58 +405,60 @@ function Pelis() {
 										switch (order) {
 											case "asc":
 												return (
-													parse(a["Fecha"]) -
-													parse(b["Fecha"])
+													parse(a["fecha"]) -
+													parse(b["fecha"])
 												);
 											case "name-az":
 												return (
-													a["Nombre"] || ""
+													a["nombre"] || ""
 												).localeCompare(
-													b["Nombre"] || "",
+													b["nombre"] || "",
 												);
 											case "name-za":
 												return (
-													b["Nombre"] || ""
+													b["nombre"] || ""
 												).localeCompare(
-													a["Nombre"] || "",
+													a["nombre"] || "",
 												);
 											case "nota-desc":
 												return (
-													(Number(b["Nota"]) || 0) -
-													(Number(a["Nota"]) || 0)
+													(Number(b["nota"]) || 0) -
+													(Number(a["nota"]) || 0)
 												);
 											case "nota-asc":
 												return (
-													(Number(a["Nota"]) || 0) -
-													(Number(b["Nota"]) || 0)
+													(Number(a["nota"]) || 0) -
+													(Number(b["nota"]) || 0)
 												);
 											case "duracion-desc":
 												return (
 													parseDuration(
-														b["Duracion"],
+														b["duracion"],
 													) -
-													parseDuration(a["Duracion"])
+													parseDuration(a["duracion"])
 												);
 											case "duracion-asc":
 												return (
 													parseDuration(
-														a["Duracion"],
+														a["duracion"],
 													) -
-													parseDuration(b["Duracion"])
+													parseDuration(b["duracion"])
 												);
 											case "desc":
 											default:
 												return (
-													parse(b["Fecha"]) -
-													parse(a["Fecha"])
+													parse(b["fecha"]) -
+													parse(a["fecha"])
 												);
 										}
 									})
 									.map((row, idx) => (
 										<ItemImagenList
 											key={idx}
-											{...row}
-											userSheet={getUserById(row.Usuario)}
+											{...normalizeItemRow(row)}
+											userSheet={getUserById(
+												row.usuario_id,
+											)}
 											onRecommendationDeleted={refetch}
 										/>
 									))}
@@ -433,58 +496,60 @@ function Pelis() {
 										switch (order) {
 											case "asc":
 												return (
-													parse(a["Fecha"]) -
-													parse(b["Fecha"])
+													parse(a["fecha"]) -
+													parse(b["fecha"])
 												);
 											case "name-az":
 												return (
-													a["Nombre"] || ""
+													a["nombre"] || ""
 												).localeCompare(
-													b["Nombre"] || "",
+													b["nombre"] || "",
 												);
 											case "name-za":
 												return (
-													b["Nombre"] || ""
+													b["nombre"] || ""
 												).localeCompare(
-													a["Nombre"] || "",
+													a["nombre"] || "",
 												);
 											case "nota-desc":
 												return (
-													(Number(b["Nota"]) || 0) -
-													(Number(a["Nota"]) || 0)
+													(Number(b["nota"]) || 0) -
+													(Number(a["nota"]) || 0)
 												);
 											case "nota-asc":
 												return (
-													(Number(a["Nota"]) || 0) -
-													(Number(b["Nota"]) || 0)
+													(Number(a["nota"]) || 0) -
+													(Number(b["nota"]) || 0)
 												);
 											case "duracion-desc":
 												return (
 													parseDuration(
-														b["Duracion"],
+														b["duracion"],
 													) -
-													parseDuration(a["Duracion"])
+													parseDuration(a["duracion"])
 												);
 											case "duracion-asc":
 												return (
 													parseDuration(
-														a["Duracion"],
+														a["duracion"],
 													) -
-													parseDuration(b["Duracion"])
+													parseDuration(b["duracion"])
 												);
 											case "desc":
 											default:
 												return (
-													parse(b["Fecha"]) -
-													parse(a["Fecha"])
+													parse(b["fecha"]) -
+													parse(a["fecha"])
 												);
 										}
 									})
 									.map((row, idx) => (
 										<ItemCaratula
 											key={idx}
-											{...row}
-											userSheet={getUserById(row.Usuario)}
+											{...normalizeItemRow(row)}
+											userSheet={getUserById(
+												row.usuario_id,
+											)}
 											onRecommendationDeleted={refetch}
 										/>
 									))}

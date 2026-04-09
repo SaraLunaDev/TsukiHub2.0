@@ -63,7 +63,7 @@ function Gacha() {
 		config?.gachaSheetUrl || "",
 	);
 	const { data: usersData } = useGoogleSheet(
-		config?.userdataSheetUrl || "",
+		config?.usuariosSheetUrl || "",
 		"userData",
 	);
 
@@ -104,93 +104,47 @@ function Gacha() {
 				};
 			}
 
-			const parsedChars = charData.map((row) => ({
-				gs_ID: row["gs_ID"]?.toString().trim(),
-				gs_Nombre: row["gs_Nombre"]?.toString().trim(),
-				gs_Tier: row["gs_Tier"]?.toString().trim(),
-				mh_ID: row["mh_ID"]?.toString().trim(),
-				mh_Nombre: row["mh_Nombre"]?.toString().trim(),
-				mh_Tier: row["mh_Tier"]?.toString().trim(),
-				op_ID: row["op_ID"]?.toString().trim(),
-				op_Nombre: row["op_Nombre"]?.toString().trim(),
-				op_Tier: row["op_Tier"]?.toString().trim(),
-				fs_ID: row["fs_ID"]?.toString().trim(),
-				fs_Nombre: row["fs_Nombre"]?.toString().trim(),
-				fs_Tier: row["fs_Tier"]?.toString().trim(),
-				db_ID: row["db_ID"]?.toString().trim(),
-				db_Nombre: row["db_Nombre"]?.toString().trim(),
-				db_Tier: row["db_Tier"]?.toString().trim(),
-				sb_ID: row["sb_ID"]?.toString().trim(),
-				sb_Nombre: row["sb_Nombre"]?.toString().trim(),
-				sb_Tier: row["sb_Tier"]?.toString().trim(),
-			}));
+			const totalCharactersGlobal = charData.filter(
+				(row) => !row.eliminado_en,
+			).length;
 
-			let totalCharactersGlobal = 0;
-			BANNERS.forEach((b) => {
-				parsedChars.forEach((char) => {
-					const idKey = `${b.name}_ID`;
-					const nameKey = `${b.name}_Nombre`;
-					const tierKey = `${b.name}_Tier`;
-					if (char[idKey] && char[nameKey] && char[tierKey]) {
-						totalCharactersGlobal++;
-					}
-				});
-			});
-
-			const bannerChars = [];
-			parsedChars.forEach((char) => {
-				const idKey = `${activeBanner}_ID`;
-				const nameKey = `${activeBanner}_Nombre`;
-				const tierKey = `${activeBanner}_Tier`;
-				if (char[idKey] && char[nameKey] && char[tierKey]) {
-					bannerChars.push({
-						id: char[idKey],
-						name: char[nameKey]?.toString().trim().toLowerCase(),
-						tier: parseInt(char[tierKey]),
-						banner: activeBanner,
-						bannerDisplay: BANNERS.find(
-							(b) => b.name === activeBanner,
-						).displayName,
-						lowUrl: `/static/resources/gacha/${BANNER_TO_FOLDER[activeBanner]}/low/${char[idKey]}_low.webp`,
-						highUrl: `/static/resources/gacha/${BANNER_TO_FOLDER[activeBanner]}/high/${char[idKey]}_high.webp`,
-					});
-				}
-			});
+			const bannerChars = charData
+				.filter(
+					(row) =>
+						String(row.banner_id || "").trim() === activeBanner &&
+						!row.eliminado_en,
+				)
+				.map((row) => ({
+					id: String(row.personaje_id || "").trim(),
+					name: String(row.personaje_nombre || "")
+						.trim()
+						.toLowerCase(),
+					tier: parseInt(row.personaje_tier),
+					banner: activeBanner,
+					bannerDisplay: BANNERS.find((b) => b.name === activeBanner)
+						?.displayName,
+					lowUrl: `/static/resources/gacha/${BANNER_TO_FOLDER[activeBanner]}/low/${String(row.personaje_id || "").trim()}_low.webp`,
+					highUrl: `/static/resources/gacha/${BANNER_TO_FOLDER[activeBanner]}/high/${String(row.personaje_id || "").trim()}_high.webp`,
+				}));
 
 			const userMap = new Map();
 			const countMap = new Map();
 
 			userData.forEach((row) => {
-				const userId = row["id"]?.toString().trim();
-				const userName = row["user"]?.toString().trim();
-				if (userId && userName) {
-					const userDataInfo = usersData?.find(
+				const userId = String(row.usuario_id || "").trim();
+				if (!userId || row.eliminado_en) return;
+				countMap.set(userId, (countMap.get(userId) || 0) + 1);
+				if (!userMap.has(userId)) {
+					const userInfo = usersData?.find(
 						(u) => String(u.id).trim() === String(userId).trim(),
 					);
-					if (!userMap.has(userId)) {
-						userMap.set(userId, {
-							id: userId,
-							nombre: userName,
-							pfp:
-								userDataInfo?.pfp ||
-								`https://decapi.me/twitch/avatar/${userDataInfo?.nombre || userName}`,
-						});
-					}
-
-					let ownedCount = 0;
-					BANNERS.forEach((b) => {
-						for (let tier = 3; tier <= 5; tier++) {
-							const tierKey = `${b.name}${tier}`;
-							const tierChars = row[tierKey]?.toString().trim();
-							if (tierChars) {
-								const chars = tierChars
-									.split("/-/")
-									.filter((c) => c.trim());
-								ownedCount += chars.length;
-							}
-						}
+					userMap.set(userId, {
+						id: userId,
+						nombre: userInfo?.nombre || userId,
+						pfp:
+							userInfo?.imagen_perfil ||
+							`https://decapi.me/twitch/avatar/${userInfo?.nombre || userId}`,
 					});
-					countMap.set(userId, ownedCount);
 				}
 			});
 
@@ -267,26 +221,21 @@ function Gacha() {
 		const tier4 = [];
 		const tier5 = [];
 
-		const userRow = userData?.find(
-			(row) => String(row.id).trim() === String(selectedUser).trim(),
+		const ownedSet = new Set(
+			(userData || [])
+				.filter(
+					(row) =>
+						String(row.usuario_id || "").trim() ===
+							String(selectedUser || "").trim() &&
+						String(row.banner_id || "").trim() === activeBanner &&
+						!row.eliminado_en,
+				)
+				.map((row) => String(row.personaje_id || "").trim())
+				.filter(Boolean),
 		);
 
-		const ownedSets = {};
-		for (let t = 3; t <= 5; t++) {
-			const tierKey = `${activeBanner}${t}`;
-			const tierCharsStr = userRow?.[tierKey]?.toString().trim() || "";
-			ownedSets[t] = new Set(
-				tierCharsStr
-					? tierCharsStr
-							.split("/-/")
-							.map((c) => c.trim().toLowerCase())
-					: [],
-			);
-		}
-
 		characters.forEach((char) => {
-			const owned =
-				ownedSets[char.tier]?.has(char.name.toLowerCase()) || false;
+			const owned = ownedSet.has(char.id) || false;
 			const gridChar = { ...char, owned };
 
 			if (char.tier === 3) {

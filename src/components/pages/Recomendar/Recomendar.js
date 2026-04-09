@@ -24,9 +24,7 @@ function Recomendar() {
 	};
 	const location = useLocation();
 	const isJuegos = location.pathname.includes("/juegos");
-	const SHEET_URL = isJuegos
-		? config?.juegosSheetUrl || ""
-		: config?.pelisSheetUrl || "";
+	const SHEET_URL = config?.itemsSheetUrl || "";
 
 	const CACHE_KEY = React.useMemo(
 		() => `gsheet_cache_${SHEET_URL}_default`,
@@ -35,8 +33,12 @@ function Recomendar() {
 
 	const { data, loading, error } = useGoogleSheet(SHEET_URL);
 	const { data: usersData } = useGoogleSheet(
-		config?.userdataSheetUrl || "",
+		config?.usuariosSheetUrl || "",
 		"userData",
+	);
+	const { data: comentariosData } = useGoogleSheet(
+		config?.comentariosSheetUrl || "",
+		"comentarios",
 	);
 
 	const [localCacheData, setLocalCacheData] = useState([]);
@@ -123,6 +125,7 @@ function Recomendar() {
 					selectedResult.name ||
 					"",
 				Estado: "Recomendacion",
+				tipo: isJuegos ? "Juego" : "Pelicula",
 				Tipo: tipoValue || "",
 				Fecha: formatDateDDMMYYYY(now),
 				URL: "",
@@ -156,7 +159,7 @@ function Recomendar() {
 				Comentario: comentario || "",
 			};
 		},
-		[formatDateDDMMYYYY, user],
+		[formatDateDDMMYYYY, user, isJuegos],
 	);
 
 	const parseDateValue = (val) => {
@@ -182,90 +185,38 @@ function Recomendar() {
 	};
 
 	const [voteCounts, setVoteCounts] = useState(new Map());
-
-	const mapsAreEqual = React.useCallback((a, b) => {
-		if (a === b) return true;
-		if (!a || !b) return false;
-		if (a.size !== b.size) return false;
-		for (const [key, value] of a) {
-			if (b.get(key) !== value) return false;
-		}
-		return true;
-	}, []);
-
-	const setVoteCountsIfChanged = React.useCallback(
-		(next) => {
-			setVoteCounts((prev) => {
-				if (mapsAreEqual(prev, next)) return prev;
-				return next;
-			});
-		},
-		[mapsAreEqual],
-	);
+	const [userVotedIds, setUserVotedIds] = useState(new Set());
 
 	useEffect(() => {
-		if (!data) return;
-		const tipo = isJuegos ? "Juegos" : "Pelis";
-		const cacheKey = `gsheet_cache_votes_${tipo}`;
-		try {
-			const stored = window.localStorage.getItem(cacheKey);
-			if (stored) {
-				const parsed = JSON.parse(stored);
-				let votes = [];
-				if (Array.isArray(parsed)) {
-					votes = parsed;
-				} else if (parsed && typeof parsed === "object") {
-					votes = Object.entries(parsed).flatMap(([id, count]) =>
-						Array.from({ length: Number(count) || 0 }, () => ({
-							ID: id,
-						})),
-					);
-				}
-				const map = new Map();
-				for (const vote of votes) {
-					const id = String(
-						vote?.ID ?? vote?.Id ?? vote?.id ?? "",
-					).trim();
-					if (!id) continue;
-					map.set(id, (map.get(id) || 0) + 1);
-				}
-				setVoteCounts(map);
-			}
-		} catch {}
-	}, [data, isJuegos]);
+		const tipo = isJuegos ? "Juego" : "Pelicula";
+		let cancelled = false;
+		fetchVotes(tipo, user?.id)
+			.then(({ counts, userSet }) => {
+				if (cancelled) return;
+				setVoteCounts(counts || new Map());
+				if (userSet) setUserVotedIds(userSet);
+			})
+			.catch(() => {});
+		return () => {
+			cancelled = true;
+		};
+	}, [isJuegos, user?.id]);
 
-	const handleVoteChange = (id, newCount) => {
+	const handleVoteChange = (id, newCount, voted) => {
 		setVoteCounts((prev) => {
 			const m = new Map(prev);
 			m.set(id, newCount);
 			return m;
 		});
+		if (voted !== undefined) {
+			setUserVotedIds((prev) => {
+				const next = new Set(prev);
+				if (voted) next.add(id);
+				else next.delete(id);
+				return next;
+			});
+		}
 	};
-
-	useEffect(() => {
-		if (!data) return;
-
-		const tipo = isJuegos ? "Juegos" : "Pelis";
-		let cancelled = false;
-
-		const loadVotes = async () => {
-			try {
-				const { counts } = await fetchVotes(tipo);
-				if (!cancelled && counts) setVoteCountsIfChanged(counts);
-
-				const { counts: updatedCounts } = await fetchVotes(tipo, null, {
-					skipCache: true,
-				});
-				if (!cancelled && updatedCounts)
-					setVoteCountsIfChanged(updatedCounts);
-			} catch {}
-		};
-
-		loadVotes();
-		return () => {
-			cancelled = true;
-		};
-	}, [data, isJuegos, setVoteCountsIfChanged]);
 
 	const filteredData = useMemo(() => {
 		if (!data && (!localCacheData || localCacheData.length === 0))
@@ -283,8 +234,15 @@ function Recomendar() {
 		const items = Array.from(uniqueById.values())
 			.filter(
 				(row) =>
-					(row["Estado"] || "").toLowerCase() === "recomendacion",
+					(row.estado || row["Estado"] || "").toLowerCase() ===
+					"recomendacion",
 			)
+			.filter(
+				(row) =>
+					(row.tipo || "").toLowerCase() ===
+					(isJuegos ? "juego" : "pelicula"),
+			)
+			.filter((row) => !(row.eliminado_en || ""))
 			.filter((row) => {
 				const id = String(getRowId(row)).trim();
 				return !removedIds.has(id);
@@ -296,12 +254,12 @@ function Recomendar() {
 			const votesA = voteCounts.get(idA) || 0;
 			const votesB = voteCounts.get(idB) || 0;
 			if (votesB !== votesA) return votesB - votesA;
-			const da = parseDateValue(a.Fecha || a.recommendedDate);
-			const db = parseDateValue(b.Fecha || b.recommendedDate);
+			const da = parseDateValue(a.fecha || a.Fecha || a.recommendedDate);
+			const db = parseDateValue(b.fecha || b.Fecha || b.recommendedDate);
 			return da - db;
 		});
 		return items;
-	}, [data, voteCounts, localCacheData, removedIds]);
+	}, [data, voteCounts, localCacheData, removedIds, isJuegos]);
 
 	const getUserById = (id) => {
 		if (!usersData || !id) {
@@ -310,7 +268,45 @@ function Recomendar() {
 		const found = usersData.find(
 			(u) => String(u.id).trim() === String(id).trim(),
 		);
-		return found;
+		if (!found) return null;
+		return { ...found, pfp: found.imagen_perfil || "" };
+	};
+
+	const normalizeItemRow = (row) => {
+		const userId = row.usuario_id || row.Usuario || "";
+		const itemId = row.id || row.ID || row.Id || "";
+		const comment = comentariosData
+			? (
+					comentariosData.find(
+						(c) =>
+							String(c.item_id || "").trim() ===
+								String(itemId).trim() &&
+							String(c.usuario_id || "").trim() ===
+								String(userId).trim(),
+					) || {}
+				).comentario || ""
+			: row.comentario || row.Comentario || "";
+		return {
+			...row,
+			ID: itemId,
+			Nombre: row.nombre || row.Nombre,
+			Estado: row.estado || row.Estado,
+			Tipo: row.plataforma || row.Tipo,
+			Fecha: row.fecha || row.Fecha,
+			URL: row.youtube_url || row.URL || row.Link,
+			Caratula: row.caratula || row.Caratula,
+			Imagen: row.imagen || row.Imagen,
+			Duracion: row.duracion || row.Duracion,
+			Nota: row.nota || row.Nota,
+			Trailer: row.trailer || row.Trailer,
+			Generos: row.generos || row.Generos,
+			Resumen: row.resumen || row.Resumen,
+			Fecha_Salida: row.fecha_salida || row.Fecha_Salida,
+			Nota_Global: row.nota_global || row.Nota_Global,
+			Creador: row.creador || row.Creador,
+			Usuario: userId,
+			Comentario: comment,
+		};
 	};
 
 	const title = isJuegos
@@ -880,9 +876,19 @@ function Recomendar() {
 							<div className={gridClass}>
 								{filteredData.map((row, idx) => (
 									<ItemCaratula
-										key={idx}
-										{...row}
-										userSheet={getUserById(row.Usuario)}
+										key={getRowId(row) || idx}
+										{...normalizeItemRow(row)}
+										voteCount={
+											voteCounts.get(
+												String(getRowId(row)),
+											) || 0
+										}
+										hasVotedInitial={userVotedIds.has(
+											String(getRowId(row)),
+										)}
+										userSheet={getUserById(
+											row.usuario_id || row.Usuario,
+										)}
 										onVote={handleVoteChange}
 										onRecommendationDeleted={
 											removeRecommendationFromLocalCache
@@ -900,9 +906,11 @@ function Recomendar() {
 							>
 								{filteredData.map((row, idx) => (
 									<ItemImagenList
-										key={idx}
-										{...row}
-										userSheet={getUserById(row.Usuario)}
+										key={getRowId(row) || idx}
+										{...normalizeItemRow(row)}
+										userSheet={getUserById(
+											row.usuario_id || row.Usuario,
+										)}
 										onRecommendationDeleted={
 											removeRecommendationFromLocalCache
 										}

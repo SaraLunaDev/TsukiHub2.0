@@ -323,11 +323,7 @@ function UserMenu() {
 											<button
 												className="user-menu-option user-menu-option-primary user-menu-option-divider"
 												onClick={() => {
-													window.dispatchEvent(
-														new CustomEvent(
-															"openAddGamePopup",
-														),
-													);
+													navigate("/juegos/anadir");
 													setIsOpen(false);
 												}}
 											>
@@ -342,11 +338,7 @@ function UserMenu() {
 											<button
 												className="user-menu-option user-menu-option-primary user-menu-option-divider"
 												onClick={() => {
-													window.dispatchEvent(
-														new CustomEvent(
-															"openAddMoviePopup",
-														),
-													);
+													navigate("/pelis/anadir");
 													setIsOpen(false);
 												}}
 											>

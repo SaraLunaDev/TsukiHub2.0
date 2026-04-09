@@ -9,6 +9,7 @@ export default function EditarItem() {
 	const { id } = useParams();
 	const [searchParams] = useSearchParams();
 	const fecha = searchParams.get("fecha");
+	const usuario = searchParams.get("usuario");
 	const navigate = useNavigate();
 	const { isAdmin, user } = useAuth();
 	const [token] = useLocalStorage(STORAGE_KEYS.TWITCH_TOKEN, null);
@@ -32,7 +33,7 @@ export default function EditarItem() {
 				setLoading(true);
 
 				const response = await fetch(
-					`/api/get-item?id=${id}&fecha=${encodeURIComponent(fecha || "")}`,
+					`/api/get-item?id=${id}&fecha=${encodeURIComponent(fecha || "")}&usuario=${encodeURIComponent(usuario || "")}`,
 					{
 						headers: {
 							Authorization: `Bearer ${token}`,
@@ -63,7 +64,7 @@ export default function EditarItem() {
 		};
 
 		loadItemData();
-	}, [id, user, isAdmin, token, fecha]);
+	}, [id, user, isAdmin, token, fecha, usuario]);
 
 	const handleInputChange = (field, value) => {
 		setItemData((prev) => ({ ...prev, [field]: value }));
@@ -75,7 +76,7 @@ export default function EditarItem() {
 		const mm = String(now.getMonth() + 1).padStart(2, "0");
 		const yyyy = now.getFullYear();
 		const formatted = `${dd}/${mm}/${yyyy}`;
-		handleInputChange("Fecha", formatted);
+		handleInputChange("fecha", formatted);
 	};
 
 	const handleSave = async (e) => {
@@ -91,8 +92,9 @@ export default function EditarItem() {
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					id: itemData.ID,
+					id: itemData.id,
 					fecha: fecha,
+					usuario: usuario,
 					itemData: itemData,
 				}),
 			});
@@ -130,7 +132,7 @@ export default function EditarItem() {
 			<div className="top-section editar-header">
 				<div className="header-title-ellipsis">
 					<span className="header-title-text">
-						{itemData.Nombre || `Item #${id}`} ({id})
+						{itemData.nombre || `Item #${id}`} ({id})
 					</span>
 					<button
 						type="button"
@@ -153,10 +155,10 @@ export default function EditarItem() {
 									<label>Nombre</label>
 									<input
 										type="text"
-										value={itemData.Nombre || ""}
+										value={itemData.nombre || ""}
 										onChange={(e) =>
 											handleInputChange(
-												"Nombre",
+												"nombre",
 												e.target.value,
 											)
 										}
@@ -165,19 +167,17 @@ export default function EditarItem() {
 								<div className="form-group">
 									<label>Estado</label>
 									<select
-										value={itemData.Estado || ""}
+										value={itemData.estado || ""}
 										onChange={(e) =>
 											handleInputChange(
-												"Estado",
+												"estado",
 												e.target.value,
 											)
 										}
 									>
 										<option value="">Seleccionar...</option>
 										<option value="Ahora">Ahora</option>
-										<option value="Planeado">
-											Planeado
-										</option>
+										<option value="Planeo">Planeo</option>
 										<option value="Pasado">Pasado</option>
 										<option value="Dropeado">
 											Dropeado
@@ -192,10 +192,10 @@ export default function EditarItem() {
 									<label>Tipo</label>
 									<input
 										type="text"
-										value={itemData.Tipo || ""}
+										value={itemData.plataforma || ""}
 										onChange={(e) =>
 											handleInputChange(
-												"Tipo",
+												"plataforma",
 												e.target.value,
 											)
 										}
@@ -209,16 +209,16 @@ export default function EditarItem() {
 											min="0"
 											max="10"
 											step="0.25"
-											value={itemData.Nota || 0}
+											value={itemData.nota || 0}
 											onChange={(e) =>
 												handleInputChange(
-													"Nota",
+													"nota",
 													e.target.value,
 												)
 											}
 										/>
 										<span className="slider-value">
-											{itemData.Nota || 0}
+											{itemData.nota || 0}
 										</span>
 									</div>
 								</div>
@@ -226,12 +226,10 @@ export default function EditarItem() {
 									<label>URL</label>
 									<input
 										type="url"
-										value={
-											itemData.Link || itemData.URL || ""
-										}
+										value={itemData.youtube_url || ""}
 										onChange={(e) =>
 											handleInputChange(
-												"Link",
+												"youtube_url",
 												e.target.value,
 											)
 										}
@@ -241,10 +239,10 @@ export default function EditarItem() {
 									<label>Duración</label>
 									<input
 										type="text"
-										value={itemData.Duracion || ""}
+										value={itemData.duracion || ""}
 										onChange={(e) =>
 											handleInputChange(
-												"Duracion",
+												"duracion",
 												e.target.value,
 											)
 										}
@@ -255,10 +253,10 @@ export default function EditarItem() {
 									<div className="fecha-input-wrapper">
 										<input
 											type="text"
-											value={itemData.Fecha || ""}
+											value={itemData.fecha || ""}
 											onChange={(e) =>
 												handleInputChange(
-													"Fecha",
+													"fecha",
 													e.target.value,
 												)
 											}
@@ -275,10 +273,10 @@ export default function EditarItem() {
 									<label>Fecha Salida</label>
 									<input
 										type="text"
-										value={itemData.Fecha_Salida || ""}
+										value={itemData.fecha_salida || ""}
 										onChange={(e) =>
 											handleInputChange(
-												"Fecha_Salida",
+												"fecha_salida",
 												e.target.value,
 											)
 										}
@@ -288,10 +286,10 @@ export default function EditarItem() {
 									<label>Trailer</label>
 									<input
 										type="url"
-										value={itemData.Trailer || ""}
+										value={itemData.trailer || ""}
 										onChange={(e) =>
 											handleInputChange(
-												"Trailer",
+												"trailer",
 												e.target.value,
 											)
 										}
@@ -305,16 +303,16 @@ export default function EditarItem() {
 											min="0"
 											max="10"
 											step="0.001"
-											value={itemData.Nota_Global || 0}
+											value={itemData.nota_global || 0}
 											onChange={(e) =>
 												handleInputChange(
-													"Nota_Global",
+													"nota_global",
 													e.target.value,
 												)
 											}
 										/>
 										<span className="slider-value">
-											{itemData.Nota_Global || 0}
+											{itemData.nota_global || 0}
 										</span>
 									</div>
 								</div>
@@ -322,10 +320,10 @@ export default function EditarItem() {
 									<label>Creador</label>
 									<input
 										type="text"
-										value={itemData.Creador || ""}
+										value={itemData.creador || ""}
 										onChange={(e) =>
 											handleInputChange(
-												"Creador",
+												"creador",
 												e.target.value,
 											)
 										}
@@ -335,10 +333,10 @@ export default function EditarItem() {
 									<label>Usuario</label>
 									<input
 										type="text"
-										value={itemData.Usuario || ""}
+										value={itemData.usuario_id || ""}
 										onChange={(e) =>
 											handleInputChange(
-												"Usuario",
+												"usuario_id",
 												e.target.value,
 											)
 										}
@@ -349,10 +347,10 @@ export default function EditarItem() {
 								<label>Géneros</label>
 								<input
 									type="text"
-									value={itemData.Generos || ""}
+									value={itemData.generos || ""}
 									onChange={(e) =>
 										handleInputChange(
-											"Generos",
+											"generos",
 											e.target.value,
 										)
 									}
@@ -362,10 +360,10 @@ export default function EditarItem() {
 							<div className="form-group form-group-full resumen-field">
 								<label>Resumen</label>
 								<textarea
-									value={itemData.Resumen || ""}
+									value={itemData.resumen || ""}
 									onChange={(e) =>
 										handleInputChange(
-											"Resumen",
+											"resumen",
 											e.target.value,
 										)
 									}
@@ -374,10 +372,10 @@ export default function EditarItem() {
 							<div className="form-group form-group-full comentario-field">
 								<label>Comentario</label>
 								<textarea
-									value={itemData.Comentario || ""}
+									value={itemData.comentario || ""}
 									onChange={(e) =>
 										handleInputChange(
-											"Comentario",
+											"comentario",
 											e.target.value,
 										)
 									}
@@ -388,10 +386,10 @@ export default function EditarItem() {
 						<div className="images-sidebar">
 							<div className="form-group">
 								<label>Carátula</label>
-								{itemData.Caratula && (
+								{itemData.caratula && (
 									<div className="image-preview">
 										<img
-											src={itemData.Caratula}
+											src={itemData.caratula}
 											alt="Previsualización carátula"
 											onError={(e) => {
 												e.target.style.display = "none";
@@ -405,10 +403,10 @@ export default function EditarItem() {
 								)}
 								<input
 									type="url"
-									value={itemData.Caratula || ""}
+									value={itemData.caratula || ""}
 									onChange={(e) =>
 										handleInputChange(
-											"Caratula",
+											"caratula",
 											e.target.value,
 										)
 									}
@@ -418,10 +416,10 @@ export default function EditarItem() {
 
 							<div className="form-group">
 								<label>Imagen</label>
-								{itemData.Imagen && (
+								{itemData.imagen && (
 									<div className="image-preview">
 										<img
-											src={itemData.Imagen}
+											src={itemData.imagen}
 											alt="Previsualización imagen"
 											onError={(e) => {
 												e.target.style.display = "none";
@@ -435,10 +433,10 @@ export default function EditarItem() {
 								)}
 								<input
 									type="url"
-									value={itemData.Imagen || ""}
+									value={itemData.imagen || ""}
 									onChange={(e) =>
 										handleInputChange(
-											"Imagen",
+											"imagen",
 											e.target.value,
 										)
 									}

@@ -1,4 +1,4 @@
-import { getValues, deleteRows } from "../lib/sheets-client.js";
+import { getValues, updateValues } from "../lib/sheets-client.js";
 import { requireAuth } from "../lib/auth-middleware.js";
 import { getUserLists } from "../lib/utils/jwt-utils.js";
 
@@ -38,34 +38,33 @@ export default async function handler(req, res) {
 	}
 
 	try {
-		const sheets = ["Juegos New", "Pelis New"];
+		const sheets = ["DB_Items"];
 		let foundSheet = null;
-		let headers = null;
 		let itemRowIndex = -1;
-		let currentRow = null;
 
 		for (const sheetName of sheets) {
 			try {
-				const sheetData = await getValues(sheetId, `${sheetName}!A:Q`);
+				const sheetData = await getValues(sheetId, `${sheetName}!A:U`);
 				if (!sheetData || !sheetData.values) continue;
 
-				headers = sheetData.values[0];
+				const headers = sheetData.values[0];
 				const rows = sheetData.values.slice(1);
 
 				itemRowIndex = rows.findIndex((row) => {
-					const rowId = String(row?.[0] || "").trim();
-					const rowUsuario = String(row?.[16] || "").trim();
-					const rowEstado = String(row?.[2] || "").trim();
+					const rowId = String(row?.[1] || "").trim();
+					const rowEstado = String(row?.[3] || "").trim();
+					const rowUsuario = String(row?.[17] || "").trim();
+					const rowEliminado = String(row?.[20] || "").trim();
 					return (
 						String(itemId).trim() === rowId &&
 						rowEstado.toLowerCase() === "recomendacion" &&
+						rowEliminado === "" &&
 						(isAdmin ||
 							rowUsuario === String(authenticatedUserId).trim())
 					);
 				});
 
 				if (itemRowIndex !== -1) {
-					currentRow = rows[itemRowIndex];
 					foundSheet = sheetName;
 					break;
 				}
@@ -82,7 +81,14 @@ export default async function handler(req, res) {
 		}
 
 		const rowIndexReal = itemRowIndex + 2;
-		await deleteRows(sheetId, foundSheet, [rowIndexReal], rowIndexReal + 1);
+		const now = new Date();
+		const pad = (n) => String(n).padStart(2, "0");
+		const ts = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+		await updateValues(
+			sheetId,
+			`${foundSheet}!T${rowIndexReal}:U${rowIndexReal}`,
+			[[ts, ts]],
+		);
 
 		res.json({ success: true });
 	} catch (e) {

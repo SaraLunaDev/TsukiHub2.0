@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 			return res.status(403).json({ error: "Admin access required" });
 		}
 
-		const { id, fecha, itemData } = req.body;
+		const { id, fecha, usuario, itemData } = req.body;
 
 		if (!id || !itemData) {
 			return res
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
 			return res.status(500).json({ error: "Google Sheet ID missing" });
 		}
 
-		const sheets = ["Juegos New", "Pelis New"];
+		const sheets = ["DB_Items"];
 		let foundSheet = null;
 		let headers = null;
 		let itemRowIndex = -1;
@@ -40,21 +40,28 @@ export default async function handler(req, res) {
 
 		for (const sheetName of sheets) {
 			try {
-				const sheetData = await getValues(sheetId, `${sheetName}!A:Q`);
+				const sheetData = await getValues(sheetId, `${sheetName}!A:U`);
 				if (!sheetData || !sheetData.values) continue;
 
 				headers = sheetData.values[0];
 				const rows = sheetData.values.slice(1);
 
 				if (fecha) {
+					const decodedFecha = decodeURIComponent(fecha);
+					const decodedUsuario = usuario
+						? decodeURIComponent(usuario)
+						: null;
+					const fechaIdx = headers.indexOf("fecha");
+					const usuarioIdx = headers.indexOf("usuario_id");
 					itemRowIndex = rows.findIndex(
 						(row) =>
-							row[0] === id &&
-							row[headers.indexOf("Fecha")] ===
-								decodeURIComponent(fecha),
+							row[1] === id &&
+							row[fechaIdx] === decodedFecha &&
+							(!decodedUsuario ||
+								row[usuarioIdx] === decodedUsuario),
 					);
 				} else {
-					itemRowIndex = rows.findIndex((row) => row[0] === id);
+					itemRowIndex = rows.findIndex((row) => row[1] === id);
 				}
 
 				if (itemRowIndex !== -1) {
@@ -74,14 +81,75 @@ export default async function handler(req, res) {
 
 		const updatedRow = [];
 		headers.forEach((header, index) => {
-			updatedRow.push(itemData[header] || currentRow[index] || "");
+			if (header === "actualizado_en") {
+				const now = new Date();
+				const pad = (n) => String(n).padStart(2, "0");
+				updatedRow.push(
+					`${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
+				);
+			} else {
+				updatedRow.push(itemData[header] ?? currentRow[index] ?? "");
+			}
 		});
 
 		const sheetRowNumber = itemRowIndex + 2;
-
 		const range = `${foundSheet}!A${sheetRowNumber}:${String.fromCharCode(64 + headers.length)}${sheetRowNumber}`;
-
 		await updateValues(sheetId, range, [updatedRow]);
+
+		if (itemData.comentario !== undefined) {
+			try {
+				const itemUserId =
+					itemData.usuario_id ||
+					currentRow[headers.indexOf("usuario_id")] ||
+					"";
+				const comentariosData = await getValues(
+					sheetId,
+					"DB_Comentarios!A:H",
+				);
+				const comentRows = Array.isArray(comentariosData?.values)
+					? comentariosData.values
+					: [];
+				const dataRows = comentRows.slice(1);
+				const comentRowIndex = dataRows.findIndex(
+					(row) =>
+						String(row[1] || "").trim() === String(id).trim() &&
+						String(row[3] || "").trim() ===
+							String(itemUserId).trim(),
+				);
+				const now = new Date();
+				const pad = (n) => String(n).padStart(2, "0");
+				const ts = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+				if (comentRowIndex !== -1) {
+					const realRow = comentRowIndex + 2;
+					await updateValues(
+						sheetId,
+						`DB_Comentarios!E${realRow}:G${realRow}`,
+						[[itemData.comentario, ts, ""]],
+					);
+				} else if (itemData.comentario) {
+					const itemTipo =
+						itemData.tipo ||
+						currentRow[headers.indexOf("tipo")] ||
+						"";
+					const itemNombre =
+						itemData.nombre ||
+						currentRow[headers.indexOf("nombre")] ||
+						"";
+					await appendValues(sheetId, "DB_Comentarios!A1", [
+						[
+							itemTipo,
+							id,
+							itemNombre,
+							itemUserId,
+							itemData.comentario,
+							ts,
+							ts,
+							"",
+						],
+					]);
+				}
+			} catch (_) {}
+		}
 
 		res.status(200).json({
 			success: true,

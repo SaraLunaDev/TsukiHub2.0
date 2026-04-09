@@ -13,7 +13,7 @@
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
-	z-index: 3;
+	z-index: 5;
 	opacity: 0;
 	pointer-events: none;
 	will-change: transform;
@@ -196,7 +196,7 @@
 	background: var(--dark);
 	opacity: 0;
 	pointer-events: none;
-	z-index: 1;
+	z-index: 4;
 }
 .item-caratula:hover .item-img-overlay-recomendacion {
 	opacity: 0.95;
@@ -213,7 +213,7 @@
 	background: var(--dark);
 	opacity: 0;
 	pointer-events: none;
-	z-index: 1;
+	z-index: 4;
 }
 .item-caratula:hover .item-img-overlay-normal {
 	opacity: 0.95;
@@ -233,7 +233,7 @@
 	background: none;
 	padding: 2px 10px;
 	border-radius: 0 0 10px 10px;
-	z-index: 2;
+	z-index: 5;
 	pointer-events: none;
 	opacity: 0;
 }
@@ -247,7 +247,7 @@
 	top: 8px;
 	font-size: 13px;
 	color: var(--text);
-	z-index: 2;
+	z-index: 5;
 	pointer-events: none;
 	padding: 2px 4px;
 	box-sizing: border-box;
@@ -262,7 +262,7 @@
 	font-size: 13px;
 	font-weight: normal;
 	color: var(--text);
-	z-index: 2;
+	z-index: 5;
 	pointer-events: none;
 	padding: 2px 4px;
 	box-sizing: border-box;
@@ -442,4 +442,31 @@
 	.item-caratula-recomendacion {
 		height: 230px;
 	}
+}
+
+.item-estado-badge {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 2;
+	text-align: center;
+	font-size: 11px;
+	font-weight: bold;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: #fff;
+	padding: 3px 0;
+	border-radius: 6px 6px 0 0;
+	pointer-events: none;
+}
+.item-estado-badge--pausado {
+	background: #c87000;
+	border: 1px solid var(--border);
+	border-bottom: none;
+}
+.item-estado-badge--dropeado {
+	background: #b52020;
+	border: 1px solid var(--border);
+	border-bottom: none;
 }

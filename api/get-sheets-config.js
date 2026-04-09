@@ -5,14 +5,14 @@ export default async function handler(req, res) {
 
 	try {
 		return res.status(200).json({
-			version: "4.0.0",
-			juegosSheetUrl: process.env.JUEGOS_SHEET_URL || "",
-			pelisSheetUrl: process.env.PELIS_SHEET_URL || "",
-			userdataSheetUrl: process.env.USERDATA_SHEET_URL || "",
-			pokedexSheetUrl: process.env.POKEDEX_SHEET_URL || "",
-			gachaSheetUrl: process.env.GACHA_SHEET_URL || "",
-			gachaCharSheetUrl: process.env.GACHACHAR_SHEET_URL || "",
-			votosSheetUrl: process.env.VOTOS_SHEET_URL || "",
+			version: "5.0.0",
+			itemsSheetUrl: process.env.DB_ITEMS || "",
+			usuariosSheetUrl: process.env.DB_USUARIOS || "",
+			votosSheetUrl: process.env.DB_VOTOS || "",
+			comentariosSheetUrl: process.env.DB_COMENTARIOS || "",
+			pokedexSheetUrl: process.env.DB_POKEDEX || "",
+			gachaSheetUrl: process.env.DB_GACHA || "",
+			gachaCharSheetUrl: process.env.DB_GACHA_PERSONAJES || "",
 			twitchClientId: process.env.TWITCH_CLIENT_ID || "",
 			twitchRedirectUri: process.env.TWITCH_REDIRECT_URI || "",
 		});

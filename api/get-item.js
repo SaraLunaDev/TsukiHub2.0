@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 			return res.status(403).json({ error: "Admin access required" });
 		}
 
-		const { id, fecha } = req.query;
+		const { id, fecha, usuario } = req.query;
 		if (!id) {
 			return res.status(400).json({ error: "Item ID is required" });
 		}
@@ -29,13 +29,13 @@ export default async function handler(req, res) {
 			return res.status(500).json({ error: "Google Sheet ID missing" });
 		}
 
-		const sheets = ["Juegos New", "Pelis New"];
+		const sheets = ["DB_Items"];
 		let itemData = null;
 		let foundSheet = null;
 
 		for (const sheetName of sheets) {
 			try {
-				const sheetData = await getValues(sheetId, `${sheetName}!A:Q`);
+				const sheetData = await getValues(sheetId, `${sheetName}!A:U`);
 				if (!sheetData || !sheetData.values) continue;
 
 				const headers = sheetData.values[0];
@@ -43,14 +43,21 @@ export default async function handler(req, res) {
 
 				let itemRowIndex = -1;
 				if (fecha) {
+					const decodedFecha = decodeURIComponent(fecha);
+					const decodedUsuario = usuario
+						? decodeURIComponent(usuario)
+						: null;
+					const fechaIdx = headers.indexOf("fecha");
+					const usuarioIdx = headers.indexOf("usuario_id");
 					itemRowIndex = rows.findIndex(
 						(row) =>
-							row[0] === id &&
-							row[headers.indexOf("Fecha")] ===
-								decodeURIComponent(fecha),
+							row[1] === id &&
+							row[fechaIdx] === decodedFecha &&
+							(!decodedUsuario ||
+								row[usuarioIdx] === decodedUsuario),
 					);
 				} else {
-					itemRowIndex = rows.findIndex((row) => row[0] === id);
+					itemRowIndex = rows.findIndex((row) => row[1] === id);
 				}
 
 				if (itemRowIndex !== -1) {
@@ -72,6 +79,27 @@ export default async function handler(req, res) {
 
 		if (!itemData) {
 			return res.status(404).json({ error: "Item not found" });
+		}
+
+		try {
+			const comentariosData = await getValues(
+				sheetId,
+				"DB_Comentarios!A:H",
+			);
+			const comentRows = Array.isArray(comentariosData?.values)
+				? comentariosData.values.slice(1)
+				: [];
+			const matchComent = comentRows.find(
+				(row) =>
+					String(row[1] || "").trim() === String(id).trim() &&
+					String(row[3] || "").trim() ===
+						String(itemData.usuario_id || "").trim(),
+			);
+			itemData.comentario = matchComent
+				? String(matchComent[4] || "")
+				: "";
+		} catch (_) {
+			itemData.comentario = "";
 		}
 
 		res.status(200).json({

@@ -38,7 +38,7 @@ function Inicio() {
 		data: rawData,
 		loading,
 		error,
-	} = useGoogleSheet(config?.userdataSheetUrl || "", "userData");
+	} = useGoogleSheet(config?.usuariosSheetUrl || "", "userData");
 
 	const achievements = useMemo(() => {
 		if (!rawData || !rawData.length) return {};
@@ -48,12 +48,15 @@ function Inicio() {
 		);
 		const achievementUsers = {};
 		achievementHeaders.forEach((achievement) => {
-			achievementUsers[achievement] = rawData.filter(
-				(user) =>
-					user[achievement]?.toString().toLowerCase() === "si" &&
-					user.nombre &&
-					!EXCLUDED_USERS.includes(String(user.nombre)),
-			);
+			achievementUsers[achievement] = rawData
+				.filter(
+					(user) =>
+						user[achievement]?.toString().toUpperCase() ===
+							"TRUE" &&
+						user.nombre &&
+						!EXCLUDED_USERS.includes(String(user.nombre)),
+				)
+				.map((user) => ({ ...user, pfp: user.imagen_perfil || "" }));
 		});
 		return achievementUsers;
 	}, [rawData]);
@@ -135,15 +138,29 @@ function Inicio() {
 					user.nombre &&
 					!EXCLUDED_USERS.includes(String(user.nombre)),
 			)
-			.map((user) => ({
-				...user,
-				tickets: typeof user.tickets === "number" ? user.tickets : 0,
-				emotes: user.emotes
-					? typeof user.emotes === "string"
-						? user.emotes.split(" ").filter((e) => e)
-						: []
-					: [],
-			}));
+			.map((user) => {
+				const rachaNum = user.racha || "0";
+				const mantenida =
+					String(user.mantenida || "").toUpperCase() === "TRUE";
+				const congelada =
+					String(user.congelada || "").toUpperCase() === "TRUE";
+				let rachaDisplay;
+				if (congelada) rachaDisplay = `f_${rachaNum}`;
+				else if (!mantenida) rachaDisplay = `m_${rachaNum}`;
+				else rachaDisplay = String(rachaNum);
+				return {
+					...user,
+					pfp: user.imagen_perfil || "",
+					racha: rachaDisplay,
+					tickets:
+						typeof user.tickets === "number" ? user.tickets : 0,
+					emotes: user.emotes
+						? typeof user.emotes === "string"
+							? user.emotes.split(" ").filter((e) => e)
+							: []
+						: [],
+				};
+			});
 	}, [rawData]);
 
 	useEffect(() => {
@@ -1152,8 +1169,8 @@ function Inicio() {
 						{userData.some(
 							(user) =>
 								user.l_platino &&
-								user.l_platino.toString().toLowerCase() ===
-									"si",
+								user.l_platino.toString().toUpperCase() ===
+									"TRUE",
 						) && (
 							<span
 								style={{
@@ -1168,7 +1185,7 @@ function Inicio() {
 											user.l_platino &&
 											user.l_platino
 												.toString()
-												.toLowerCase() === "si",
+												.toUpperCase() === "TRUE",
 									)
 									.map((user, idx) => (
 										<div

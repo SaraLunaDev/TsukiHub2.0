@@ -11,6 +11,7 @@ import GameBoy from "./components/pages/GameBoy/GameBoy";
 import TTS from "./components/pages/TTS/TTS";
 import UserProfile from "./components/pages/UserProfile/UserProfile";
 import EditarItem from "./components/pages/EditarItem/EditarItem";
+import AnadirItem from "./components/pages/AnadirItem/AnadirItem";
 import "./App.css";
 
 function App() {
@@ -26,11 +27,13 @@ function App() {
 					{}
 					<Route path="/juegos" element={<Juegos />} />
 					<Route path="/juegos/recomendar" element={<Recomendar />} />
+					<Route path="/juegos/anadir" element={<AnadirItem />} />
 					<Route path="/juegos/editar/:id" element={<EditarItem />} />
 
 					{}
 					<Route path="/pelis" element={<Pelis />} />
 					<Route path="/pelis/recomendar" element={<Recomendar />} />
+					<Route path="/pelis/anadir" element={<AnadirItem />} />
 					<Route path="/pelis/editar/:id" element={<EditarItem />} />
 
 					{}

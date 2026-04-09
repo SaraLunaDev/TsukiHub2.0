@@ -79,7 +79,7 @@ function Pokedex() {
 		config?.pokedexSheetUrl || "",
 	);
 	const { data: usersData } = useGoogleSheet(
-		config?.userdataSheetUrl || "",
+		config?.usuariosSheetUrl || "",
 		"userData",
 	);
 
@@ -108,30 +108,30 @@ function Pokedex() {
 		}
 
 		const parsedData = rawData.map((row) => ({
-			pokemonId: row["id"]?.toString().trim(),
-			pokemonName: row["Pokemon"]?.toString().trim(),
-			tipo1: row["Tipo1"]?.toString().trim(),
-			tipo2: row["Tipo2"]?.toString().trim(),
-			movimiento1: row["Movimiento1"]?.toString().trim(),
-			movimiento2: row["Movimiento2"]?.toString().trim(),
-			movimiento3: row["Movimiento3"]?.toString().trim(),
-			movimiento4: row["Movimiento4"]?.toString().trim(),
-			Usuario: row["ID Usuario"]?.toString().trim(),
-			Shiny: row["Shiny"]?.toString().trim(),
-			HP: row["HP"]?.toString().trim(),
-			Ataque: row["Ataque"]?.toString().trim(),
-			Defensa: row["Defensa"]?.toString().trim(),
-			AtaqueEsp: row["AtaqueEsp"]?.toString().trim(),
-			DefensaEsp: row["DefensaEsp"]?.toString().trim(),
-			Velocidad: row["Velocidad"]?.toString().trim(),
-			ivHP: row["ivHP"]?.toString().trim(),
-			ivAtaque: row["ivAtaque"]?.toString().trim(),
-			ivDefensa: row["ivDefensa"]?.toString().trim(),
-			ivAtaqueEsp: row["ivAtaqueEsp"]?.toString().trim(),
-			ivDefensaEsp: row["ivDefensaEsp"]?.toString().trim(),
-			ivVelocidad: row["ivVelocidad"]?.toString().trim(),
-			XP: row["XP"]?.toString().trim(),
-			Peso: row["Peso"]?.toString().trim(),
+			pokemonId: row["pokemon_id"]?.toString().trim(),
+			pokemonName: row["nombre_pokemon"]?.toString().trim(),
+			tipo1: row["tipo1"]?.toString().trim(),
+			tipo2: row["tipo2"]?.toString().trim(),
+			movimiento1: row["movimiento1"]?.toString().trim(),
+			movimiento2: row["movimiento2"]?.toString().trim(),
+			movimiento3: row["movimiento3"]?.toString().trim(),
+			movimiento4: row["movimiento4"]?.toString().trim(),
+			Usuario: row["usuario_id"]?.toString().trim(),
+			Shiny: row["shiny"]?.toString().trim(),
+			HP: row["hp"]?.toString().trim(),
+			Ataque: row["ataque"]?.toString().trim(),
+			Defensa: row["defensa"]?.toString().trim(),
+			AtaqueEsp: row["ataqueEsp"]?.toString().trim(),
+			DefensaEsp: row["defensa_esp"]?.toString().trim(),
+			Velocidad: row["velocidad"]?.toString().trim(),
+			ivHP: row["iv_hp"]?.toString().trim(),
+			ivAtaque: row["iv_ataque"]?.toString().trim(),
+			ivDefensa: row["iv_defensa"]?.toString().trim(),
+			ivAtaqueEsp: row["iv_ataque_esp"]?.toString().trim(),
+			ivDefensaEsp: row["iv_defensa_esp"]?.toString().trim(),
+			ivVelocidad: row["iv_velocidad"]?.toString().trim(),
+			XP: row["xp"]?.toString().trim(),
+			Peso: row["peso"]?.toString().trim(),
 		}));
 
 		const userMap = new Map();
@@ -149,7 +149,7 @@ function Pokedex() {
 						nombre:
 							userData?.nombre || `Usuario ${pokemon.Usuario}`,
 						pfp:
-							userData?.pfp ||
+							userData?.imagen_perfil ||
 							`https://decapi.me/twitch/avatar/${userData?.nombre || pokemon.Usuario}`,
 					});
 				}
@@ -252,7 +252,7 @@ function Pokedex() {
 				};
 			}
 
-			const isShiny = matchedPokemon.Shiny?.toLowerCase() === "si";
+			const isShiny = matchedPokemon.Shiny?.toLowerCase() === "true";
 			return {
 				...matchedPokemon,
 				id: id.toString(),

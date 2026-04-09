@@ -8,11 +8,10 @@ export const API_URLS = {
 	GET_SHEETS_CONFIG: "/api/get-sheets-config",
 	VERIFY_USER: "/api/verify-user",
 	DELETE_RECOMMENDATION: "/api/delete-recommendation",
-	GET_VOTES: "/api/get-votes",
 	MODIFY_VOTE: "/api/modify-vote",
 };
 
-const CONFIG_VERSION = "4.0.0";
+const CONFIG_VERSION = "5.0.0";
 
 let cachedConfig = null;
 let configPromise = null;
@@ -25,9 +24,8 @@ try {
 		if (
 			!parsed.version ||
 			parsed.version !== CONFIG_VERSION ||
-			!parsed.gachaSheetUrl ||
-			!parsed.gachaCharSheetUrl ||
-			!parsed.votosSheetUrl
+			!parsed.itemsSheetUrl ||
+			!parsed.usuariosSheetUrl
 		) {
 			localStorage.removeItem("sheets_config_cache");
 		} else {
@@ -66,13 +64,13 @@ export const getConfig = async () => {
 		})
 		.catch((error) => {
 			return {
-				juegosSheetUrl: "",
-				pelisSheetUrl: "",
-				userdataSheetUrl: "",
+				itemsSheetUrl: "",
+				usuariosSheetUrl: "",
+				votosSheetUrl: "",
+				comentariosSheetUrl: "",
 				pokedexSheetUrl: "",
 				gachaSheetUrl: "",
 				gachaCharSheetUrl: "",
-				votosSheetUrl: "",
 				twitchClientId: "",
 				twitchRedirectUri: window.location.origin,
 			};
